@@ -187,8 +187,8 @@ a {
   transform: translateY(0) scale(1);
   bottom: 5%;
   right: 5%;
-  /* 나타나는 애니메이션(opacity, transform 등)에 2초(2s) 지연(delay) 설정 */
-  transition: object-position 6s ease-out, transform 0.6s cubic-bezier(0.16, 1, 0.3, 1) 2s, opacity 0.6s ease 2s, bottom 0.6s ease 2s, right 0.6s ease 2s;
+  /* 나타나는 애니메이션(opacity, transform 등)에 0.5초(0.5s) 지연(delay) 설정 */
+  transition: object-position 6s ease-out, transform 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.5s, opacity 0.6s ease 0.5s, bottom 0.6s ease 0.5s, right 0.6s ease 0.5s;
 }
 
 .project-info {
