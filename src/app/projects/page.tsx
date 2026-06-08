@@ -16,7 +16,7 @@ export default function Projects() {
             <div className="project-info">
               <div>
                 <h2 className="project-title">{item.title}</h2>
-                <p className="project-desc">{item.description}</p>
+                {item.description && <p className="project-desc">{item.description}</p>}
               </div>
               <div className="project-arrow">&#8599;</div>
             </div>

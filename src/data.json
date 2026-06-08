@@ -1,26 +1,10 @@
 [
   {
     "id": 1,
-    "title": "첫 번째 작업물",
-    "description": "이곳에 작업물에 대한 짧은 요약을 적어주세요.",
-    "content": "이곳은 상세 페이지에서 보여질 긴 내용입니다. 프로젝트를 만들게 된 배경, 사용된 기술, 디자인 컨셉, 그리고 어려웠던 점이나 해결 과정 등을 자유롭게 적어보세요. 이 부분 역시 data.json 파일에서 수정할 수 있습니다.",
-    "image": "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=800&q=80",
-    "link": "https://github.com"
-  },
-  {
-    "id": 2,
-    "title": "다크 모드와 애니메이션",
-    "description": "세련된 다크 모드와 부드러운 호버 애니메이션이 적용되어 있습니다.",
-    "content": "두 번째 프로젝트의 상세 내용입니다. 갤러리 뷰뿐만 아니라 상세 페이지에서도 일관된 디자인 시스템(다크모드 등)이 유지되도록 설계했습니다. 방문자들이 더 깊이 있게 작업물을 감상할 수 있습니다.",
-    "image": "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&w=800&q=80",
-    "link": "#"
-  },
-  {
-    "id": 3,
-    "title": "가장 쉬운 데이터 관리",
-    "description": "복잡한 코드를 몰라도 data.json 파일만 수정하면 됩니다.",
-    "content": "이제 목록 페이지(갤러리)와 상세 페이지 모두가 자동으로 생성됩니다. 새로운 작업물이 생겼을 때, data.json 파일에 새로운 항목(이미지, 제목, 내용)을 한 덩어리 추가하기만 하면 상세 페이지까지 완벽하게 완성됩니다!",
-    "image": "https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=800&q=80",
-    "link": "#"
+    "title": "피부과 반응형 웹사이트",
+    "description": "",
+    "content": "안티에이징 특화 시술을 강조하는 프리미엄 메디컬 브랜드의 웹사이트 구축 프로젝트입니다. 1:1 맞춤형 진료 프로세스의 강점을 직관적으로 시각화하는 데 집중했습니다.\n\n[Design Strategy]\n\nVisual Concept: \n정제된 베이지 톤을 메인으로 사용하고, 피부의 매끄러운 결과 은은한 광채를 은유하는 추상적인 그래픽 요소를 활용해 하이엔드 감성을 극대화했습니다.\n\nLayout & UI: \n절제된 레이아웃과 미니멀한 모던 감각을 적용하여, 감각적이면서도 메디컬 브랜드가 지녀야 할 깊은 신뢰감을 동시에 전달하고자 했습니다.",
+    "image": "/images/aurora.png",
+    "link": "https://aurora-dermatology.vercel.app/"
   }
 ]

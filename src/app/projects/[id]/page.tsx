@@ -33,7 +33,7 @@ export default async function PortfolioDetail({ params }: { params: Promise<{ id
         </header>
 
         <div className={styles.content}>
-          <p className={styles.desc}>{item.description}</p>
+          {item.description && <p className={styles.desc}>{item.description}</p>}
           <div className={styles.longText}>
             {item.content}
           </div>
