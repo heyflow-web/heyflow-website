@@ -1,0 +1,225 @@
+.home {
+  padding-top: 80px; /* Navbar space */
+}
+
+/* Floating Actions */
+.floating-actions {
+  position: fixed;
+  right: 20px;
+  bottom: 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 100;
+}
+
+.fab {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 700;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  transition: transform 0.3s ease;
+  border: none;
+  cursor: pointer;
+}
+
+.fab:hover {
+  transform: scale(1.1);
+}
+
+.fab.kakao { background-color: #FEE500; color: #3C1E1E; }
+.fab.kakao img { width: 24px; margin-bottom: 2px; }
+.fab.booking { background-color: var(--primary); }
+
+/* Hero Section */
+.hero {
+  height: 85vh;
+  min-height: 600px;
+  background: linear-gradient(rgba(0,40,142,0.6), rgba(0,40,142,0.4)), 
+              url('https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&q=80&w=1200') center/cover;
+  display: flex;
+  align-items: center;
+  color: white;
+}
+
+.hero-content {
+  max-width: 800px;
+}
+
+.badge {
+  display: inline-block;
+  background-color: var(--secondary);
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+.hero h1 {
+  font-size: 4rem;
+  margin-bottom: 24px;
+}
+
+.hero h1 span {
+  color: var(--secondary-container);
+}
+
+.hero p {
+  font-size: 1.25rem;
+  margin-bottom: 40px;
+  opacity: 0.9;
+}
+
+.hero-btns {
+  display: flex;
+  gap: 16px;
+}
+
+/* Treatment Grid */
+.treatment-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 30px;
+}
+
+.treatment-card {
+  background: white;
+  padding: 40px;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+  transition: all 0.3s ease;
+  border: 1px solid var(--border);
+}
+
+.treatment-card:hover {
+  transform: translateY(-10px);
+  border-color: var(--primary);
+}
+
+.icon-wrapper {
+  width: 60px;
+  height: 60px;
+  background-color: #eff6ff;
+  color: var(--primary);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+
+.treatment-card h3 { margin-bottom: 16px; color: var(--primary); }
+.treatment-card p { color: var(--text-muted); margin-bottom: 24px; font-size: 0.95rem; }
+
+.card-btn {
+  background: none;
+  border: none;
+  color: var(--primary);
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+}
+
+/* Experts Section */
+.bg-white { background-color: white; }
+.expert-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 40px;
+}
+
+.expert-card {
+  display: flex;
+  gap: 30px;
+  padding: 30px;
+  background-color: var(--bg-primary);
+  border-radius: 24px;
+  align-items: center;
+}
+
+.expert-img-placeholder {
+  width: 180px;
+  height: 220px;
+  background-color: #cbd5e1;
+  border-radius: 16px;
+  flex-shrink: 0;
+}
+
+.doc-role {
+  color: var(--secondary);
+  font-weight: 700;
+  font-size: 0.9rem;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.school { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 12px; }
+.philosophy { font-style: italic; color: var(--primary); margin-bottom: 20px; font-weight: 500; }
+
+/* Facility Gallery */
+.facility-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.facility-card {
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.facility-card .img-wrapper {
+  height: 200px;
+  overflow: hidden;
+}
+
+.facility-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.facility-card:hover img { transform: scale(1.1); }
+.facility-card h4 {
+  padding: 16px;
+  background: white;
+  text-align: center;
+}
+
+/* Testimonials */
+.testimonial-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
+}
+
+.testimonial-card {
+  padding: 30px;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  background: var(--bg-primary);
+}
+
+.stars { color: #fbbf24; margin-bottom: 12px; }
+.testimonial-card p { font-style: italic; margin-bottom: 16px; }
+.author { font-weight: 700; color: var(--primary); }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .hero h1 { font-size: 2.5rem; }
+  .expert-card { flex-direction: column; text-align: center; }
+  .expert-img-placeholder { margin: 0 auto; }
+  .hero-btns { flex-direction: column; }
+}
