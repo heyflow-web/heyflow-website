@@ -137,21 +137,54 @@ a {
 .project-image-wrapper {
   width: 100%;
   aspect-ratio: 4/3;
-  overflow: hidden;
   background: var(--border);
   margin-bottom: 1.5rem;
+  overflow: hidden;
+  position: relative;
 }
 
-.project-image {
+.project-image-pc,
+.project-image-mobile {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: top center; /* 기본은 웹사이트의 가장 위쪽을 보여줌 */
-  transition: object-position 4s ease-in-out; /* 4초 동안 부드럽게 스크롤 */
+  object-position: top center;
+  transition: object-position 4s ease-in-out, transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.6s ease;
 }
 
-.project-card:hover .project-image {
-  object-position: bottom center; /* 마우스 오버 시 웹사이트의 가장 아래쪽으로 스크롤 */
+.project-image-pc {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.project-image-mobile {
+  position: absolute;
+  bottom: -20px;
+  right: -20px;
+  width: 25%;
+  height: auto;
+  aspect-ratio: 9/19;
+  border-radius: 12px;
+  border: 4px solid #fff;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  opacity: 0;
+  transform: translateY(30px) scale(0.95);
+  z-index: 10;
+  pointer-events: none;
+}
+
+.project-card:hover .project-image-pc {
+  object-position: bottom center;
+  transform: scale(1.02);
+}
+
+.project-card:hover .project-image-mobile {
+  object-position: bottom center;
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  bottom: 5%;
+  right: 5%;
 }
 
 .project-info {

@@ -18,9 +18,17 @@ export default async function PortfolioDetail({ params }: { params: Promise<{ id
           &larr; Back to Projects
         </Link>
         
-        <div className={styles.imageWrapper}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={item.image} alt={item.title} className={styles.image} />
+        <div className={styles.imageGallery}>
+          <div className={styles.imageWrapperPc}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={item.pcImage} alt={`${item.title} PC`} className={styles.image} />
+          </div>
+          {item.mobileImage && (
+            <div className={styles.imageWrapperMobile}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={item.mobileImage} alt={`${item.title} Mobile`} className={styles.image} />
+            </div>
+          )}
         </div>
 
         <header className={styles.header}>

@@ -11,7 +11,11 @@ export default function Projects() {
           <Link href={`/projects/${item.id}`} className="project-card" key={item.id}>
             <div className="project-image-wrapper">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={item.image} alt={item.title} className="project-image" />
+              <img src={item.pcImage} alt={`${item.title} PC`} className="project-image-pc" />
+              {item.mobileImage && (
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img src={item.mobileImage} alt={`${item.title} Mobile`} className="project-image-mobile" />
+              )}
             </div>
             <div className="project-info">
               <div>

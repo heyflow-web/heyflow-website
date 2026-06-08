@@ -22,10 +22,33 @@
   opacity: 0.4;
 }
 
-.imageWrapper {
-  width: 100%;
+.imageGallery {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
   margin-bottom: 2.5rem;
+}
+
+@media (min-width: 768px) {
+  .imageGallery {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+  .imageWrapperPc {
+    flex: 3;
+  }
+  .imageWrapperMobile {
+    flex: 1;
+  }
+}
+
+.imageWrapperPc,
+.imageWrapperMobile {
+  width: 100%;
   background: var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--border);
 }
 
 .image {
