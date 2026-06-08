@@ -18,19 +18,6 @@ export default async function PortfolioDetail({ params }: { params: Promise<{ id
           &larr; Back to Projects
         </Link>
         
-        <div className={styles.imageGallery}>
-          <div className={styles.imageWrapperPc}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={item.pcImage} alt={`${item.title} PC`} className={styles.image} />
-          </div>
-          {item.mobileImage && (
-            <div className={styles.imageWrapperMobile}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={item.mobileImage} alt={`${item.title} Mobile`} className={styles.image} />
-            </div>
-          )}
-        </div>
-
         <header className={styles.header}>
           <h1 className={styles.title}>{item.title}</h1>
           {item.link && item.link !== "#" && (
@@ -45,6 +32,19 @@ export default async function PortfolioDetail({ params }: { params: Promise<{ id
           <div className={styles.longText}>
             {item.content}
           </div>
+        </div>
+
+        <div className={styles.imageGallery}>
+          <div className={styles.imageWrapperPc}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={item.pcImage} alt={`${item.title} PC`} className={styles.image} />
+          </div>
+          {item.mobileImage && (
+            <div className={styles.imageWrapperMobile}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={item.mobileImage} alt={`${item.title} Mobile`} className={styles.image} />
+            </div>
+          )}
         </div>
       </article>
     </main>
