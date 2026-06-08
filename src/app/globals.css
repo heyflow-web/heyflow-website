@@ -161,8 +161,8 @@ a {
 
 .project-image-mobile {
   position: absolute;
-  bottom: -20px;
-  right: -20px;
+  bottom: 5%;
+  right: 5%;
   width: 25%;
   height: auto;
   aspect-ratio: 9/19;
@@ -170,7 +170,7 @@ a {
   border: 4px solid #fff;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
   opacity: 0;
-  transform: translateY(30px) scale(0.95);
+  transform: translateY(40px); /* 완전히 수직으로만 아래로 내려가 있도록 설정 */
   z-index: 10;
   pointer-events: none;
 }
@@ -184,11 +184,11 @@ a {
 .project-card:hover .project-image-mobile {
   object-position: center 30%;
   opacity: 1;
-  transform: translateY(0) scale(1);
+  transform: translateY(0);
   bottom: 5%;
   right: 5%;
-  /* 나타나는 애니메이션(opacity, transform 등)에 0.5초(0.5s) 지연(delay) 설정 */
-  transition: object-position 6s ease-out, transform 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.5s, opacity 0.6s ease 0.5s, bottom 0.6s ease 0.5s, right 0.6s ease 0.5s;
+  /* 지연 시간(delay) 완전히 제거 및 아래에서 위로만 올라오도록 트랜지션 간소화 */
+  transition: object-position 6s ease-out, transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.6s ease;
 }
 
 .project-info {
