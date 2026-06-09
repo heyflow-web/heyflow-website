@@ -245,16 +245,15 @@ export default function GlobalContact() {
                     </label>
                     <div className={styles.budgetGrid} style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
                       {[
-                        { title: "반응형 웹사이트", desc: "기업/브랜드/스타트업 등" },
-                        { title: "랜딩페이지", desc: "마케팅 / 프로모션용 원페이지" },
-                        { title: "디지털 제품 상세페이지", desc: "이커머스 제품 기획 및 비주얼 디자인" },
-                        { title: "온·오프라인 그래픽/인쇄물", desc: "브로셔, 리플렛, 패키지, SNS 에셋 등" }
+                        "반응형 웹사이트",
+                        "랜딩페이지",
+                        "제품 상세페이지",
+                        "온라인 배너(SNS 에셋 등)"
                       ].map(type => {
-                        const typeId = type.title;
-                        const isSelected = formData.projectTypes.includes(typeId);
+                        const isSelected = formData.projectTypes.includes(type);
                         return (
                           <button 
-                            key={typeId}
+                            key={type}
                             className={`${styles.budgetButton} cursor-hover`} 
                             style={{
                               background: isSelected ? "var(--text)" : "transparent",
@@ -262,12 +261,11 @@ export default function GlobalContact() {
                               textAlign: "left",
                               padding: "1.2rem 1.5rem"
                             }}
-                            onClick={() => toggleProjectType(typeId)}
+                            onClick={() => toggleProjectType(type)}
                           >
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                              <span style={{ fontWeight: 600, fontSize: "1.5rem", letterSpacing: "-0.02em" }}>{isSelected ? "✓ " : ""}{type.title}</span>
+                              <span style={{ fontWeight: 600, fontSize: "1.5rem", letterSpacing: "-0.02em" }}>{isSelected ? "✓ " : ""}{type}</span>
                             </div>
-                            <div className={styles.tooltip}>{type.desc}</div>
                           </button>
                         );
                       })}
