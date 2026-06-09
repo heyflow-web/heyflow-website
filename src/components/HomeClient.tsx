@@ -234,7 +234,9 @@ export default function HomeClient() {
         <div className={styles.footerBottom}>
           <div className={styles.footerLegal}>
             <div className={styles.legalRow}>
-              <span>상호명: 아카이브헤이</span>
+              <span>아카이브헤이</span>
+              <span className={styles.divider}>|</span>
+              <span>브랜드명: 헤이플로우</span>
               <span className={styles.divider}>|</span>
               <span>대표: 지원규</span>
               <span className={styles.divider}>|</span>
