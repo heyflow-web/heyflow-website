@@ -234,16 +234,16 @@ export default function HomeClient() {
             <div className={styles.legalRow}>
               <span>상호명: 아카이브헤이</span>
               <span className={styles.divider}>|</span>
-              <span>대표: 김헤이</span>
+              <span>대표: 지원규</span>
               <span className={styles.divider}>|</span>
-              <span>사업자등록번호: 000-00-00000</span>
+              <span>사업자등록번호: 151-47-01239</span>
             </div>
             <div className={styles.legalRow}>
-              <span>주소: 서울특별시 강남구 테헤란로 000</span>
+              <span>주소: 경기도 화성시 동탄구 동탄중심상가2길 8, 4층 401-하46호</span>
               <span className={styles.divider}>|</span>
-              <span>이메일: hello@heyflow.com</span>
+              <span>이메일: travel202@naver.com</span>
               <span className={styles.divider}>|</span>
-              <span>TEL: 010-0000-0000</span>
+              <span>TEL: 0507-1395-1381</span>
             </div>
             <div className={styles.legalPolicy}>
               <a href="#" className="cursor-hover">개인정보처리방침</a>
