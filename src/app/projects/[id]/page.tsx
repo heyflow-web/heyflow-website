@@ -1,11 +1,14 @@
-import data from '../../../data.json';
+import { getProject } from '@/lib/notion';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import styles from './detail.module.css';
+import ReactMarkdown from 'react-markdown';
+
+export const revalidate = 60; // 1분 단위 재검증
 
 export default async function PortfolioDetail({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const item = data.find((d) => d.id.toString() === id);
+  const item = await getProject(id);
 
   if (!item) {
     notFound();
@@ -30,7 +33,7 @@ export default async function PortfolioDetail({ params }: { params: Promise<{ id
         <div className={styles.content}>
           {item.description && <p className={styles.desc}>{item.description}</p>}
           <div className={styles.longText}>
-            {item.content}
+            <ReactMarkdown>{item.content || ''}</ReactMarkdown>
           </div>
         </div>
 
