@@ -141,38 +141,37 @@ export default function GlobalContact() {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.6, ease: "easeInOut" }}
           >
-            <header className={styles.modalHeader} style={{ position: "absolute", top: "40px", left: "5vw", right: "5vw", display: "flex", flexDirection: "column", gap: "1rem" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
-                <div className={styles.modalBrand}>heyflow</div>
-                <button 
-                  className={`${styles.closeButton} cursor-hover`} 
-                  onClick={() => setIsOpen(false)}
-                >
-                  ✕
-                </button>
-              </div>
-              
-              {step > 0 && step < 6 && (
-                <button 
-                  onClick={() => setStep(prev => prev - 1)}
-                  className={`cursor-hover`}
-                  style={{
-                    background: "none",
-                    border: "none",
-                    color: "var(--gray)",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "8px",
-                    fontSize: "0.85rem",
-                    zIndex: 20,
-                    width: "fit-content",
-                    padding: 0
-                  }}
-                >
-                  <ArrowLeft size={16} /> 뒤로가기
-                </button>
-              )}
+            <header className={styles.modalHeader}>
+              <div className={styles.modalBrand}>heyflow</div>
+              <button 
+                className={`${styles.closeButton} cursor-hover`} 
+                onClick={() => setIsOpen(false)}
+              >
+                ✕
+              </button>
             </header>
+
+            {step > 0 && step < 6 && (
+              <button 
+                onClick={() => setStep(prev => prev - 1)}
+                className={`cursor-hover`}
+                style={{
+                  position: "absolute",
+                  top: "85px", // 헤더(40px) 바로 아래에 위치
+                  left: "5vw", // 헤더의 left 여백과 동일하게 맞춤
+                  background: "none",
+                  border: "none",
+                  color: "var(--gray)",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  fontSize: "0.85rem",
+                  zIndex: 20
+                }}
+              >
+                <ArrowLeft size={16} /> 뒤로가기
+              </button>
+            )}
 
             <main className={styles.modalBody}>
               <AnimatePresence mode="wait">
@@ -242,7 +241,7 @@ export default function GlobalContact() {
                   >
                     <span className={styles.questionHighlight}>02 / 05</span>
                     <label className={styles.questionLabel}>
-                      프로젝트의 형태를 선택해 주세요.<span className={styles.subLabel} style={{ fontSize: "24px", color: "#777777", verticalAlign: "baseline" }}>(중복 가능)</span>
+                      프로젝트의 형태를 선택해 주세요.<span className={styles.subLabel}>(중복 가능)</span>
                     </label>
                     <div className={styles.budgetGrid} style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
                       {[
@@ -266,9 +265,9 @@ export default function GlobalContact() {
                             onClick={() => toggleProjectType(typeId)}
                           >
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                              <span style={{ fontWeight: 600, fontSize: "24px" }}>{isSelected ? "✓ " : ""}{type.title}</span>
+                              <span style={{ fontWeight: 600 }}>{isSelected ? "✓ " : ""}{type.title}</span>
                             </div>
-                            <span className={styles.optionDesc} style={{ color: isSelected ? "var(--bg)" : "#777777" }}>
+                            <span className={styles.optionDesc} style={{ color: isSelected ? "var(--bg)" : "inherit" }}>
                               ({type.desc})
                             </span>
                           </button>
