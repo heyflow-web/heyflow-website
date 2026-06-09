@@ -8,6 +8,7 @@ import styles from "./GlobalContact.module.css";
 export default function GlobalContact() {
   const [isOpen, setIsOpen] = useState(false);
   const [step, setStep] = useState(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     problem: "",
@@ -35,10 +36,34 @@ export default function GlobalContact() {
     }
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
+    if (isSubmitting) return; // 전송 중 중복 입력 방지
+
     if (step === 1 && !formData.name) return;
     if (step === 2 && !formData.problem) return;
-    if (step === 4 && !formData.contact) return;
+    
+    // 마지막 제출 단계
+    if (step === 4) {
+      if (!formData.contact) return;
+      
+      setIsSubmitting(true);
+      try {
+        // 구글 Apps Script로 데이터 전송 (CORS 우회를 위해 text/plain 사용)
+        await fetch("https://script.google.com/macros/s/AKfycbz2Yb4PKyyF4h05ajcHC17eeGv_0Mk2_zUMfBclVbJ9IZGSQVtlWy_wmZYiFYCaePdC/exec", {
+          method: "POST",
+          headers: {
+            "Content-Type": "text/plain;charset=utf-8",
+          },
+          body: JSON.stringify(formData),
+        });
+      } catch (error) {
+        console.error("Submission failed:", error);
+      } finally {
+        setIsSubmitting(false);
+        setStep(5); // 안전하게 Outro로 이동
+      }
+      return;
+    }
     
     setStep((prev) => prev + 1);
   };
@@ -50,17 +75,19 @@ export default function GlobalContact() {
 
   // 완료 후 닫기 처리
   useEffect(() => {
+    let timer: NodeJS.Timeout;
     if (step === 5) {
-      const timer = setTimeout(() => {
+      // Outro 화면 4.5초 유지 후 모달 닫힘
+      timer = setTimeout(() => {
         setIsOpen(false);
-        // 상태 초기화
+        // 모달 애니메이션 끝난 후 상태 초기화
         setTimeout(() => {
           setStep(0);
           setFormData({ name: "", problem: "", budget: "", contact: "" });
-        }, 500);
-      }, 4000);
-      return () => clearTimeout(timer);
+        }, 600);
+      }, 4500);
     }
+    return () => clearTimeout(timer);
   }, [step]);
 
   const variants: any = {
@@ -230,7 +257,11 @@ export default function GlobalContact() {
                       onKeyDown={handleKeyDown}
                     />
                     <div className={styles.guideText}>
-                      작성 완료 후 Enter를 누르시면 제출됩니다 <CornerDownLeft size={16} />
+                      {isSubmitting ? (
+                        "안전하게 암호화하여 전송 중입니다..."
+                      ) : (
+                        <>작성 완료 후 Enter를 누르시면 제출됩니다 <CornerDownLeft size={16} /></>
+                      )}
                     </div>
                   </motion.div>
                 )}
