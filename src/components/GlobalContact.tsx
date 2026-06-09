@@ -243,7 +243,7 @@ export default function GlobalContact() {
                     <label className={styles.questionLabel}>
                       프로젝트의 형태를 선택해 주세요.<span className={styles.subLabel} style={{ fontSize: "1.5rem", color: "#777777", marginLeft: "12px", verticalAlign: "baseline" }}>(중복 가능)</span>
                     </label>
-                    <div className={styles.projectGrid}>
+                    <div className={styles.budgetGrid} style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
                       {[
                         { title: "반응형 웹사이트", desc: "기업/브랜드/스타트업 등" },
                         { title: "랜딩페이지", desc: "마케팅 / 프로모션용 원페이지" },
@@ -260,19 +260,14 @@ export default function GlobalContact() {
                               background: isSelected ? "var(--text)" : "transparent",
                               color: isSelected ? "var(--bg)" : "var(--text)",
                               textAlign: "left",
-                              padding: "1.5rem 1.2rem",
-                              display: "flex",
-                              flexDirection: "column",
-                              justifyContent: "center",
-                              alignItems: "flex-start",
-                              gap: "8px"
+                              padding: "1.2rem 1.5rem"
                             }}
                             onClick={() => toggleProjectType(typeId)}
                           >
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                              <span style={{ fontWeight: 600, fontSize: "clamp(1.5rem, 3vw, 2.5rem)", letterSpacing: "-0.02em", wordBreak: "keep-all" }}>{isSelected ? "✓ " : ""}{type.title}</span>
+                              <span style={{ fontWeight: 600, fontSize: "1.5rem", letterSpacing: "-0.02em" }}>{isSelected ? "✓ " : ""}{type.title}</span>
                             </div>
-                            <span className={styles.optionDesc} style={{ color: isSelected ? "var(--bg)" : "#777777", fontSize: "clamp(1rem, 2vw, 1.5rem)", marginTop: "4px", wordBreak: "keep-all" }}>
+                            <span className={styles.optionDesc} style={{ color: isSelected ? "var(--bg)" : "#777777", fontSize: "1rem", marginTop: "4px" }}>
                               ({type.desc})
                             </span>
                           </button>
@@ -328,15 +323,15 @@ export default function GlobalContact() {
                     exit="exit"
                   >
                     <span className={styles.questionHighlight}>04 / 05</span>
-                    <label className={styles.questionLabel}>프로젝트의 예상 일정과 예산 범위를 선택해 주세요.</label>
+                    <label className={styles.questionLabel}>프로젝트의 예산 범위를 선택해 주세요.</label>
                     <div className={styles.budgetGrid}>
-                      <button className={`${styles.budgetButton} cursor-hover`} onClick={() => handleBudgetSelect("100만 원 이하")}>
+                      <button className={`${styles.budgetButton} cursor-hover`} style={{ fontSize: "1.5rem", padding: "1.2rem" }} onClick={() => handleBudgetSelect("100만 원 이하")}>
                         100만 원 이하
                       </button>
-                      <button className={`${styles.budgetButton} cursor-hover`} onClick={() => handleBudgetSelect("100만 원 - 300만 원")}>
+                      <button className={`${styles.budgetButton} cursor-hover`} style={{ fontSize: "1.5rem", padding: "1.2rem" }} onClick={() => handleBudgetSelect("100만 원 - 300만 원")}>
                         100만 원 - 300만 원
                       </button>
-                      <button className={`${styles.budgetButton} cursor-hover`} onClick={() => handleBudgetSelect("300만 원 이상")}>
+                      <button className={`${styles.budgetButton} cursor-hover`} style={{ fontSize: "1.5rem", padding: "1.2rem" }} onClick={() => handleBudgetSelect("300만 원 이상")}>
                         300만 원 이상
                       </button>
                     </div>
