@@ -376,7 +376,7 @@ export default function GlobalContact() {
                     exit="exit"
                   >
                     <h2 className={styles.outroTitle}>
-                      불필요한 소음을 걷어내고,<br />귀사의 본질을 마주할 준비를 시작합니다.
+                      불필요한 소음을 걷어내고,<br />브랜드의 본질을 마주할 준비를 시작합니다.
                     </h2>
                     <p className={styles.outroDesc}>
                       남겨주신 내용을 면밀히 검토 후, 곧 연결되겠습니다. 감사합니다.

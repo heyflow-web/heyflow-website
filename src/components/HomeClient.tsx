@@ -147,7 +147,7 @@ export default function HomeClient() {
             transition={{ duration: 1, delay: 0.4 }}
           >
             가장 미니멀한 레이아웃과 깊이 있는 감도로<br />
-            귀사의 비즈니스를 디지털 세상에 단단하게 뿌리내리게 합니다.
+            브랜드의 비즈니스를 디지털 세상에 단단하게 뿌리내리게 합니다.
           </motion.p>
         </div>
       </section>
