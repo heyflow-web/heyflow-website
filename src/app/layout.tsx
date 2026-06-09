@@ -4,6 +4,7 @@ import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
 import Link from "next/link";
+import GlobalContact from "@/components/GlobalContact";
 
 export const metadata: Metadata = {
   title: "heyflow.",
@@ -20,7 +21,7 @@ export default function RootLayout({
       <body className={inter.className}>
         <nav className="navbar">
           <Link href="/" className="nav-brand">
-            heyflow.
+            heyflow
           </Link>
           <div className="nav-links">
             <Link href="/" className="nav-link">Home</Link>
@@ -30,6 +31,7 @@ export default function RootLayout({
         <div className="main-content">
           {children}
         </div>
+        <GlobalContact />
       </body>
     </html>
   );
