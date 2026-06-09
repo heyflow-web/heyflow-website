@@ -67,7 +67,8 @@ export async function getProjects(): Promise<Project[]> {
     });
 
     if (!res.ok) {
-      throw new Error(`Notion API error: ${res.statusText}`);
+      console.error(`Notion API error: ${res.statusText}`);
+      return fallbackData.map((p: any) => ({ ...p, id: String(p.id) }));
     }
 
     const data = await res.json();
@@ -84,7 +85,7 @@ export async function getProjects(): Promise<Project[]> {
     });
   } catch (error) {
     console.error("Error fetching projects from Notion:", error);
-    return [];
+    return fallbackData.map((p: any) => ({ ...p, id: String(p.id) }));
   }
 }
 
@@ -112,6 +113,7 @@ export async function getProject(id: string): Promise<Project | null> {
     };
   } catch (error) {
     console.error(`Error fetching project ${id} from Notion:`, error);
-    return null;
+    const project = fallbackData.find((p: any) => String(p.id) === id);
+    return project ? { ...project, id: String(project.id) } : null;
   }
 }
