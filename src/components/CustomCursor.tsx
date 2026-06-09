@@ -51,7 +51,7 @@ export default function CustomCursor() {
         left: 0,
         borderRadius: "50%",
         pointerEvents: "none",
-        zIndex: 9999,
+        zIndex: 999999,
         mixBlendMode: "difference", // 배경색에 따라 반전되는 효과
         backgroundColor: "#ffffff",
       }}
