@@ -230,12 +230,28 @@ export default function HomeClient() {
         </div>
 
         <div className={styles.footerBottom}>
-          <p className={styles.copyright}>heyflow. All rights reserved.</p>
-          <div className={styles.footerInfo}>
-            <span>상호명: 아카이브헤이</span>
-            <span className={styles.divider}>|</span>
-            <span>비즈니스 디렉터: 김헤이</span>
+          <div className={styles.footerLegal}>
+            <div className={styles.legalRow}>
+              <span>상호명: 아카이브헤이</span>
+              <span className={styles.divider}>|</span>
+              <span>대표: 김헤이</span>
+              <span className={styles.divider}>|</span>
+              <span>사업자등록번호: 000-00-00000</span>
+            </div>
+            <div className={styles.legalRow}>
+              <span>주소: 서울특별시 강남구 테헤란로 000</span>
+              <span className={styles.divider}>|</span>
+              <span>이메일: hello@heyflow.com</span>
+              <span className={styles.divider}>|</span>
+              <span>TEL: 010-0000-0000</span>
+            </div>
+            <div className={styles.legalPolicy}>
+              <a href="#" className="cursor-hover">개인정보처리방침</a>
+              <span className={styles.divider}>|</span>
+              <a href="#" className="cursor-hover">이용약관</a>
+            </div>
           </div>
+          <p className={styles.copyright}>© {new Date().getFullYear()} heyflow. All rights reserved.</p>
         </div>
       </footer>
     </div>
