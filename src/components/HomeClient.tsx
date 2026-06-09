@@ -21,6 +21,15 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
   const { scrollYProgress } = useScroll({ target: horizontalRef });
   const horizontalX = useTransform(scrollYProgress, [0, 1], ["0%", "-80%"]);
 
+  // Conclusion Text Scroll 로직
+  const conclusionRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress: cProgress } = useScroll({
+    target: conclusionRef,
+    offset: ["start end", "end start"]
+  });
+  const cScale = useTransform(cProgress, [0, 0.5, 1], [1.5, 1, 0.8]);
+  const cOpacity = useTransform(cProgress, [0, 0.3, 0.8, 1], [0, 1, 1, 0]);
+
   useEffect(() => {
     // Problem 섹션에서만 글로벌 다크모드 유지
     if (isProblemInView) {
@@ -129,13 +138,10 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
       </section>
 
       {/* Section 02.5: Conclusion Section */}
-      <section className={styles.conclusionSection}>
+      <section ref={conclusionRef} className={styles.conclusionSection}>
         <motion.h2 
           className={styles.conclusionText}
-          initial={{ opacity: 0, scale: 0.95 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: true, margin: "-20%" }}
-          transition={{ duration: 1.2, ease: "easeOut" }}
+          style={{ scale: cScale, opacity: cOpacity }}
         >
           이 중 단 하나라도 해당한다면,<br />
           현재의 웹사이트는 브랜드를 대변하는 무기가 아니라<br />

@@ -150,13 +150,13 @@
 
 /* Section 02.5: Conclusion Section (독립된 거대 중앙 정렬 텍스트) */
 .conclusionSection {
-  padding: 20vh 5vw;
+  padding: 30vh 5vw; /* 여유 스크롤 공간 확보 */
   display: flex;
   justify-content: center;
   align-items: center;
   background-color: var(--bg);
   transition: background-color 0.8s ease, color 0.8s ease;
-  border-top: 1px solid rgba(128,128,128,0.2);
+  overflow: hidden;
 }
 
 .conclusionText {
@@ -169,7 +169,7 @@
 }
 
 .conclusionHighlight {
-  color: #ff3333; /* 강렬한 레드 또는 강조 색상으로 감점 요인 부각 */
+  /* color: #ff3333; 기존 강조 레드 제거 */
 }
 
 /* Section 03: About / Solution */
@@ -331,11 +331,7 @@
 .horizontalFlexGroup {
   display: flex;
   align-items: center;
-  /* 카드 사이 간격 */
-  gap: 8vw;
-  /* 처음 진입 시 타이틀이 보일 여백 */
   padding-left: 10vw;
-  /* will-change 로 렌더링 성능 최적화 */
   will-change: transform;
 }
 
@@ -366,28 +362,26 @@
 }
 
 .horizontalCard {
-  width: 50vw;
+  width: 35vw;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
-  background-color: rgba(255,255,255,0.05);
-  padding: 4rem;
-  border-radius: 20px;
-  border: 1px solid rgba(255,255,255,0.1);
+  padding: 0 4vw;
+  border-left: 1px solid rgba(255,255,255,0.2);
   gap: 1.5rem;
 }
 
 @media (max-width: 1024px) {
   .horizontalCard {
-    width: 70vw;
-    padding: 3rem;
+    width: 45vw;
+    padding: 0 3vw;
   }
 }
 
 @media (max-width: 768px) {
   .horizontalCard {
-    width: 85vw;
-    padding: 2rem;
+    width: 75vw;
+    padding: 0 5vw;
   }
 }
 
