@@ -5,7 +5,25 @@
   overflow-x: hidden;
 }
 
-/* Section 1: Hero */
+/* Common Typography & Layout */
+.sectionHeadline {
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -0.04em;
+  margin-bottom: 4rem;
+}
+
+.sectionHeadlineCenter {
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -0.04em;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+/* Section 01: Hero */
 .heroSection {
   min-height: 100vh;
   display: flex;
@@ -29,7 +47,7 @@
 }
 
 .heroSubtitle {
-  font-size: clamp(1rem, 1.5vw, 1.25rem);
+  font-size: clamp(1.1rem, 1.5vw, 1.25rem);
   line-height: 1.6;
   color: var(--gray);
   max-width: 600px;
@@ -59,12 +77,66 @@
   height: 60px;
 }
 
-/* Section 2: About */
+/* Section 02: Problem Section */
+.problemSection {
+  padding: 15vh 5vw;
+  background-color: var(--bg);
+}
+
+.problemContainer {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.problemList {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-bottom: 4rem;
+}
+
+.problemItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.5rem;
+  font-size: clamp(1.1rem, 2vw, 1.3rem);
+  font-weight: 500;
+  color: var(--gray);
+  line-height: 1.5;
+  padding: 1.5rem;
+  border-left: 2px solid var(--border);
+  transition: all 0.3s ease;
+}
+
+.problemItem:hover {
+  border-left-color: var(--text);
+  color: var(--text);
+  background-color: rgba(0,0,0,0.02);
+}
+
+:global(.dark-theme) .problemItem:hover {
+  background-color: rgba(255,255,255,0.05);
+}
+
+.problemCheck {
+  font-weight: 800;
+  color: var(--text);
+  font-size: 1.5rem;
+}
+
+.problemConclusion {
+  font-size: clamp(1.2rem, 2.5vw, 1.5rem);
+  font-weight: 700;
+  line-height: 1.6;
+}
+
+/* Section 03: About / Solution */
 .aboutSection {
   min-height: 100vh;
   display: flex;
   align-items: center;
   padding: 15vh 5vw;
+  background-color: var(--bg);
 }
 
 .aboutContent {
@@ -91,7 +163,7 @@
   opacity: 0.9;
 }
 
-/* Section 3: Selected Work */
+/* Selected Work (프로젝트 갤러리) */
 .workSection {
   padding: 15vh 5vw;
   background-color: var(--bg);
@@ -127,7 +199,7 @@
   gap: 1.5rem;
 }
 
-/* 비대칭 레이아웃 배치 (Magazine Style) */
+/* 비대칭 레이아웃 배치 (Magazine Style) - 4 items */
 .projectCard:nth-child(1) { grid-column: 1 / 8; margin-top: 5vh; }
 .projectCard:nth-child(2) { grid-column: 7 / 13; margin-top: -15vh; }
 .projectCard:nth-child(3) { grid-column: 2 / 7; margin-top: 10vh; }
@@ -157,28 +229,8 @@
   transition: transform 0.6s ease;
 }
 
-.triggerOverlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.3);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.projectCard:hover .triggerOverlay {
-  opacity: 1;
-}
-
-.triggerOverlay span {
-  color: white;
-  font-size: 1.2rem;
-  font-weight: 600;
-  border: 1px solid white;
-  padding: 0.8rem 2rem;
-  border-radius: 40px;
+.projectCard:hover .projectImage {
+  transform: scale(1.05);
 }
 
 .projectInfo {
@@ -202,71 +254,340 @@
 .projectCategory {
   font-size: 1rem;
   color: var(--gray);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  line-height: 1.5;
 }
 
-/* HeyMedi Popup */
-.heymediPopup {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.8);
-  backdrop-filter: blur(10px);
-  z-index: 99999;
+.viewAllWrapper {
+  margin-top: 10vh;
   display: flex;
-  align-items: center;
   justify-content: center;
-  padding: 5vw;
 }
 
-.heymediPopupInner {
-  background: #ffffff;
-  color: #000000;
-  padding: 4rem 3rem;
-  width: 100%;
-  max-width: 600px;
-  position: relative;
-  text-align: center;
+/* Section 04: Core Capabilities */
+.capabilitiesSection {
+  padding: 15vh 5vw;
+  background-color: var(--bg);
+}
+
+.capaContainer {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.capaGrid {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  gap: 3rem;
+}
+
+.capaCard {
+  border-top: 1px solid var(--border);
+  padding-top: 2rem;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+@media (min-width: 768px) {
+  .capaCard {
+    grid-template-columns: 1fr 2fr;
+    gap: 2rem;
+  }
+}
+
+.capaHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.capaNum {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--gray);
+}
+
+.capaTitle {
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.capaSubtitle {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.capaDesc {
+  font-size: 1.05rem;
+  line-height: 1.6;
+  color: var(--gray);
+}
+
+/* Section 05: Ideal Clients */
+.idealSection {
+  padding: 15vh 5vw;
+  background-color: var(--bg);
+}
+
+.idealContainer {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.idealList {
+  display: grid;
+  grid-template-columns: 1fr;
   gap: 2rem;
 }
 
-.closeButton {
-  position: absolute;
-  top: 1.5rem;
-  right: 1.5rem;
-  background: none;
-  border: none;
-  font-size: 1.5rem;
-  cursor: none; /* Custom cursor takes over */
+.idealItem {
+  background-color: rgba(128,128,128,0.05);
+  padding: 2.5rem;
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
-.heymediTitle {
-  font-size: 1.2rem;
-  font-weight: 600;
-  color: var(--gray);
+.idealHeaderInner {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.idealTag {
+  font-size: 0.85rem;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-}
-
-.heymediDesc {
-  font-size: 1.8rem;
   font-weight: 700;
-  line-height: 1.5;
-  word-break: keep-all;
+  color: var(--gray);
 }
 
-.heymediLink {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
+.idealTitle {
+  font-size: 1.4rem;
+  font-weight: 800;
+}
+
+.idealDesc {
+  font-size: 1.05rem;
+  line-height: 1.6;
+  color: var(--gray);
+}
+
+/* Section 06: Pricing Plan */
+.pricingSection {
+  padding: 15vh 5vw;
+  background-color: var(--bg);
+}
+
+.pricingContainer {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.pricingHeader {
+  text-align: center;
+  margin-bottom: 4rem;
+}
+
+.pricingSubtitle {
   font-size: 1.1rem;
-  font-weight: 600;
-  padding-bottom: 0.2rem;
-  border-bottom: 2px solid #000;
+  color: var(--gray);
 }
 
-/* Section 4: Contact & Footer */
+.pricingGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+  margin-bottom: 3rem;
+}
+
+@media (min-width: 1024px) {
+  .pricingGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.pricingCard {
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 3rem 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  position: relative;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.pricingCard:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.05);
+}
+
+.pricingPopular {
+  border: 2px solid var(--text);
+  background-color: rgba(128,128,128,0.02);
+}
+
+.popBadge {
+  position: absolute;
+  top: -15px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: var(--text);
+  color: var(--bg);
+  padding: 0.4rem 1.2rem;
+  font-size: 0.8rem;
+  font-weight: 800;
+  border-radius: 20px;
+  letter-spacing: 0.05em;
+}
+
+.planHeader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.5rem;
+}
+
+.planTitle {
+  font-size: 1.8rem;
+  font-weight: 800;
+}
+
+.planType {
+  font-size: 0.9rem;
+  color: var(--gray);
+  font-weight: 600;
+}
+
+.planDesc {
+  font-size: 0.95rem;
+  text-align: center;
+  line-height: 1.5;
+  color: var(--gray);
+  min-height: 60px;
+}
+
+.planPrice {
+  font-size: 2.5rem;
+  font-weight: 800;
+  text-align: center;
+  margin: 1rem 0;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.planFeatures {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.planFeatures li {
+  font-size: 0.95rem;
+  line-height: 1.5;
+  position: relative;
+  padding-left: 1.5rem;
+}
+
+.planFeatures li::before {
+  content: "✓";
+  position: absolute;
+  left: 0;
+  color: var(--text);
+  font-weight: 800;
+}
+
+.pricingNotice {
+  font-size: 0.85rem;
+  color: var(--gray);
+  line-height: 1.6;
+  text-align: center;
+}
+
+/* Section 07: FAQ */
+.faqSection {
+  padding: 15vh 5vw;
+  background-color: var(--bg);
+}
+
+.faqContainer {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.faqList {
+  display: flex;
+  flex-direction: column;
+}
+
+.faqItem {
+  border-bottom: 1px solid var(--border);
+}
+
+.faqQuestion {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  text-align: left;
+  background: none;
+  border: none;
+  padding: 2rem 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.faqQMark {
+  font-weight: 800;
+  color: var(--gray);
+  margin-right: 1rem;
+}
+
+.faqIcon {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gray);
+  transition: transform 0.3s ease;
+}
+
+.faqOpen .faqIcon {
+  color: var(--text);
+  transform: rotate(180deg);
+}
+
+.faqAnswerWrapper {
+  overflow: hidden;
+}
+
+.faqAnswer {
+  display: flex;
+  padding-bottom: 2rem;
+  font-size: 1.05rem;
+  line-height: 1.7;
+  color: var(--gray);
+}
+
+.faqAMark {
+  font-weight: 800;
+  color: var(--text);
+  margin-right: 1rem;
+}
+
+/* Section 08: Contact & Footer */
 .footerSection {
   background-color: var(--bg);
   padding: 15vh 5vw 4vw 5vw;
@@ -287,11 +608,13 @@
   font-size: clamp(3rem, 6vw, 5rem);
   font-weight: 800;
   letter-spacing: -0.03em;
+  line-height: 1.1;
 }
 
 .contactDesc {
   font-size: 1.2rem;
   color: var(--gray);
+  line-height: 1.6;
 }
 
 .ctaButton {
