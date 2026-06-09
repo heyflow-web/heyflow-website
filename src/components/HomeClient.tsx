@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { motion, useScroll, useInView } from "framer-motion";
+import { motion, useScroll, useTransform, useInView } from "framer-motion";
 import { ArrowRight, Plus, Minus } from "lucide-react";
 import Link from "next/link";
 import styles from "./HomeClient.module.css";
@@ -12,15 +12,17 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
   
   // 섹션별 레퍼런스 (다크모드 교차 전환용)
   const problemRef = useRef<HTMLDivElement>(null);
-  const capaRef = useRef<HTMLDivElement>(null);
-  
-  // 옵저버 (화면 진입 시점 마진)
   const isProblemInView = useInView(problemRef, { margin: "-40% 0px -40% 0px" });
 
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
+  // Horizontal Scroll 로직
+  const horizontalRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({ target: horizontalRef });
+  const horizontalX = useTransform(scrollYProgress, [0, 1], ["0%", "-80%"]);
+
   useEffect(() => {
-    // 다중 교차 배경색 반전 로직: Problem 섹션에서만 글로벌 다크모드 유지
+    // Problem 섹션에서만 글로벌 다크모드 유지
     if (isProblemInView) {
       document.body.classList.add("dark-theme");
     } else {
@@ -122,20 +124,23 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
                 <p>{text}</p>
               </motion.div>
             ))}
-            
-            <motion.div 
-              className={styles.problemConclusionWrapper}
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 1 }}
-            >
-              <p className={styles.problemConclusion}>
-                이 중 단 하나라도 해당한다면, 현재의 웹사이트는 브랜드를 대변하는 무기가 아니라 감점 요인입니다.
-              </p>
-            </motion.div>
           </div>
         </div>
+      </section>
+
+      {/* Section 02.5: Conclusion Section */}
+      <section className={styles.conclusionSection}>
+        <motion.h2 
+          className={styles.conclusionText}
+          initial={{ opacity: 0, scale: 0.95 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true, margin: "-20%" }}
+          transition={{ duration: 1.2, ease: "easeOut" }}
+        >
+          이 중 단 하나라도 해당한다면,<br />
+          현재의 웹사이트는 브랜드를 대변하는 무기가 아니라<br />
+          <span className={styles.conclusionHighlight}>감점 요인입니다.</span>
+        </motion.h2>
       </section>
 
       {/* Section 03: Solution & Philosophy */}
@@ -225,26 +230,18 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
         </div>
       </section>
 
-      {/* Section 04: Core Capabilities (Magazine List Layout) */}
-      <motion.section 
-        className={styles.capabilitiesSection}
-        initial={{ backgroundColor: "var(--bg)", color: "var(--text)" }}
-        whileInView={{ backgroundColor: "#000000", color: "#ffffff" }}
-        viewport={{ margin: "-20% 0px -20% 0px" }}
-        transition={{ duration: 0.8 }}
-      >
-        <div className={styles.capaContainer}>
-          <motion.h2 
-            className={styles.sectionHeadline}
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-20%" }}
-            transition={{ duration: 1 }}
-          >
-            압도적 차별점 5
-          </motion.h2>
-          
-          <div className={styles.capaList}>
+      {/* Section 04: Core Capabilities (Horizontal Scroll) */}
+      <section ref={horizontalRef} className={styles.capabilitiesHorizontalSection}>
+        <div className={styles.horizontalStickyContainer}>
+          <motion.div style={{ x: horizontalX }} className={styles.horizontalFlexGroup}>
+            
+            <div className={styles.horizontalTitleSlide}>
+              <h2 className={styles.horizontalHeadline}>
+                압도적<br/>차별점 5
+              </h2>
+              <p className={styles.horizontalSub}>마우스를 스크롤하여 옆으로 이동하세요.</p>
+            </div>
+
             {[
               { num: "01", title: "End-to-End Strategic Building", subtitle: "기획부터 제작까지, 완벽한 원스톱 프로세스", desc: "복잡한 기획안을 고민할 필요 없습니다. 기존의 회사소개서나 대략적인 사업 내용만 가볍게 전달해 주세요. 비즈니스 모델을 분석한 전략적 화면 구성부터 잠재 고객을 설득하는 카피라이팅, 그리고 고감도 프론트엔드 제작까지 모든 과정을 번거로움 없이 한 번에 완성합니다." },
               { num: "02", title: "Zero Server Cost & Full Ownership", subtitle: "월 고정 비용 0원, 완벽한 소유권", desc: "플랫폼에 종속되는 폐쇄형 웹 빌더를 거부합니다. 완성된 프로덕트의 원본 소스코드 소유권을 투명하게 인도합니다. 매월 지출되는 불필요한 호스팅 비용을 완전히 제거하고, 가벼우면서도 독립적인 운영 생태계를 제공합니다." },
@@ -252,27 +249,21 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
               { num: "04", title: "AI Visual Branding & Identity", subtitle: "컨셉에 맞는 AI 이미지로 브랜딩 완성", desc: "별도의 고비용 사진 촬영 없이도 브랜드 무드에 딱 맞는 비주얼을 구현합니다. 비즈니스의 페르소나를 정밀하게 반영한 독창적인 AI 아트워크를 직접 설계하고 배치하여, 리소스는 최소화하고 시각적 임팩트는 극대화합니다." },
               { num: "05", title: "Search Engine & AI Top-Tier Sync", subtitle: "검색 엔진 및 AI 최상위 동기화", desc: "단순한 비주얼을 넘어 디지털 세상의 생존 기술을 심습니다. 구글 검색창과 챗GPT, 제미나이 등 차세대 AI 비서들이 우리 브랜드를 가장 먼저 찾아내고 검색 최상위에 동기화할 수 있도록 표준 웹 가이드라인을 완벽히 준수해 설계합니다." }
             ].map((capa, idx) => (
-              <motion.div 
-                key={idx} 
-                className={styles.capaRow}
-                initial={{ opacity: 0, y: 40 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.8, delay: idx * 0.1 }}
-              >
-                <div className={styles.capaRowLeft}>
-                  <span className={styles.capaRowNum}>{capa.num}</span>
-                  <span className={styles.capaRowEnTitle}>{capa.title}</span>
-                </div>
-                <div className={styles.capaRowRight}>
-                  <h3 className={styles.capaRowMainTitle}>{capa.subtitle}</h3>
-                  <p className={styles.capaRowDesc}>{capa.desc}</p>
-                </div>
-              </motion.div>
+              <div key={idx} className={styles.horizontalCard}>
+                <span className={styles.hCardNum}>{capa.num}</span>
+                <span className={styles.hCardEnTitle}>{capa.title}</span>
+                <h3 className={styles.hCardMainTitle}>{capa.subtitle}</h3>
+                <div className={styles.hCardDivider}></div>
+                <p className={styles.hCardDesc}>{capa.desc}</p>
+              </div>
             ))}
-          </div>
+            
+            {/* 끝부분 여유 마진 */}
+            <div className={styles.horizontalEndSpacer}></div>
+
+          </motion.div>
         </div>
-      </motion.section>
+      </section>
 
       {/* Section 05: Ideal Clients */}
       <section className={styles.idealSection}>
@@ -314,7 +305,7 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
         </div>
       </section>
 
-      {/* Section 06: Pricing Plan */}
+      {/* Section 06: Pricing Plan (다크모드 강제) */}
       <section className={styles.pricingSection}>
         <div className={styles.pricingContainer}>
           <motion.div 
@@ -382,7 +373,7 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
               { q: "스마트폰이나 태블릿 등 모바일 환경에서도 잘 보이나요?", a: "네, 기본 스펙입니다. 헤이플로우가 빌딩하는 모든 페이지는 유연한 '반응형 웹사이트'로 제작됩니다. 접속하는 사용자의 기기(PC, 태블릿, 모바일) 디스플레이 환경을 실시간으로 감지하여 레이아웃이 가장 선명하고 세련된 형태로 자동 최적화됩니다." },
               { q: "제작 기간은 얼마나 걸리나요?", a: "헤이플로우는 비효율적인 소통 구조를 생략하고 브랜드의 핵심 동선과 시각적 밀도에만 집중합니다. 대표님께서 대략적인 자료와 피드백을 전달해 주신 시점부터, 평균 3~5일 이내에 완전히 작동하는 고감도 최종본을 마주하실 수 있습니다." },
               { q: "제작 비용 외에 추가로 발생하는 유지 비용이 있나요?", a: "기본적으로 헤이플로우는 매달 수만 원씩 유료 호스팅 월세를 내실 필요가 없도록 서버비 0원의 독립형 인프라 구조로 빌딩해 드립니다. 다만 도메인 갱신, 보안인증서(SSL) 관리, 정기 모니터링 등 신경 쓰이는 사이트 관리를 완벽하게 위임하고 싶으신 분들을 위해 2년 차부터 최소한의 연간 프리미엄 유지관리 패키지를 정찰제로 운영하고 있습니다." },
-              { q: "도메인은 정확히 무엇이며 어떻게 준비해야 하나요?", a: "도메인은 홈페이지에 진입하기 위한 주소(예: .com, .co.kr)를 뜻하며, 공통적으로 연간 약 2만 원대의 필수 리소스 비용이 발생합니다. 헤이플로우는 이에 대한 별도의 대행 수수료를 취하지 않으며, 복잡한 네임서버 연결부터 도메인 매칭까지 전 과정을 알아서 완벽하게 세팅해 드리니 걱정하지 않으셔도 됩니다." },
+              { q: "도메인은 정확히 무엇이며 어떻게 준비해야 하나요?", a: "도메인은 홈페이지에 진입하기 위한 주소(예: .com, .co.kr)를 뜻하며, 공통적으로 연간 약 2만 원대의 필수 리소스 비용이 발생합니다. 헤이플로우는 이에 대한 별도의 대행 수수료를 취하지 않으며, 복잡한 네임서버 신규 등록부터 서버 연결까지 전 과정을 알아서 완벽하게 세팅해 드리니 걱정하지 않으셔도 됩니다." },
               { q: "구글 검색 엔진 및 AI 최상위 동기화는 정말 작동하나요?", a: "네, 확실하게 작동합니다. 단순히 눈에만 예쁜 사이트가 아니라, 구글 검색 로봇과 챗GPT, 제미나이 등 차세대 AI 비서들이 웹사이트의 정보를 가장 정확하고 빠르게 크롤링할 수 있도록 표준 시멘틱 마크업 가이드라인을 철저히 준수하여 빌딩합니다. 브랜드의 장기적인 디지털 자산 가치를 극대화하는 헤이플로우만의 핵심 기술입니다." }
             ].map((faq, idx) => (
               <div key={idx} className={`${styles.faqItem} ${openFaq === idx ? styles.faqOpen : ''}`}>

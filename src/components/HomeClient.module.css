@@ -2,7 +2,8 @@
 
 .homeContainer {
   width: 100%;
-  overflow-x: hidden;
+  /* overflow-x: hidden; <-- 이것이 position: sticky를 고장내는 원인입니다 */
+  overflow-x: clip; /* clip을 사용하면 sticky 기능을 유지하면서 가로 스크롤만 막을 수 있습니다 */
 }
 
 /* Common Typography & Layout */
@@ -40,9 +41,10 @@
 }
 
 .heroTitle {
-  font-size: clamp(3rem, 7vw, 6rem);
+  /* 폰트 사이즈 1단계 축소 */
+  font-size: clamp(2.5rem, 5vw, 4.5rem);
   font-weight: 800;
-  line-height: 1.1;
+  line-height: 1.2;
   letter-spacing: -0.04em;
   margin-bottom: 2rem;
 }
@@ -56,7 +58,6 @@
 
 .scrollIndicator {
   position: absolute;
-  /* 화면이 긴 모바일 기기에서도 안전하게 보이도록 하단 여백 대폭 증가 */
   bottom: 8vh; 
   left: 50%;
   transform: translateX(-50%);
@@ -105,14 +106,15 @@
 .problemStickyLeft {
   flex: 1;
   position: sticky;
-  top: 25vh;
+  top: 25vh; /* 스크롤 시 이 위치에서 딱 멈춥니다 */
   z-index: 10;
 }
 
 .problemStickyTitle {
-  font-size: clamp(3rem, 5vw, 5rem);
+  /* 폰트 사이즈 1단계 축소 */
+  font-size: clamp(2rem, 4vw, 4rem);
   font-weight: 800;
-  line-height: 1.2;
+  line-height: 1.3;
   letter-spacing: -0.04em;
 }
 
@@ -120,9 +122,9 @@
   flex: 1.5;
   display: flex;
   flex-direction: column;
-  gap: 30vh; /* 각 문제점 사이의 간격을 넓혀 스크롤 유도 */
+  gap: 30vh;
   padding-top: 10vh;
-  padding-bottom: 10vh;
+  padding-bottom: 20vh;
 }
 
 .problemHugeItem {
@@ -146,18 +148,28 @@
   letter-spacing: -0.02em;
 }
 
-.problemConclusionWrapper {
-  margin-top: 10vh;
-  padding-top: 5vh;
-  border-top: 1px solid var(--border);
+/* Section 02.5: Conclusion Section (독립된 거대 중앙 정렬 텍스트) */
+.conclusionSection {
+  padding: 20vh 5vw;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--bg);
+  transition: background-color 0.8s ease, color 0.8s ease;
+  border-top: 1px solid rgba(128,128,128,0.2);
 }
 
-.problemConclusion {
-  font-size: clamp(1.2rem, 2vw, 1.8rem);
-  font-weight: 600;
-  line-height: 1.6;
-  color: var(--gray);
+.conclusionText {
+  text-align: center;
+  font-size: clamp(1.5rem, 3.5vw, 3rem);
+  font-weight: 800;
+  line-height: 1.5;
+  letter-spacing: -0.02em;
   word-break: keep-all;
+}
+
+.conclusionHighlight {
+  color: #ff3333; /* 강렬한 레드 또는 강조 색상으로 감점 요인 부각 */
 }
 
 /* Section 03: About / Solution */
@@ -298,78 +310,125 @@
   justify-content: center;
 }
 
-/* Section 04: Core Capabilities (Magazine List Style) */
-.capabilitiesSection {
-  padding: 15vh 5vw;
-  background-color: var(--bg);
-  transition: background-color 0.8s ease, color 0.8s ease;
+/* Section 04: Core Capabilities (HORIZONTAL SCROLL) */
+.capabilitiesHorizontalSection {
+  /* 5개의 카드를 스크롤할 충분한 높이(여정)를 확보 */
+  height: 400vh; 
+  background-color: #000;
+  color: #fff;
 }
 
-.capaContainer {
-  max-width: 1200px;
-  margin: 0 auto;
+.horizontalStickyContainer {
+  position: sticky;
+  top: 0;
+  height: 100vh; /* 화면에 딱 맞춰 고정 */
+  width: 100%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
 }
 
-.capaList {
+.horizontalFlexGroup {
+  display: flex;
+  align-items: center;
+  /* 카드 사이 간격 */
+  gap: 8vw;
+  /* 처음 진입 시 타이틀이 보일 여백 */
+  padding-left: 10vw;
+  /* will-change 로 렌더링 성능 최적화 */
+  will-change: transform;
+}
+
+.horizontalTitleSlide {
+  width: 30vw;
+  flex-shrink: 0;
   display: flex;
   flex-direction: column;
-  border-top: 2px solid var(--border);
+  gap: 2rem;
 }
 
-.capaRow {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 1.5rem;
-  padding: 4rem 0;
-  border-bottom: 1px solid var(--border);
-}
-
-@media (min-width: 1024px) {
-  .capaRow {
-    grid-template-columns: 1fr 2fr;
-    gap: 4rem;
+@media (max-width: 768px) {
+  .horizontalTitleSlide {
+    width: 80vw;
   }
 }
 
-.capaRowLeft {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.capaRowNum {
-  font-size: 1.2rem;
+.horizontalHeadline {
+  font-size: clamp(3rem, 6vw, 6rem);
   font-weight: 800;
-  color: var(--gray);
+  line-height: 1.1;
+  letter-spacing: -0.04em;
 }
 
-.capaRowEnTitle {
+.horizontalSub {
   font-size: 1.1rem;
-  font-weight: 700;
-  color: var(--gray);
-  letter-spacing: 0.05em;
+  color: #999;
 }
 
-.capaRowRight {
+.horizontalCard {
+  width: 50vw;
+  flex-shrink: 0;
   display: flex;
   flex-direction: column;
+  background-color: rgba(255,255,255,0.05);
+  padding: 4rem;
+  border-radius: 20px;
+  border: 1px solid rgba(255,255,255,0.1);
   gap: 1.5rem;
 }
 
-/* 핵심 메시지를 메인으로 격상 */
-.capaRowMainTitle {
-  font-size: clamp(2rem, 3.5vw, 3rem);
-  font-weight: 800;
-  line-height: 1.3;
-  word-break: keep-all;
-  letter-spacing: -0.03em;
+@media (max-width: 1024px) {
+  .horizontalCard {
+    width: 70vw;
+    padding: 3rem;
+  }
 }
 
-.capaRowDesc {
-  font-size: 1.15rem;
+@media (max-width: 768px) {
+  .horizontalCard {
+    width: 85vw;
+    padding: 2rem;
+  }
+}
+
+.hCardNum {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #666;
+}
+
+.hCardEnTitle {
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #ccc;
+  font-weight: 700;
+}
+
+.hCardMainTitle {
+  font-size: clamp(1.8rem, 3vw, 2.5rem);
+  font-weight: 800;
+  line-height: 1.4;
+  word-break: keep-all;
+}
+
+.hCardDivider {
+  width: 100%;
+  height: 1px;
+  background-color: rgba(255,255,255,0.2);
+  margin: 1rem 0;
+}
+
+.hCardDesc {
+  font-size: 1.1rem;
   line-height: 1.7;
-  color: var(--gray);
-  max-width: 800px;
+  color: #bbb;
+}
+
+/* 모션이 끝난 뒤 우측 여백을 주어 자연스럽게 빠져나가도록 함 */
+.horizontalEndSpacer {
+  width: 20vw;
+  flex-shrink: 0;
 }
 
 /* Section 05: Ideal Clients */
@@ -424,11 +483,12 @@
   color: var(--gray);
 }
 
-/* Section 06: Pricing Plan */
+/* Section 06: Pricing Plan (다크모드 강제 고정) */
 .pricingSection {
   padding: 15vh 5vw;
-  background-color: var(--bg);
-  transition: background-color 0.8s ease;
+  /* 완전히 독립적인 다크 테마 적용 */
+  background-color: #000;
+  color: #fff;
 }
 
 .pricingContainer {
@@ -443,7 +503,7 @@
 
 .pricingSubtitle {
   font-size: 1.1rem;
-  color: var(--gray);
+  color: #aaa;
 }
 
 .pricingGrid {
@@ -460,7 +520,7 @@
 }
 
 .pricingCard {
-  border: 1px solid var(--border);
+  border: 1px solid rgba(255,255,255,0.15);
   border-radius: 24px;
   padding: 3rem 2rem;
   display: flex;
@@ -468,20 +528,17 @@
   gap: 1.5rem;
   position: relative;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+  background-color: #000;
 }
 
 .pricingCard:hover {
   transform: translateY(-5px);
-  box-shadow: 0 20px 40px rgba(0,0,0,0.05);
-}
-
-:global(.dark-theme) .pricingCard:hover {
   box-shadow: 0 20px 40px rgba(255,255,255,0.05);
 }
 
 .pricingPopular {
-  border: 2px solid var(--text);
-  background-color: rgba(128,128,128,0.02);
+  border: 2px solid #fff;
+  background-color: rgba(255,255,255,0.05);
 }
 
 .popBadge {
@@ -489,8 +546,8 @@
   top: -15px;
   left: 50%;
   transform: translateX(-50%);
-  background-color: var(--text);
-  color: var(--bg);
+  background-color: #fff;
+  color: #000;
   padding: 0.4rem 1.2rem;
   font-size: 0.8rem;
   font-weight: 800;
@@ -513,7 +570,7 @@
 
 .planType {
   font-size: 0.9rem;
-  color: var(--gray);
+  color: #aaa;
   font-weight: 600;
 }
 
@@ -521,7 +578,7 @@
   font-size: 0.95rem;
   text-align: center;
   line-height: 1.5;
-  color: var(--gray);
+  color: #aaa;
   min-height: 60px;
 }
 
@@ -531,7 +588,7 @@
   text-align: center;
   margin: 1rem 0;
   padding-bottom: 1.5rem;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid rgba(255,255,255,0.2);
 }
 
 .planFeatures {
@@ -548,19 +605,20 @@
   line-height: 1.5;
   position: relative;
   padding-left: 1.5rem;
+  color: #ddd;
 }
 
 .planFeatures li::before {
   content: "✓";
   position: absolute;
   left: 0;
-  color: var(--text);
+  color: #fff;
   font-weight: 800;
 }
 
 .pricingNotice {
   font-size: 0.85rem;
-  color: var(--gray);
+  color: #888;
   line-height: 1.6;
   text-align: center;
 }
