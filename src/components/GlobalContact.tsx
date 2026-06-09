@@ -195,14 +195,14 @@ export default function GlobalContact() {
                     <span className={styles.questionHighlight}>03 / 04</span>
                     <label className={styles.questionLabel}>프로젝트의 예상 일정과 예산 범위를 선택해 주세요.</label>
                     <div className={styles.budgetGrid}>
-                      <button className={`${styles.budgetButton} cursor-hover`} onClick={() => handleBudgetSelect("1,000만 원 이하")}>
-                        1,000만 원 이하
+                      <button className={`${styles.budgetButton} cursor-hover`} onClick={() => handleBudgetSelect("100만 원 이하")}>
+                        100만 원 이하
                       </button>
-                      <button className={`${styles.budgetButton} cursor-hover`} onClick={() => handleBudgetSelect("1,000만 원 - 3,000만 원")}>
-                        1,000만 원 - 3,000만 원
+                      <button className={`${styles.budgetButton} cursor-hover`} onClick={() => handleBudgetSelect("100만 원 - 300만 원")}>
+                        100만 원 - 300만 원
                       </button>
-                      <button className={`${styles.budgetButton} cursor-hover`} onClick={() => handleBudgetSelect("3,000만 원 이상")}>
-                        3,000만 원 이상
+                      <button className={`${styles.budgetButton} cursor-hover`} onClick={() => handleBudgetSelect("300만 원 이상")}>
+                        300만 원 이상
                       </button>
                     </div>
                   </motion.div>
