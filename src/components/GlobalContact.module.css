@@ -27,6 +27,7 @@
   z-index: 100000;
   display: flex;
   flex-direction: column;
+  overflow-x: hidden; /* 가로 스크롤 완벽 차단 */
 }
 
 .modalHeader {
@@ -178,6 +179,12 @@
   gap: 1.5rem;
 }
 
+.projectGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
 .budgetButton {
   background: transparent;
   border: 1px solid var(--border);
@@ -218,5 +225,8 @@
     bottom: 1.5rem;
     right: 1.5rem;
     padding: 1rem 2rem;
+  }
+  .projectGrid {
+    grid-template-columns: 1fr; /* 모바일에서는 세로로 배치하여 가독성 유지 */
   }
 }

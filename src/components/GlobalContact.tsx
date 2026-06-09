@@ -243,7 +243,7 @@ export default function GlobalContact() {
                     <label className={styles.questionLabel}>
                       프로젝트의 형태를 선택해 주세요.<span className={styles.subLabel}>(중복 가능)</span>
                     </label>
-                    <div className={styles.budgetGrid} style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                    <div className={styles.projectGrid}>
                       {[
                         { title: "반응형 웹사이트", desc: "기업/브랜드/스타트업 등" },
                         { title: "랜딩페이지", desc: "마케팅 / 프로모션용 원페이지" },
@@ -260,7 +260,12 @@ export default function GlobalContact() {
                               background: isSelected ? "var(--text)" : "transparent",
                               color: isSelected ? "var(--bg)" : "var(--text)",
                               textAlign: "left",
-                              padding: "1.2rem 1.5rem"
+                              padding: "1.5rem 1.2rem",
+                              display: "flex",
+                              flexDirection: "column",
+                              justifyContent: "center",
+                              alignItems: "flex-start",
+                              gap: "8px"
                             }}
                             onClick={() => toggleProjectType(typeId)}
                           >
