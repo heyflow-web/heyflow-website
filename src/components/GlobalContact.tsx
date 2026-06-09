@@ -144,7 +144,7 @@ export default function GlobalContact() {
                       ref={inputRef}
                       type="text" 
                       className={styles.textInput} 
-                      placeholder="ex. 김미연 / 헤이플로우"
+                      placeholder="ex. 김헤이 / 헤이플로우"
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                       onKeyDown={handleKeyDown}

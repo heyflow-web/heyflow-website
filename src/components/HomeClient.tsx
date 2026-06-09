@@ -234,7 +234,7 @@ export default function HomeClient() {
           <div className={styles.footerInfo}>
             <span>상호명: 아카이브헤이</span>
             <span className={styles.divider}>|</span>
-            <span>비즈니스 디렉터: 김미연</span>
+            <span>비즈니스 디렉터: 김헤이</span>
           </div>
         </div>
       </footer>
