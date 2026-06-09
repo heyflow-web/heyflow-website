@@ -59,14 +59,16 @@
 }
 
 .modalBody {
-  flex: 1;
+  width: 100%;
+  max-width: 600px;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  max-width: 900px;
-  width: 100%;
+  position: relative;
+  max-height: 80vh; /* 화면을 넘어가면 스크롤되도록 */
+  overflow-y: auto;
+  padding: 20px 0;
   margin: 0 auto;
-  padding: 2rem 5vw;
 }
 
 .stepContainer {
@@ -179,14 +181,13 @@
 .budgetButton {
   background: transparent;
   border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 2rem;
-  text-align: left;
-  font-size: clamp(1.2rem, 2vw, 1.8rem);
-  font-weight: 600;
   color: var(--text);
-  cursor: none;
-  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  padding: 1rem;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  flex: 1;
 }
 
 .budgetButton:hover {

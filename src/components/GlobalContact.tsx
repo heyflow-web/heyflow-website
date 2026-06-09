@@ -48,8 +48,8 @@ export default function GlobalContact() {
     if (isSubmitting) return; // 전송 중 중복 입력 방지
 
     if (step === 1 && !formData.name) return;
-    if (step === 2 && !formData.problem) return;
-    if (step === 4 && formData.projectTypes.length === 0) return;
+    if (step === 2 && formData.projectTypes.length === 0) return;
+    if (step === 3 && !formData.problem) return;
     
     // 마지막 제출 단계 (step 5)
     if (step === 5) {
@@ -157,16 +157,17 @@ export default function GlobalContact() {
                   className={`cursor-hover`}
                   style={{
                     position: "absolute",
-                    top: "30px",
-                    left: "30px",
+                    top: "0px",
+                    left: "0px",
                     background: "none",
                     border: "none",
                     color: "var(--gray)",
                     display: "flex",
                     alignItems: "center",
                     gap: "8px",
-                    fontSize: "0.9rem",
-                    zIndex: 10
+                    fontSize: "0.85rem",
+                    zIndex: 10,
+                    transform: "translateY(-40px)" // 로고 바로 아래에 위치하도록 조정
                   }}
                 >
                   <ArrowLeft size={16} /> 뒤로가기
@@ -227,7 +228,7 @@ export default function GlobalContact() {
                   </motion.div>
                 )}
 
-                {/* Step 2: Problem */}
+                {/* Step 2: Project Types */}
                 {step === 2 && (
                   <motion.div 
                     key="step2"
@@ -238,6 +239,62 @@ export default function GlobalContact() {
                     exit="exit"
                   >
                     <span className={styles.questionHighlight}>02 / 05</span>
+                    <label className={styles.questionLabel}>
+                      프로젝트의 형태를 선택해 주세요.<span className={styles.subLabel}>(중복 가능)</span>
+                    </label>
+                    <div className={styles.budgetGrid} style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                      {[
+                        { title: "반응형 웹사이트", desc: "기업/브랜드/스타트업 등" },
+                        { title: "랜딩페이지", desc: "마케팅 / 프로모션용 원페이지" },
+                        { title: "디지털 제품 상세페이지", desc: "이커머스 제품 기획 및 비주얼 디자인" },
+                        { title: "온·오프라인 그래픽/인쇄물", desc: "브로셔, 리플렛, 패키지, SNS 에셋 등" }
+                      ].map(type => {
+                        const typeId = type.title;
+                        const isSelected = formData.projectTypes.includes(typeId);
+                        return (
+                          <button 
+                            key={typeId}
+                            className={`${styles.budgetButton} cursor-hover`} 
+                            style={{
+                              background: isSelected ? "var(--text)" : "transparent",
+                              color: isSelected ? "var(--bg)" : "var(--text)",
+                              textAlign: "left",
+                              padding: "1.2rem 1.5rem"
+                            }}
+                            onClick={() => toggleProjectType(typeId)}
+                          >
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <span style={{ fontWeight: 600 }}>{isSelected ? "✓ " : ""}{type.title}</span>
+                            </div>
+                            <span className={styles.optionDesc} style={{ color: isSelected ? "var(--bg)" : "inherit" }}>
+                              ({type.desc})
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <button 
+                       className={`${styles.startButton} cursor-hover`} 
+                       style={{ marginTop: '2rem', opacity: formData.projectTypes.length > 0 ? 1 : 0.5 }}
+                       onClick={handleNext}
+                       disabled={formData.projectTypes.length === 0}
+                    >
+                      다음으로 <ArrowRight size={20} style={{ display: 'inline', verticalAlign: 'middle', marginLeft: '8px' }} />
+                    </button>
+                  </motion.div>
+                )}
+
+                {/* Step 3: Problem */}
+                {step === 3 && (
+                  <motion.div 
+                    key="step3"
+                    className={styles.stepContainer}
+                    variants={variants}
+                    initial="initial"
+                    animate="animate"
+                    exit="exit"
+                  >
+                    <span className={styles.questionHighlight}>03 / 05</span>
                     <label className={styles.questionLabel}>우리가 함께 해결해야 할 브랜드의 본질적인 문제는 무엇인가요?</label>
                     <input 
                       ref={inputRef}
@@ -254,17 +311,17 @@ export default function GlobalContact() {
                   </motion.div>
                 )}
 
-                {/* Step 3: Budget */}
-                {step === 3 && (
+                {/* Step 4: Budget */}
+                {step === 4 && (
                   <motion.div 
-                    key="step3"
+                    key="step4"
                     className={styles.stepContainer}
                     variants={variants}
                     initial="initial"
                     animate="animate"
                     exit="exit"
                   >
-                    <span className={styles.questionHighlight}>03 / 05</span>
+                    <span className={styles.questionHighlight}>04 / 05</span>
                     <label className={styles.questionLabel}>프로젝트의 예상 일정과 예산 범위를 선택해 주세요.</label>
                     <div className={styles.budgetGrid}>
                       <button className={`${styles.budgetButton} cursor-hover`} onClick={() => handleBudgetSelect("100만 원 이하")}>
@@ -341,7 +398,7 @@ export default function GlobalContact() {
                       ref={inputRef}
                       type="text" 
                       className={styles.textInput} 
-                      placeholder="ex. hello@heyflow.com / 010-0000-0000"
+                      placeholder="ex. hellow@flow.com / 010-0000-0000"
                       value={formData.contact}
                       onChange={(e) => setFormData({ ...formData, contact: e.target.value })}
                       onKeyDown={handleKeyDown}
