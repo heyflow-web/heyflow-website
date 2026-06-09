@@ -267,9 +267,7 @@ export default function GlobalContact() {
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                               <span style={{ fontWeight: 600, fontSize: "1.5rem", letterSpacing: "-0.02em" }}>{isSelected ? "✓ " : ""}{type.title}</span>
                             </div>
-                            <span className={styles.optionDesc} style={{ color: isSelected ? "var(--bg)" : "#777777", fontSize: "1rem", marginTop: "4px" }}>
-                              ({type.desc})
-                            </span>
+                            <div className={styles.tooltip}>{type.desc}</div>
                           </button>
                         );
                       })}

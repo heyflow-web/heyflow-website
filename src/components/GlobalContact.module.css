@@ -20,6 +20,10 @@
 }
 
 .modalOverlay {
+  --bg: #ffffff;
+  --text: #000000;
+  --border: #e6e6e6;
+  --gray: #777777;
   position: fixed;
   inset: 0;
   background-color: var(--bg);
@@ -92,6 +96,7 @@
 }
 
 .startButton {
+  font-family: inherit;
   background: none;
   border: none;
   font-size: 1.5rem;
@@ -143,6 +148,7 @@
 }
 
 .textInput {
+  font-family: inherit;
   width: 100%;
   font-size: clamp(1.5rem, 3vw, 2.5rem);
   background: transparent;
@@ -180,6 +186,8 @@
 }
 
 .budgetButton {
+  position: relative;
+  font-family: inherit;
   background: transparent;
   border: 1px solid var(--border);
   color: var(--text);
@@ -194,7 +202,34 @@
 .budgetButton:hover {
   background: var(--text);
   color: var(--bg);
-  transform: translateX(10px);
+  /* 가로 스크롤을 유발하던 translateX 제거 */
+}
+
+/* 툴팁 스타일 */
+.tooltip {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translate(-50%, -10px);
+  background-color: var(--text);
+  color: var(--bg);
+  padding: 0.6rem 1rem;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 500;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: all 0.2s ease;
+  z-index: 100;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.budgetButton:hover .tooltip {
+  opacity: 1;
+  visibility: visible;
+  transform: translate(-50%, -5px);
 }
 
 .outroContainer {
