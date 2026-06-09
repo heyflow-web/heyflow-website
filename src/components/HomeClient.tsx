@@ -9,17 +9,20 @@ import { Project } from "@/lib/notion";
 
 export default function HomeClient({ projects = [] }: { projects?: Project[] }) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const aboutRef = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll();
-
-  // About 섹션 진입 시 배경 반전을 위한 옵저버
-  const isAboutInView = useInView(aboutRef, { margin: "-40% 0px -40% 0px" });
+  
+  // 섹션별 레퍼런스 (다크모드 교차 전환용)
+  const problemRef = useRef<HTMLDivElement>(null);
+  const capaRef = useRef<HTMLDivElement>(null);
+  
+  // 옵저버 (화면 진입 시점 마진)
+  const isProblemInView = useInView(problemRef, { margin: "-40% 0px -40% 0px" });
+  const isCapaInView = useInView(capaRef, { margin: "-40% 0px -40% 0px" });
 
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   useEffect(() => {
-    // 배경색 반전 로직: body 요소의 클래스를 토글
-    if (isAboutInView) {
+    // 다중 교차 배경색 반전 로직: Problem과 Capabilities 섹션에서만 다크모드
+    if (isProblemInView || isCapaInView) {
       document.body.classList.add("dark-theme");
     } else {
       document.body.classList.remove("dark-theme");
@@ -28,7 +31,7 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
     return () => {
       document.body.classList.remove("dark-theme");
     };
-  }, [isAboutInView]);
+  }, [isProblemInView, isCapaInView]);
 
   const toggleFaq = (index: number) => {
     setOpenFaq(openFaq === index ? null : index);
@@ -48,7 +51,7 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
               >
-                오프라인에서 증명된 브랜드의 가치,
+                오프라인에서 증명된 가치,
               </motion.div>
             </div>
             <div style={{ overflow: "hidden" }}>
@@ -87,55 +90,59 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
         </motion.div>
       </section>
 
-      {/* Section 02: Problem Section */}
-      <section className={styles.problemSection}>
-        <div className={styles.problemContainer}>
-          <motion.h2 
-            className={styles.sectionHeadline}
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-20%" }}
-            transition={{ duration: 1 }}
-          >
-            브랜드가 겪고 있는 디지털 정체체
-          </motion.h2>
-          
-          <div className={styles.problemList}>
-            {[
-              "01. 비즈니스의 실제 체급에 비해 너무 가벼워 보이는 공식 웹사이트",
-              "02. 무료 빌더의 한계로 인해 지워지지 않는 아마추어 같은 레이아웃",
-              "03. 본질을 가리는 화려한 기교와 불필요한 비주얼 소음(Noise)",
-              "04. 비즈니스를 전혀 이해하지 못하는 대행사와의 소통으로 낭비된 시간",
-              "05. 구글(SEO)과 인공지능(AEO) 시장의 표준을 따르지 못하는 낙후된 구조"
-            ].map((item, idx) => (
-              <motion.div 
-                key={idx} 
-                className={styles.problemItem}
-                initial={{ opacity: 0, x: -20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: idx * 0.1 }}
-              >
-                <span className={styles.problemCheck}>!</span>
-                <p>{item}</p>
-              </motion.div>
-            ))}
+      {/* Section 02: Problem Section (Sticky Layout) */}
+      <section ref={problemRef} className={styles.problemSection}>
+        <div className={styles.problemStickyContainer}>
+          <div className={styles.problemStickyLeft}>
+            <motion.h2 
+              className={styles.problemStickyTitle}
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-20%" }}
+              transition={{ duration: 1 }}
+            >
+              브랜드가 겪고 있는<br />디지털 정체체
+            </motion.h2>
           </div>
           
-          <motion.p 
-            className={styles.problemConclusion}
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 1, delay: 0.6 }}
-          >
-            하나라도 해당한다면, 현재 웹사이트는 브랜드를 대변하는 무기가 아니라 감점 요인입니다.
-          </motion.p>
+          <div className={styles.problemScrollRight}>
+            {[
+              "비즈니스의 실제 체급에 비해 너무 가벼워 보이는 공식 웹사이트",
+              "무료 빌더의 한계로 인해 지워지지 않는 아마추어 같은 레이아웃",
+              "본질을 가리는 화려한 기교와 불필요한 비주얼 소음(Noise)",
+              "비즈니스를 전혀 이해하지 못하는 대행사와의 소통으로 낭비된 시간",
+              "구글(SEO)과 인공지능(AEO) 시장의 표준을 따르지 못하는 낙후된 구조"
+            ].map((text, idx) => (
+              <motion.div 
+                key={idx} 
+                className={styles.problemHugeItem}
+                initial={{ opacity: 0.1, y: 60 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ margin: "-20% 0px -20% 0px" }}
+                transition={{ duration: 0.8 }}
+              >
+                <span className={styles.problemHugeNum}>0{idx + 1}</span>
+                <p>{text}</p>
+              </motion.div>
+            ))}
+            
+            <motion.div 
+              className={styles.problemConclusionWrapper}
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 1 }}
+            >
+              <p className={styles.problemConclusion}>
+                하나라도 해당한다면, 현재 웹사이트는 브랜드를 대변하는 무기가 아니라 감점 요인입니다.
+              </p>
+            </motion.div>
+          </div>
         </div>
       </section>
 
       {/* Section 03: Solution & Philosophy */}
-      <section ref={aboutRef} className={styles.aboutSection}>
+      <section className={styles.aboutSection}>
         <div className={styles.aboutContent}>
           <motion.h2 
             className={styles.aboutHeadline}
@@ -144,8 +151,8 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
             viewport={{ once: true, margin: "-20%" }}
             transition={{ duration: 1 }}
           >
-            우리는 불필요한 모든 장식을 덜어내는<br />
-            '정제된 미니멀리즘'만을 지향합니다.
+            우리는 불필요함을 덜어내는<br />
+            '정제된 미니멀리즘'을 지향합니다.
           </motion.h2>
           
           <motion.p 
@@ -221,8 +228,8 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
         </div>
       </section>
 
-      {/* Section 04: Core Capabilities */}
-      <section className={styles.capabilitiesSection}>
+      {/* Section 04: Core Capabilities (Magazine List Layout) */}
+      <section ref={capaRef} className={styles.capabilitiesSection}>
         <div className={styles.capaContainer}>
           <motion.h2 
             className={styles.sectionHeadline}
@@ -234,7 +241,7 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
             압도적 차별점 5
           </motion.h2>
           
-          <div className={styles.capaGrid}>
+          <div className={styles.capaList}>
             {[
               { num: "01", title: "End-to-End Strategic Building", subtitle: "기획부터 제작까지, 완벽한 원스톱 프로세스", desc: "복잡한 기획안을 고민할 필요 없습니다. 기존의 회사소개서나 대략적인 사업 내용만 가볍게 전달해 주세요. 비즈니스 모델을 분석한 전략적 화면 구성부터 잠재 고객을 설득하는 카피라이팅, 그리고 고감도 프론트엔드 제작까지 모든 과정을 번거로움 없이 한 번에 완성합니다." },
               { num: "02", title: "Zero Server Cost & Full Ownership", subtitle: "월 고정 비용 0원, 완벽한 소유권", desc: "플랫폼에 종속되는 폐쇄형 웹 빌더를 거부합니다. 완성된 프로덕트의 원본 소스코드 소유권을 투명하게 인도합니다. 매월 지출되는 불필요한 호스팅 비용을 완전히 제거하고, 가벼우면서도 독립적인 운영 생태계를 제공합니다." },
@@ -244,18 +251,20 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
             ].map((capa, idx) => (
               <motion.div 
                 key={idx} 
-                className={styles.capaCard}
+                className={styles.capaRow}
                 initial={{ opacity: 0, y: 40 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.8, delay: idx * 0.1 }}
               >
-                <div className={styles.capaHeader}>
-                  <span className={styles.capaNum}>{capa.num}</span>
-                  <h3 className={styles.capaTitle}>{capa.title}</h3>
+                <div className={styles.capaRowLeft}>
+                  <span className={styles.capaRowNum}>{capa.num}</span>
+                  <span className={styles.capaRowEnTitle}>{capa.title}</span>
                 </div>
-                <h4 className={styles.capaSubtitle}>• {capa.subtitle}</h4>
-                <p className={styles.capaDesc}>{capa.desc}</p>
+                <div className={styles.capaRowRight}>
+                  <h3 className={styles.capaRowMainTitle}>{capa.subtitle}</h3>
+                  <p className={styles.capaRowDesc}>{capa.desc}</p>
+                </div>
               </motion.div>
             ))}
           </div>
