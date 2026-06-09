@@ -6,8 +6,8 @@ const inter = Inter({ subsets: ["latin"] });
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "STUDIO.",
-  description: "Modern Industrial Design Studio Portfolio",
+  title: "heyflow.",
+  description: "Premium Visual Web Agency",
 };
 
 export default function RootLayout({
@@ -20,7 +20,7 @@ export default function RootLayout({
       <body className={inter.className}>
         <nav className="navbar">
           <Link href="/" className="nav-brand">
-            STUDIO.
+            heyflow.
           </Link>
           <div className="nav-links">
             <Link href="/" className="nav-link">Home</Link>

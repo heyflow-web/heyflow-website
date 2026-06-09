@@ -66,22 +66,38 @@ export default function HomeClient() {
 
       {/* Section 1: Hero */}
       <section className={styles.heroSection}>
-        <motion.div 
-          className={styles.heroContent}
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1.2, ease: "easeOut" }}
-        >
-          <h1 className={styles.heroTitle}>
-            우리는 본질만 남기고,<br />
-            시선의 흐름을 디자인합니다.
-          </h1>
-          <p className={styles.heroSubtitle}>
-            Stripping away the noise, capturing the visual flow.<br />
-            헤이플로우는 10년 차 디자인 내공을 바탕으로 브랜드의 가치를<br />
-            가장 프리미엄한 디지털 공간으로 빌딩하는 비주얼 웹에이전시입니다.
-          </p>
-        </motion.div>
+        <div className={styles.heroContent}>
+          <div className={styles.heroTitle}>
+            <div style={{ overflow: "hidden" }}>
+              <motion.div 
+                initial={{ y: "120%", opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+              >
+                가장 강력한 메시지는
+              </motion.div>
+            </div>
+            <div style={{ overflow: "hidden" }}>
+              <motion.div 
+                initial={{ y: "120%", opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1], delay: 0.15 }}
+              >
+                언제나 가장 단순합니다.
+              </motion.div>
+            </div>
+          </div>
+          <motion.p 
+            className={styles.heroSubtitle}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, ease: "easeOut", delay: 0.6 }}
+          >
+            화려한 기교와 비주얼 소음은 브랜드의 본질을 가릴 뿐입니다.<br />
+            헤이플로우는 10년의 내공으로 불필요한 모든 것을 덜어내고,<br />
+            오직 고객의 시선과 움직임이 가치로 이어지는 완벽한 동선(Visual Flow)만을 남깁니다.
+          </motion.p>
+        </div>
         
         <motion.div 
           className={styles.scrollIndicator}
