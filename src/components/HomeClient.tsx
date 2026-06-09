@@ -6,7 +6,6 @@ import { ArrowRight, MoveDown } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import styles from "./HomeClient.module.css";
-import CustomCursor from "./CustomCursor";
 
 const DUMMY_PROJECTS = [
   {
@@ -64,8 +63,6 @@ export default function HomeClient() {
 
   return (
     <div ref={containerRef} className={styles.homeContainer}>
-      <CustomCursor />
-
       {/* Section 1: Hero */}
       <section className={styles.heroSection}>
         <div className={styles.heroContent}>
@@ -225,8 +222,11 @@ export default function HomeClient() {
       <footer className={styles.footerSection}>
         <div className={styles.contactContainer}>
           <h2 className={styles.contactTitle}>Let's flow together.</h2>
-          <p className={styles.contactDesc}>귀사의 가치를 흐르게 할 준비가 되셨다면, 시작해 보세요.</p>
-          <button className={`${styles.ctaButton} cursor-hover`}>
+          <p className={styles.contactDesc}>헤이플로우에서 브랜드의 다음 챕터를 시작해 보세요.</p>
+          <button 
+            className={`${styles.ctaButton} cursor-hover`}
+            onClick={() => window.dispatchEvent(new Event("openContactModal"))}
+          >
             START A PROJECT <ArrowRight className={styles.ctaIcon} />
           </button>
         </div>

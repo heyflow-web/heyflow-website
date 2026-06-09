@@ -5,6 +5,7 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 import Link from "next/link";
 import GlobalContact from "@/components/GlobalContact";
+import CustomCursor from "@/components/CustomCursor";
 
 export const metadata: Metadata = {
   title: "heyflow.",
@@ -31,6 +32,7 @@ export default function RootLayout({
         <div className="main-content">
           {children}
         </div>
+        <CustomCursor />
         <GlobalContact />
       </body>
     </html>
