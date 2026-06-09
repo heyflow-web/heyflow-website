@@ -28,7 +28,7 @@ export default function GlobalContact() {
 
   // 모달이 열리거나 스텝이 변경될 때 인풋 포커스
   useEffect(() => {
-    if (isOpen && [1, 2, 5].includes(step)) {
+    if (isOpen && [1, 3, 5].includes(step)) {
       const timer = setTimeout(() => {
         inputRef.current?.focus();
       }, 600); // 애니메이션 대기 후 포커스
@@ -150,29 +150,29 @@ export default function GlobalContact() {
               </button>
             </header>
 
+            {step > 0 && step < 6 && (
+              <button 
+                onClick={() => setStep(prev => prev - 1)}
+                className={`cursor-hover`}
+                style={{
+                  position: "absolute",
+                  top: "85px", // 헤더(40px) 바로 아래에 위치
+                  left: "5vw", // 헤더의 left 여백과 동일하게 맞춤
+                  background: "none",
+                  border: "none",
+                  color: "var(--gray)",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  fontSize: "0.85rem",
+                  zIndex: 20
+                }}
+              >
+                <ArrowLeft size={16} /> 뒤로가기
+              </button>
+            )}
+
             <main className={styles.modalBody}>
-              {step > 0 && step < 6 && (
-                <button 
-                  onClick={() => setStep(prev => prev - 1)}
-                  className={`cursor-hover`}
-                  style={{
-                    position: "absolute",
-                    top: "0px",
-                    left: "0px",
-                    background: "none",
-                    border: "none",
-                    color: "var(--gray)",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "8px",
-                    fontSize: "0.85rem",
-                    zIndex: 10,
-                    transform: "translateY(-40px)" // 로고 바로 아래에 위치하도록 조정
-                  }}
-                >
-                  <ArrowLeft size={16} /> 뒤로가기
-                </button>
-              )}
               <AnimatePresence mode="wait">
                 
                 {/* Step 0: Intro */}
@@ -334,51 +334,6 @@ export default function GlobalContact() {
                         300만 원 이상
                       </button>
                     </div>
-                  </motion.div>
-                )}
-
-                {/* Step 4: Project Types */}
-                {step === 4 && (
-                  <motion.div 
-                    key="step4"
-                    className={styles.stepContainer}
-                    variants={variants}
-                    initial="initial"
-                    animate="animate"
-                    exit="exit"
-                  >
-                    <span className={styles.questionHighlight}>04 / 05</span>
-                    <label className={styles.questionLabel}>우리가 함께 해결해야 할 브랜드의 프로젝트 형태를 선택해 주세요. (중복 가능)</label>
-                    <div className={styles.budgetGrid} style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
-                      {[
-                        "반응형 웹사이트 (기업/브랜드/스타트업 등)", 
-                        "랜딩페이지 (마케팅 / 프로모션용 원페이지)", 
-                        "디지털 제품 상세페이지 (이커머스 제품 기획 및 비주얼 디자인)", 
-                        "온·오프라인 그래픽/인쇄물 (브로셔, 리플렛, 패키지, SNS 에셋 등)"
-                      ].map(type => (
-                        <button 
-                          key={type}
-                          className={`${styles.budgetButton} cursor-hover`} 
-                          style={{
-                            background: formData.projectTypes.includes(type) ? "var(--text)" : "transparent",
-                            color: formData.projectTypes.includes(type) ? "var(--bg)" : "var(--text)",
-                            textAlign: "left",
-                            paddingLeft: "1.5rem"
-                          }}
-                          onClick={() => toggleProjectType(type)}
-                        >
-                          {formData.projectTypes.includes(type) ? "✓ " : ""}{type}
-                        </button>
-                      ))}
-                    </div>
-                    <button 
-                       className={`${styles.startButton} cursor-hover`} 
-                       style={{ marginTop: '2.5rem', opacity: formData.projectTypes.length > 0 ? 1 : 0.5 }}
-                       onClick={handleNext}
-                       disabled={formData.projectTypes.length === 0}
-                    >
-                      다음으로 <ArrowRight size={20} style={{ display: 'inline', verticalAlign: 'middle', marginLeft: '8px' }} />
-                    </button>
                   </motion.div>
                 )}
 
