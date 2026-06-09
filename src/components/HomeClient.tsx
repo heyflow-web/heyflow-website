@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, useScroll, useTransform, useInView } from "framer-motion";
 import { ArrowRight, MoveDown } from "lucide-react";
+import Link from "next/link";
+import Image from "next/image";
 import styles from "./HomeClient.module.css";
 import CustomCursor from "./CustomCursor";
 
@@ -246,9 +248,9 @@ export default function HomeClient() {
               <span>TEL: 0507-1395-1381</span>
             </div>
             <div className={styles.legalPolicy}>
-              <a href="#" className="cursor-hover">개인정보처리방침</a>
+              <Link href="/privacy" className="cursor-hover">개인정보처리방침</Link>
               <span className={styles.divider}>|</span>
-              <a href="#" className="cursor-hover">이용약관</a>
+              <Link href="/terms" className="cursor-hover">이용약관</Link>
             </div>
           </div>
           <p className={styles.copyright}>© {new Date().getFullYear()} heyflow. All rights reserved.</p>
