@@ -1,6 +1,6 @@
 import { Client } from '@notionhq/client';
 import { NotionToMarkdown } from 'notion-to-md';
-import fallbackData from '../../data.json';
+import fallbackData from '../data.json';
 
 // 환경 변수에서 API 키와 데이터베이스 ID 가져오기
 const notion = new Client({
