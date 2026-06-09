@@ -16,13 +16,12 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
   
   // 옵저버 (화면 진입 시점 마진)
   const isProblemInView = useInView(problemRef, { margin: "-40% 0px -40% 0px" });
-  const isCapaInView = useInView(capaRef, { margin: "-40% 0px -40% 0px" });
 
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   useEffect(() => {
-    // 다중 교차 배경색 반전 로직: Problem과 Capabilities 섹션에서만 다크모드
-    if (isProblemInView || isCapaInView) {
+    // 다중 교차 배경색 반전 로직: Problem 섹션에서만 글로벌 다크모드 유지
+    if (isProblemInView) {
       document.body.classList.add("dark-theme");
     } else {
       document.body.classList.remove("dark-theme");
@@ -31,7 +30,7 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
     return () => {
       document.body.classList.remove("dark-theme");
     };
-  }, [isProblemInView, isCapaInView]);
+  }, [isProblemInView]);
 
   const toggleFaq = (index: number) => {
     setOpenFaq(openFaq === index ? null : index);
@@ -101,17 +100,15 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
               viewport={{ once: true, margin: "-20%" }}
               transition={{ duration: 1 }}
             >
-              브랜드가 겪고 있는<br />디지털 정체체
+              혹시 우리 브랜드도<br />이런 문제를 겪고<br />계시진 않나요?
             </motion.h2>
           </div>
           
           <div className={styles.problemScrollRight}>
             {[
-              "비즈니스의 실제 체급에 비해 너무 가벼워 보이는 공식 웹사이트",
-              "무료 빌더의 한계로 인해 지워지지 않는 아마추어 같은 레이아웃",
-              "본질을 가리는 화려한 기교와 불필요한 비주얼 소음(Noise)",
-              "비즈니스를 전혀 이해하지 못하는 대행사와의 소통으로 낭비된 시간",
-              "구글(SEO)과 인공지능(AEO) 시장의 표준을 따르지 못하는 낙후된 구조"
+              "실제 가치에 비해 너무 가벼워 보이는 공식 웹사이트",
+              "브랜드를 전혀 이해하지 못하는 대행사와의 소통으로 낭비된 시간",
+              "구글 검색창과 AI 비서들의 답변에서 완전히 누락된 존재감"
             ].map((text, idx) => (
               <motion.div 
                 key={idx} 
@@ -134,7 +131,7 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
               transition={{ duration: 1 }}
             >
               <p className={styles.problemConclusion}>
-                하나라도 해당한다면, 현재 웹사이트는 브랜드를 대변하는 무기가 아니라 감점 요인입니다.
+                이 중 단 하나라도 해당한다면, 현재의 웹사이트는 브랜드를 대변하는 무기가 아니라 감점 요인입니다.
               </p>
             </motion.div>
           </div>
@@ -229,7 +226,13 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
       </section>
 
       {/* Section 04: Core Capabilities (Magazine List Layout) */}
-      <section ref={capaRef} className={styles.capabilitiesSection}>
+      <motion.section 
+        className={styles.capabilitiesSection}
+        initial={{ backgroundColor: "var(--bg)", color: "var(--text)" }}
+        whileInView={{ backgroundColor: "#000000", color: "#ffffff" }}
+        viewport={{ margin: "-20% 0px -20% 0px" }}
+        transition={{ duration: 0.8 }}
+      >
         <div className={styles.capaContainer}>
           <motion.h2 
             className={styles.sectionHeadline}
@@ -269,7 +272,7 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
             ))}
           </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* Section 05: Ideal Clients */}
       <section className={styles.idealSection}>
