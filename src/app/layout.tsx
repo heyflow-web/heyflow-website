@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 import Link from "next/link";
 import GlobalContact from "@/components/GlobalContact";
 import CustomCursor from "@/components/CustomCursor";
@@ -19,7 +19,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko">
-      <body className={inter.className}>
+      <body className={inter.variable}>
         <nav className="navbar">
           <Link href="/" className="nav-brand">
             heyflow
