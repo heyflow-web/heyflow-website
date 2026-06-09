@@ -241,7 +241,7 @@ export default function GlobalContact() {
                   >
                     <span className={styles.questionHighlight}>02 / 05</span>
                     <label className={styles.questionLabel}>
-                      프로젝트의 형태를 선택해 주세요.<span className={styles.subLabel}>(중복 가능)</span>
+                      프로젝트의 형태를 선택해 주세요.<span className={styles.subLabel} style={{ fontSize: "1.5rem", color: "#777777", marginLeft: "12px", verticalAlign: "baseline" }}>(중복 가능)</span>
                     </label>
                     <div className={styles.projectGrid}>
                       {[
@@ -270,9 +270,9 @@ export default function GlobalContact() {
                             onClick={() => toggleProjectType(typeId)}
                           >
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                              <span style={{ fontWeight: 600 }}>{isSelected ? "✓ " : ""}{type.title}</span>
+                              <span style={{ fontWeight: 600, fontSize: "clamp(1.5rem, 3vw, 2.5rem)", letterSpacing: "-0.02em", wordBreak: "keep-all" }}>{isSelected ? "✓ " : ""}{type.title}</span>
                             </div>
-                            <span className={styles.optionDesc} style={{ color: isSelected ? "var(--bg)" : "inherit" }}>
+                            <span className={styles.optionDesc} style={{ color: isSelected ? "var(--bg)" : "#777777", fontSize: "clamp(1rem, 2vw, 1.5rem)", marginTop: "4px", wordBreak: "keep-all" }}>
                               ({type.desc})
                             </span>
                           </button>
