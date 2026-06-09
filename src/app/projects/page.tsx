@@ -23,7 +23,6 @@ export default async function Projects() {
             <div className="project-info">
               <div>
                 <h2 className="project-title">{item.title}</h2>
-                {item.description && <p className="project-desc">{item.description}</p>}
               </div>
               <div className="project-arrow">&#8599;</div>
             </div>
