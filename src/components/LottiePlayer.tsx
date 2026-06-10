@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import lottie from "lottie-web";
+import lottie, { AnimationItem } from "lottie-web";
 
 interface LottiePlayerProps {
   src: string;
@@ -14,7 +14,7 @@ export default function LottiePlayer({ src, alignLeft = false }: LottiePlayerPro
   useEffect(() => {
     if (!containerRef.current) return;
 
-    let anim: any = null;
+    let anim: AnimationItem | null = null;
 
     const observer = new IntersectionObserver((entries) => {
       if (entries[0].isIntersecting && !anim) {

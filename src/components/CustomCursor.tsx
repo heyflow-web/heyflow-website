@@ -5,13 +5,8 @@ import { motion } from "framer-motion";
 export default function CustomCursor() {
   const [mousePosition, setMousePosition] = useState({ x: -100, y: -100 });
   const [isHovered, setIsHovered] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    if (window.matchMedia("(pointer: coarse)").matches || window.innerWidth <= 768) {
-      setIsMobile(true);
-      return;
-    }
     // 마우스 이동 추적
     const updateMousePosition = (e: MouseEvent) => {
       setMousePosition({ x: e.clientX, y: e.clientY });
@@ -40,10 +35,11 @@ export default function CustomCursor() {
     };
   }, []);
 
-  if (typeof window === "undefined" || isMobile) return null;
+  if (typeof window === "undefined") return null;
 
   return (
     <motion.div
+      className="custom-cursor-element"
       style={{
         position: "fixed",
         top: 0,

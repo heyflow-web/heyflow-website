@@ -244,3 +244,10 @@ a {
     padding: 10vh 10vw !important;
   }
 }
+
+/* Custom Cursor Mobile Hide */
+@media (max-width: 768px), (pointer: coarse) {
+  .custom-cursor-element {
+    display: none !important;
+  }
+}
