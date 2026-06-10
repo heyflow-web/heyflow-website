@@ -26,7 +26,7 @@
 
 /* Section 01: Hero */
 .heroSection {
-  height: 100vh;
+  height: 100dvh; /* 모바일 브라우저 툴바 가림 현상 방지 */
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -41,9 +41,9 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start; /* 중앙 정렬에서 상단 정렬로 변경 */
   padding: 0 5vw;
-  padding-top: 10vh;
+  padding-top: 20vh; /* 텍스트를 좀 더 상단으로 끌어올림 */
 }
 
 .heroTitle {
@@ -63,13 +63,13 @@
 
 /* Infinite Carousel */
 .heroCarouselContainer {
-  height: 35vh;
+  height: 45vh; /* 35vh -> 45vh 로 캐러셀 영역 확대 */
   width: 100vw;
   overflow: hidden;
   display: flex;
   align-items: center;
   background-color: var(--bg);
-  padding-bottom: 4vh;
+  padding-bottom: 5vh;
 }
 
 .marqueeTrack {
@@ -85,8 +85,8 @@
 }
 
 .marqueeItem {
-  height: 28vh;
-  aspect-ratio: 16/9;
+  height: 35vh; /* 28vh -> 35vh 이미지 높이 증가 */
+  aspect-ratio: 4/3; /* 16/9 -> 4/3 비율로 변경하여 상하 잘림(Crop) 최소화 */
   flex-shrink: 0;
   position: relative;
   overflow: hidden;
