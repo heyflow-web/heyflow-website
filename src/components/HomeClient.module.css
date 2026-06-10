@@ -344,8 +344,6 @@
 .capabilitiesHorizontalSection {
   /* 5개의 카드를 스크롤할 충분한 높이(여정)를 확보 */
   height: 400vh; 
-  background-color: #000;
-  color: #fff;
 }
 
 .horizontalStickyContainer {
@@ -381,12 +379,12 @@
 }
 
 .horizontalCard {
-  width: 35vw;
+  width: 26vw;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
   padding: 3rem;
-  border: 1px solid rgba(255,255,255,0.15);
+  border: 1px solid var(--border);
   border-radius: 20px;
   background: transparent;
   gap: 1.5rem;
@@ -480,6 +478,20 @@
 }
 
 .idealTitle {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.idealTitleEn {
+  font-size: 1.1rem;
+  color: var(--gray);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.idealTitleKo {
   font-size: 1.8rem;
   font-weight: 800;
   color: var(--text);
@@ -816,11 +828,12 @@
   z-index: 90;
   display: flex;
   flex-direction: column;
-  background: rgba(20, 20, 20, 0.4);
+  background: var(--nav-bg);
   backdrop-filter: blur(8px);
   padding: 1.5rem 1.2rem;
   border-radius: 12px;
-  border: 1px solid rgba(255,255,255,0.05);
+  border: 1px solid var(--border);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.05);
 }
 
 .anchorNav ul {
@@ -835,7 +848,7 @@
 .anchorNav li {
   font-size: 0.85rem;
   font-weight: 600;
-  color: rgba(255,255,255,0.3);
+  color: var(--gray);
   cursor: pointer;
   transition: all 0.3s ease;
   text-align: right;
@@ -844,11 +857,11 @@
 }
 
 .anchorNav li:hover {
-  color: rgba(255,255,255,0.7);
+  color: var(--text);
 }
 
 .anchorActive {
-  color: #fff !important;
+  color: var(--text) !important;
 }
 
 .anchorActive::before {
@@ -860,8 +873,7 @@
   width: 4px;
   height: 4px;
   border-radius: 50%;
-  background-color: #fff;
-  box-shadow: 0 0 8px rgba(255,255,255,0.8);
+  background-color: var(--text);
 }
 
 @media (max-width: 1024px) {

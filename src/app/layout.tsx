@@ -21,11 +21,11 @@ export default function RootLayout({
     <html lang="ko">
       <body className={inter.variable}>
         <nav className="navbar">
-          <Link href="/" className="nav-brand">
+          <a href="/" className="nav-brand">
             heyflow
-          </Link>
+          </a>
           <div className="nav-links">
-            <Link href="/" className="nav-link">Home</Link>
+            <a href="/" className="nav-link">Home</a>
             <Link href="/projects" className="nav-link">Projects</Link>
           </div>
         </nav>

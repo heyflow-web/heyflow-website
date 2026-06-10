@@ -60,7 +60,10 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
   // Horizontal Scroll 로직
   const horizontalRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: horizontalRef });
-  const horizontalX = useTransform(scrollYProgress, [0, 1], ["0%", "-80%"]);
+  const horizontalX = useTransform(scrollYProgress, [0, 1], ["0%", "-40%"]);
+
+  const isHorizontalInView = useInView(horizontalRef, { margin: "-20% 0px -20% 0px" });
+  const isPricingInView = useInView(pricingRef, { margin: "-20% 0px -20% 0px" });
 
   // Conclusion Text Scroll 로직
   const conclusionRef = useRef<HTMLDivElement>(null);
@@ -72,8 +75,8 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
   const cOpacity = useTransform(cProgress, [0, 0.3, 0.8, 1], [0, 1, 1, 0]);
 
   useEffect(() => {
-    // Problem 섹션에서만 글로벌 다크모드 유지
-    if (isProblemInView) {
+    // Problem, Horizontal, Pricing 섹션에서 글로벌 다크모드 적용 (CSS transition으로 페이드인 효과 연출)
+    if (isProblemInView || isHorizontalInView || isPricingInView) {
       document.body.classList.add("dark-theme");
     } else {
       document.body.classList.remove("dark-theme");
@@ -82,7 +85,7 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
     return () => {
       document.body.classList.remove("dark-theme");
     };
-  }, [isProblemInView]);
+  }, [isProblemInView, isHorizontalInView, isPricingInView]);
 
   const toggleFaq = (index: number) => {
     setOpenFaq(openFaq === index ? null : index);
@@ -352,9 +355,9 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
           
           <div className={styles.idealList}>
             {[
-              "The Experts — 병원, 법인, 전문직",
-              "The Scale Up — 성장 중인 소상공인/스타트업",
-              "The Resource Saver — 시간·비용 낭비 없이 한 번에 끝내고 싶은 분"
+              { en: "The Experts", ko: "병원, 법인, 전문직" },
+              { en: "The Scale Up", ko: "성장 중인 소상공인/스타트업" },
+              { en: "The Resource Saver", ko: "시간·비용 낭비 없이 한 번에 끝내고 싶은 분" }
             ].map((ideal, idx) => (
               <motion.div 
                 key={idx} 
@@ -364,7 +367,10 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
                 viewport={{ once: true }}
                 transition={{ duration: 0.6, delay: idx * 0.1 }}
               >
-                <h3 className={styles.idealTitle}>{ideal}</h3>
+                <h3 className={styles.idealTitle}>
+                  <span className={styles.idealTitleEn}>{ideal.en}</span>
+                  <span className={styles.idealTitleKo}>{ideal.ko}</span>
+                </h3>
               </motion.div>
             ))}
           </div>
@@ -469,7 +475,7 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
       {/* Section 08: Contact & Footer */}
       <footer className={styles.footerSection}>
         <div className={styles.contactContainer}>
-          <h2 className={styles.contactTitle}>잘 되는 비즈니스엔, 그에 맞는 웹사이트가 있어야 합니다.</h2>
+          <h2 className={styles.contactTitle}>잘 되는 비즈니스엔,<br/>그에 맞는 웹사이트가 있어야 합니다.</h2>
           <p className={styles.contactDesc}>
             몇 가지 질문에 답해주시면 24시간 이내에 디렉터가 직접 연락드립니다.
           </p>
