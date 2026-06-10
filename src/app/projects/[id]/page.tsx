@@ -18,7 +18,7 @@ export default async function PortfolioDetail({ params }: { params: Promise<{ id
     <main className="container">
       <article className={styles.article}>
         <Link href="/projects" className={styles.backBtn}>
-          &larr; Back to Projects
+          &larr; Back
         </Link>
         
         <header className={styles.header}>

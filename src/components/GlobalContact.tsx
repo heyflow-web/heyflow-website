@@ -26,14 +26,24 @@ export default function GlobalContact() {
     return () => window.removeEventListener("openContactModal", handleOpen);
   }, []);
 
-  // 모달이 열리거나 스텝이 변경될 때 인풋 포커스
+  // 모달이 열리거나 스텝이 변경될 때 인풋 포커스 & 스크롤 잠금
   useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+
     if (isOpen && [1, 3, 5].includes(step)) {
       const timer = setTimeout(() => {
         inputRef.current?.focus();
       }, 600); // 애니메이션 대기 후 포커스
       return () => clearTimeout(timer);
     }
+
+    return () => {
+      document.body.style.overflow = "unset";
+    };
   }, [isOpen, step]);
 
   // 엔터 키로 다음 스텝 넘어가기
@@ -192,9 +202,11 @@ export default function GlobalContact() {
                     exit="exit"
                   >
                     <div className={styles.questionHighlight} style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                      <button onClick={() => setStep(prev => prev - 1)} className="cursor-hover" style={{ background: "none", border: "none", color: "inherit", display: "flex", alignItems: "center", padding: 0 }}>
-                        <ArrowLeft size={24} />
-                      </button>
+                      {step > 1 && (
+                        <button onClick={() => setStep(prev => prev - 1)} className="cursor-hover" style={{ background: "none", border: "none", color: "inherit", display: "flex", alignItems: "center", padding: 0 }}>
+                          <ArrowLeft size={24} />
+                        </button>
+                      )}
                       <span>01 / 05</span>
                     </div>
                     <label className={styles.questionLabel}>귀하의 성함과 브랜드(기업)명을 알려주세요.</label>

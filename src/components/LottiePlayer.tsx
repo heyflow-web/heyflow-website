@@ -13,20 +13,29 @@ export default function LottiePlayer({ src, alignLeft = false }: LottiePlayerPro
 
   useEffect(() => {
     if (!containerRef.current) return;
-    
-    const anim = lottie.loadAnimation({
-      container: containerRef.current,
-      renderer: 'svg',
-      loop: true,
-      autoplay: true,
-      path: src,
-      rendererSettings: {
-        preserveAspectRatio: alignLeft ? 'xMinYMid slice' : 'xMidYMid slice',
+
+    let anim: any = null;
+
+    const observer = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting && !anim) {
+        anim = lottie.loadAnimation({
+          container: containerRef.current!,
+          renderer: 'svg',
+          loop: true,
+          autoplay: true,
+          path: src,
+          rendererSettings: {
+            preserveAspectRatio: alignLeft ? 'xMinYMid slice' : 'xMidYMid slice',
+          }
+        });
       }
-    });
+    }, { threshold: 0.1 });
+
+    observer.observe(containerRef.current);
 
     return () => {
-      anim.destroy();
+      observer.disconnect();
+      if (anim) anim.destroy();
     };
   }, [src, alignLeft]);
 

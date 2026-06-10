@@ -46,7 +46,7 @@
 .imageWrapperMobile {
   width: 100%;
   background: var(--border);
-  border-radius: 8px;
+  border-radius: 4px;
   overflow: hidden;
   border: 1px solid var(--border);
 }

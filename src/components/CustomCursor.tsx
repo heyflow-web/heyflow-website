@@ -5,8 +5,13 @@ import { motion } from "framer-motion";
 export default function CustomCursor() {
   const [mousePosition, setMousePosition] = useState({ x: -100, y: -100 });
   const [isHovered, setIsHovered] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
+    if (window.matchMedia("(pointer: coarse)").matches || window.innerWidth <= 768) {
+      setIsMobile(true);
+      return;
+    }
     // 마우스 이동 추적
     const updateMousePosition = (e: MouseEvent) => {
       setMousePosition({ x: e.clientX, y: e.clientY });
@@ -29,19 +34,13 @@ export default function CustomCursor() {
     window.addEventListener("mousemove", updateMousePosition);
     window.addEventListener("mouseover", handleMouseOver);
 
-    // 디바이스 판별 (터치 디바이스에서는 커서 숨김)
-    if (window.matchMedia("(pointer: coarse)").matches) {
-      return; // 터치 디바이스는 이벤트를 등록하지 않음
-    }
-
     return () => {
       window.removeEventListener("mousemove", updateMousePosition);
       window.removeEventListener("mouseover", handleMouseOver);
     };
   }, []);
 
-  // SSR 환경에서는 렌더링하지 않음 방지 처리 필요 여부 체크 (간단히 x,y가 -100일땐 화면 밖)
-  if (typeof window === "undefined") return null;
+  if (typeof window === "undefined" || isMobile) return null;
 
   return (
     <motion.div
