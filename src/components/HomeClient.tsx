@@ -331,6 +331,7 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
                     autoplay
                     loop
                     style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    rendererSettings={{ preserveAspectRatio: 'xMidYMid slice' }}
                   />
                 ) : project.image.endsWith('.mp4') || project.image.endsWith('.mov') ? (
                   <video 
