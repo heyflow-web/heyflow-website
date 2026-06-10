@@ -2,7 +2,7 @@ import { MetadataRoute } from 'next';
 
 export default function sitemap(): MetadataRoute.Sitemap {
   // TODO: 추후 실제 연결될 도메인으로 변경해야 합니다.
-  const baseUrl = 'https://heyflow.co.kr';
+  const baseUrl = 'https://heyflow.kr';
 
   return [
     {

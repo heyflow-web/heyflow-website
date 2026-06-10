@@ -8,7 +8,7 @@ import GlobalContact from "@/components/GlobalContact";
 import CustomCursor from "@/components/CustomCursor";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://heyflow.co.kr"), // 실제 운영 도메인으로 변경해야 합니다.
+  metadataBase: new URL("https://heyflow.kr"),
   title: "heyflow | 잘 만들어진 웹사이트, 그 이상의 가치",
   description: "잘 만들어진 웹사이트와 잘 되는 웹사이트는 다릅니다. 전환율을 극대화하는 프리미엄 웹 에이전시 heyflow(헤이플로우)입니다. 기획, 디자인, 개발까지 완벽한 원스톱 프로세스를 제공합니다.",
   keywords: ["웹사이트 제작", "웹 에이전시", "헤이플로우", "heyflow", "반응형 웹", "프리미엄 웹사이트", "전환율 웹사이트", "기업 홈페이지", "브랜딩"],
@@ -16,7 +16,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "heyflow | 프리미엄 비주얼 웹 에이전시",
     description: "잘 만들어진 웹사이트와 잘 되는 웹사이트는 다릅니다. 브랜드를 대변하는 강력한 무기, 헤이플로우에서 시작하세요.",
-    url: "https://heyflow.co.kr", // 실제 도메인으로 변경 필요
+    url: "https://heyflow.kr",
     siteName: "heyflow",
     images: [
       {

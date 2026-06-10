@@ -324,7 +324,7 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
                 transition={{ duration: 0.8, delay: 0.1 }}
               >
                 {project.image.endsWith('.json') ? (
-                  <LottiePlayer src={project.image} alignLeft={idx === 1} />
+                  <LottiePlayer src={project.image} alignLeft={idx === 1 || idx === 2} />
                 ) : project.image.endsWith('.mp4') || project.image.endsWith('.mov') ? (
                   <video 
                     src={project.image} 
