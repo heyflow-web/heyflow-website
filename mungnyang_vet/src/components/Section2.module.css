@@ -1,0 +1,7 @@
+.imageWrapper {
+  transition: transform 0.3s ease-out;
+}
+
+.imageWrapper:hover {
+  transform: scale(1.02);
+}

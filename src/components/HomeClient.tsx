@@ -86,8 +86,8 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
   const isPricingInView = useInView(pricingRef, { margin: "-40% 0px -40% 0px" });
 
   useEffect(() => {
-    // Problem, Horizontal, Pricing 섹션에서 글로벌 다크모드 적용
-    if (isProblemInView || isHorizontalInView || isPricingInView) {
+    // Problem, Pricing 섹션에서 글로벌 다크모드 적용
+    if (isProblemInView || isPricingInView) {
       document.body.classList.add("dark-theme");
     } else {
       document.body.classList.remove("dark-theme");
@@ -96,7 +96,7 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
     return () => {
       document.body.classList.remove("dark-theme");
     };
-  }, [isProblemInView, isHorizontalInView, isPricingInView]);
+  }, [isProblemInView, isPricingInView]);
 
   const toggleFaq = (index: number) => {
     setOpenFaq(openFaq === index ? null : index);

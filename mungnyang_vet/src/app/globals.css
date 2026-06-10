@@ -11,6 +11,8 @@
   --font-sans: var(--font-pretendard), Arial, Helvetica, sans-serif;
   
   --shadow-soft: 0 10px 40px -10px rgba(141, 123, 104, 0.15);
+  
+  --animate-spin-slow: spin 10s linear infinite;
 }
 
 :root {
