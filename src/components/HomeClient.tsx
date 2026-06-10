@@ -254,21 +254,16 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
       {/* Section 04: Core Capabilities (Horizontal Scroll) */}
       <section ref={horizontalRef} className={styles.capabilitiesHorizontalSection}>
         <div className={styles.horizontalStickyContainer}>
+          <div className={styles.horizontalSectionHeader}>
+            <h2 className={styles.workTitle}>압도적 차별점 5</h2>
+          </div>
           <motion.div style={{ x: horizontalX }} className={styles.horizontalFlexGroup}>
-            
-            <div className={styles.horizontalTitleSlide}>
-              <h2 className={styles.horizontalHeadline}>
-                압도적<br/>차별점 5
-              </h2>
-              <p className={styles.horizontalSub}>마우스를 스크롤하여 옆으로 이동하세요.</p>
-            </div>
-
             {[
-              { num: "01", title: "End-to-End Strategic Building", subtitle: "기획부터 제작까지, 완벽한 원스톱 프로세스", desc: "복잡한 기획안을 고민할 필요 없습니다. 기존의 회사소개서나 대략적인 사업 내용만 가볍게 전달해 주세요. 비즈니스 모델을 분석한 전략적 화면 구성부터 잠재 고객을 설득하는 카피라이팅, 그리고 고감도 프론트엔드 제작까지 모든 과정을 번거로움 없이 한 번에 완성합니다." },
-              { num: "02", title: "Zero Server Cost & Full Ownership", subtitle: "월 고정 비용 0원, 완벽한 소유권", desc: "플랫폼에 종속되는 폐쇄형 웹 빌더를 거부합니다. 완성된 프로덕트의 원본 소스코드 소유권을 투명하게 인도합니다. 매월 지출되는 불필요한 호스팅 비용을 완전히 제거하고, 가벼우면서도 독립적인 운영 생태계를 제공합니다." },
-              { num: "03", title: "One-Source Multi-Channel Sync", subtitle: "웹사이트와 제안서(PDF)의 동시 빌드", desc: "온라인의 선명함이 오프라인 미팅룸까지 그대로 동기화됩니다. 웹 빌딩 한 번으로 거래처 송부용 회사소개서와 제안서(PDF)가 동일한 밀도의 디자인 시스템으로 한 번에 빌드됩니다. 단 하나의 액션으로 비즈니스의 모든 터치포인트를 장악하세요." },
-              { num: "04", title: "AI Visual Branding & Identity", subtitle: "컨셉에 맞는 AI 이미지로 브랜딩 완성", desc: "별도의 고비용 사진 촬영 없이도 브랜드 무드에 딱 맞는 비주얼을 구현합니다. 비즈니스의 페르소나를 정밀하게 반영한 독창적인 AI 아트워크를 직접 설계하고 배치하여, 리소스는 최소화하고 시각적 임팩트는 극대화합니다." },
-              { num: "05", title: "Search Engine & AI Top-Tier Sync", subtitle: "검색 엔진 및 AI 최상위 동기화", desc: "단순한 비주얼을 넘어 디지털 세상의 생존 기술을 심습니다. 구글 검색창과 챗GPT, 제미나이 등 차세대 AI 비서들이 우리 브랜드를 가장 먼저 찾아내고 검색 최상위에 동기화할 수 있도록 표준 웹 가이드라인을 완벽히 준수해 설계합니다." }
+              { num: "01", title: "End-to-End Strategic Building", subtitle: "기획부터 제작까지, 완벽한 원스톱 프로세스", desc: "복잡한 기획안 없이도 됩니다. 사업 내용만 가볍게 전달해 주시면 전략적 화면 구성부터 카피라이팅, 고감도 프론트엔드 제작까지 한 번에 완성합니다." },
+              { num: "02", title: "Zero Server Cost & Full Ownership", subtitle: "월 고정 비용 0원, 완벽한 소유권", desc: "플랫폼에 종속되는 웹 빌더를 거부합니다. 완성된 소스코드 소유권을 그대로 인도하고, 매달 나가는 호스팅 비용을 완전히 제거합니다." },
+              { num: "03", title: "One-Source Multi-Channel Sync", subtitle: "웹사이트와 제안서(PDF)의 동시 빌드", desc: "웹 빌딩 한 번으로 거래처 송부용 회사소개서와 제안서가 동일한 디자인 시스템으로 완성됩니다. 단 하나의 액션으로 모든 터치포인트를 장악하세요." },
+              { num: "04", title: "High-End Visual Branding", subtitle: "별도 촬영 없이, 브랜드 무드에 맞는 고감도 비주얼", desc: "고비용 사진 촬영 없이도 브랜드 컨셉에 정확히 맞는 고감도 비주얼을 설계합니다. 리소스는 최소화하고 시각적 임팩트는 극대화합니다." },
+              { num: "05", title: "Search Engine & AI Top-Tier Sync", subtitle: "네이버·구글·AI 검색 상위 노출 구조", desc: "눈에 보이는 디자인 너머, 검색 로봇과 AI 비서가 가장 먼저 찾아내는 구조로 빌딩합니다. 브랜드의 디지털 생존 기술을 심습니다." }
             ].map((capa, idx) => (
               <div key={idx} className={styles.horizontalCard}>
                 <span className={styles.hCardNum}>{capa.num}</span>
