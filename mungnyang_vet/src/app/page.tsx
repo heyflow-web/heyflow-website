@@ -12,9 +12,9 @@ export default function Home() {
       <Section3 />
       <Section4 />
       <Section5 />
-      <footer className="bg-[#111111] text-[#EAE6DF]/50 py-12 text-center text-sm font-light">
-        <p className="font-serif-title tracking-widest mb-4">MUNGNYANG CLINIC</p>
-        <p>© 2026 Mungnyang Animal Clinic. All rights reserved.</p>
+      <footer className="bg-[#2C2825] text-[#8D7B68] py-8 text-center text-sm">
+        <p>© 2026 멍냥동물병원. All rights reserved.</p>
+        <p className="mt-2">서울특별시 강남구 테헤란로 123 멍냥타워 1층 | 02-1234-5678</p>
       </footer>
     </main>
   );

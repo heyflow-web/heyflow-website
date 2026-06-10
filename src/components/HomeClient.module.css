@@ -387,7 +387,8 @@
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: flex-start;
+  gap: 1.5rem;
   padding: 3rem;
   border: 1px solid var(--border);
   border-radius: 20px;
@@ -424,11 +425,6 @@
   font-size: 2rem;
   font-weight: 800;
   color: #666;
-  transition: opacity 0.3s ease;
-}
-
-.horizontalCard:hover .hCardNum {
-  opacity: 0;
 }
 
 .hCardMainTitle {
@@ -440,7 +436,7 @@
 
 .hCardHoverDesc {
   position: absolute;
-  top: 3rem;
+  bottom: 3rem;
   left: 3rem;
   right: 3rem;
   opacity: 0;
