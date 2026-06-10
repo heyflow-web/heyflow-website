@@ -6,7 +6,7 @@ import styles from "./CustomCursor.module.css";
 export default function CustomCursor() {
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [hovered, setHovered] = useState(false);
-  const [isDarkSection, setIsDarkSection] = useState(false);
+  const [isSection5, setIsSection5] = useState(false);
 
   useEffect(() => {
     const onMouseMove = (e: MouseEvent) => {
@@ -21,11 +21,10 @@ export default function CustomCursor() {
         setHovered(false);
       }
 
-      // Check if we are inside a dark section
-      if (target.closest(".dark-section")) {
-        setIsDarkSection(true);
+      if (target.closest("#section5")) {
+        setIsSection5(true);
       } else {
-        setIsDarkSection(false);
+        setIsSection5(false);
       }
     };
 
@@ -40,12 +39,13 @@ export default function CustomCursor() {
 
   return (
     <div
-      className={`${styles.cursor} ${hovered ? styles.hovered : ""} ${isDarkSection ? styles.darkSection : ""}`}
+      className={`${styles.cursor} ${hovered ? styles.hovered : ""} ${isSection5 ? styles.section5Mode : ""}`}
       style={{
         transform: `translate3d(${position.x}px, ${position.y}px, 0)`,
       }}
     >
       <div className={styles.dot}></div>
+      {isSection5 && <span className={styles.cursorText}>Touch🐾</span>}
     </div>
   );
 }

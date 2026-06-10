@@ -1,13 +1,6 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
-import { Cormorant_Garamond } from "next/font/google";
 import "./globals.css";
-
-const cormorantGaramond = Cormorant_Garamond({
-  weight: ['400', '500', '600', '700'],
-  subsets: ['latin'],
-  variable: "--font-cormorant",
-});
 
 const pretendard = localFont({
   src: [
@@ -52,7 +45,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ko" className={`${pretendard.variable} ${cormorantGaramond.variable}`}>
+    <html lang="ko" className={`${pretendard.variable}`}>
       <body className="antialiased relative min-h-screen">
         <CustomCursor />
         <Header />

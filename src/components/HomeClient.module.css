@@ -383,6 +383,7 @@
 
 .horizontalCard {
   width: 26vw;
+  aspect-ratio: 1 / 1;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
@@ -392,6 +393,11 @@
   border-radius: 20px;
   background: transparent;
   position: relative;
+  transition: background-color 0.3s ease;
+}
+
+.horizontalCard:hover {
+  background-color: #f9f9f9;
 }
 
 @media (max-width: 1024px) {
