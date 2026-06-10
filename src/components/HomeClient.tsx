@@ -73,6 +73,15 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
   const cScale = useTransform(cProgress, [0, 0.5, 1], [1.5, 1, 0.8]);
   const cOpacity = useTransform(cProgress, [0, 0.3, 0.8, 1], [0, 1, 1, 0]);
 
+  // About Headline Scroll 로직
+  const aboutRef = useRef<HTMLElement>(null);
+  const { scrollYProgress: aboutProgress } = useScroll({
+    target: aboutRef,
+    offset: ["start end", "center center"]
+  });
+  const aboutScale = useTransform(aboutProgress, [0, 1], [0.6, 1.2]);
+  const aboutOpacity = useTransform(aboutProgress, [0, 0.5, 1], [0, 1, 1]);
+
   useEffect(() => {
     // Problem, Horizontal 섹션에서 글로벌 다크모드 적용 (CSS transition으로 페이드인 효과 연출)
     if (isProblemInView || isHorizontalInView) {
@@ -283,23 +292,14 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
             </div>
           ))}
         </div>
-        
-        <div className={styles.viewAllWrapper}>
-          <Link href="/projects" className={`${styles.ctaButton} cursor-hover`}>
-            VIEW ALL PROJECTS <ArrowRight className={styles.ctaIcon} />
-          </Link>
-        </div>
       </section>
 
       {/* Section 03: Solution & Philosophy (타이틀만 남기고 압도적 차별점 전으로 이동) */}
-      <section className={styles.aboutSection}>
+      <section ref={aboutRef} className={styles.aboutSection}>
         <div className={styles.aboutContent}>
           <motion.h2 
             className={styles.aboutHeadline}
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-20%" }}
-            transition={{ duration: 1 }}
+            style={{ scale: aboutScale, opacity: aboutOpacity }}
           >
             잘 만든 웹사이트와<br />
             잘 되는 웹사이트는 다릅니다.
