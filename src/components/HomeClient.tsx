@@ -175,8 +175,8 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
             viewport={{ once: true, margin: "-20%" }}
             transition={{ duration: 1 }}
           >
-            우리는 불필요함을 덜어내는<br />
-            '정제된 미니멀리즘'을 지향합니다.
+            잘 만든 웹사이트와<br />
+            잘 되는 웹사이트는 다릅니다.
           </motion.h2>
           
           <motion.p 
@@ -186,8 +186,8 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
             viewport={{ once: true, margin: "-20%" }}
             transition={{ duration: 1, delay: 0.2 }}
           >
-            화려하기만 하고 정작 검색창에서 사라지는 웹사이트는 자산이 될 수 없습니다.<br />
-            우리는 10년의 비주얼 안목으로 사용자의 시선이 머무는 세련된 동선을 설계합니다.
+            검색되고, 신뢰를 주고, 실제로 고객을 불러오는 것.<br />
+            그게 잘 되는 웹사이트입니다.
           </motion.p>
           
           <motion.p 
@@ -197,8 +197,8 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
             viewport={{ once: true, margin: "-20%" }}
             transition={{ duration: 1, delay: 0.4 }}
           >
-            동시에 구글 검색창과 차세대 AI 비서들이 가장 완벽하게 인식하는<br />
-            최적화 구조로 웹사이트를 빌딩합니다.
+            헤이플로우는 웹어워드 코리아 2회 수상의 비주얼 안목으로 사용자의 시선이 머무는 동선을 설계하고,<br />
+            동시에 네이버·구글·AI 검색 상위에 노출되는 구조로 빌딩합니다.
           </motion.p>
 
           <motion.p 
@@ -208,8 +208,7 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
             viewport={{ once: true, margin: "-20%" }}
             transition={{ duration: 1, delay: 0.6 }}
           >
-            눈에 보이는 격조, 눈에 보이지 않는 강력한 생존 기술.<br />
-            이것이 헤이플로우가 정의하는 새로운 디지털 표준입니다.
+            눈에 보이는 격조, 눈에 보이지 않는 생존 기술.
           </motion.p>
         </div>
       </section>
