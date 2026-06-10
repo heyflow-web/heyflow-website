@@ -478,29 +478,13 @@
   gap: 1rem;
 }
 
-.idealHeaderInner {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.idealTag {
-  font-size: 0.85rem;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  font-weight: 700;
-  color: var(--gray);
-}
-
 .idealTitle {
-  font-size: 1.4rem;
+  font-size: 1.8rem;
   font-weight: 800;
+  color: var(--text);
 }
-
 .idealDesc {
-  font-size: 1.05rem;
-  line-height: 1.6;
-  color: var(--gray);
+  display: none;
 }
 
 /* Section 06: Pricing Plan (다크모드 강제 고정) */

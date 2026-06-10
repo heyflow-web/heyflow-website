@@ -128,7 +128,7 @@ export default function GlobalContact() {
         className={`${styles.floatingButton} cursor-hover`} 
         onClick={() => setIsOpen(true)}
       >
-        Let's Talk
+        무료 상담하기
       </button>
 
       {/* 모달 영역 */}

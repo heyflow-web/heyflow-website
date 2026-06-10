@@ -260,7 +260,7 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
           <motion.div style={{ x: horizontalX }} className={styles.horizontalFlexGroup}>
             {[
               { num: "01", title: "End-to-End Strategic Building", subtitle: "기획부터 제작까지, 완벽한 원스톱 프로세스", desc: "복잡한 기획안 없이도 됩니다. 사업 내용만 가볍게 전달해 주시면 전략적 화면 구성부터 카피라이팅, 고감도 프론트엔드 제작까지 한 번에 완성합니다." },
-              { num: "02", title: "Zero Server Cost & Full Ownership", subtitle: "월 고정 비용 0원, 완벽한 소유권", desc: "플랫폼에 종속되는 웹 빌더를 거부합니다. 완성된 소스코드 소유권을 그대로 인도하고, 매달 나가는 호스팅 비용을 완전히 제거합니다." },
+              { num: "02", title: "Zero Server Cost & Full Ownership", subtitle: "월 호스팅 서버비 0원, 완벽한 소유권", desc: "플랫폼에 종속되는 웹 빌더를 거부합니다. 완성된 소스코드 소유권을 그대로 인도하고, 매달 나가는 호스팅 비용을 완전히 제거합니다. 1년간 프리미엄 유지관리가 무상으로 제공됩니다." },
               { num: "03", title: "One-Source Multi-Channel Sync", subtitle: "웹사이트와 제안서(PDF)의 동시 빌드", desc: "웹 빌딩 한 번으로 거래처 송부용 회사소개서와 제안서가 동일한 디자인 시스템으로 완성됩니다. 단 하나의 액션으로 모든 터치포인트를 장악하세요." },
               { num: "04", title: "High-End Visual Branding", subtitle: "별도 촬영 없이, 브랜드 무드에 맞는 고감도 비주얼", desc: "고비용 사진 촬영 없이도 브랜드 컨셉에 정확히 맞는 고감도 비주얼을 설계합니다. 리소스는 최소화하고 시각적 임팩트는 극대화합니다." },
               { num: "05", title: "Search Engine & AI Top-Tier Sync", subtitle: "네이버·구글·AI 검색 상위 노출 구조", desc: "눈에 보이는 디자인 너머, 검색 로봇과 AI 비서가 가장 먼저 찾아내는 구조로 빌딩합니다. 브랜드의 디지털 생존 기술을 심습니다." }
@@ -296,25 +296,19 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
           
           <div className={styles.idealList}>
             {[
-              { tag: "The Scale Up", title: "체급 성장을 준비하는 스타트업 및 중소기업", desc: "오프라인 매출이나 기업의 실제 역량은 탄탄한데, 홈페이지가 그 수준을 따라가지 못해 대외적인 신뢰도 손해를 보고 계신 대표님" },
-              { tag: "The Experts", title: "신뢰도가 생명인 전문 법인 및 메디컬 그룹", desc: "거래처 제안, 투자 미팅, 혹은 환자 내원 전 '첫인상 검증' 단계에서 압도적이고 정제된 프로의 인상을 심어주고 싶으신 분" },
-              { tag: "The Resource Saver", title: "기획과 리소스 낭비를 원치 않는 경영자", desc: "바쁜 본업 때문에 스토리보드나 카피라이팅을 붙잡고 있을 시간이 없어, 텍스트 한 줄만 던져도 전략적으로 알아서 빌딩해 주길 원하시는 분" },
-              { tag: "The Smart Investor", title: "불필요한 고정 지출을 혐오하는 경영자", desc: "매달 빠져나가는 폐쇄형 빌더의 유료 구독료와 호스팅 비용이 아깝고, 단 한 번의 제작으로 완벽한 독립 소유권을 확보하고 싶으신 분" },
-              { tag: "The Omnichannel", title: "온·오프라인 브랜딩을 한 번에 끝내고 싶은 브랜드", desc: "웹사이트 따로, 회사소개서(PPT) 따로 만드느라 디자인 톤이 깨지는 게 지치신 분. 단 한 번의 빌드로 제안서(PDF)까지 완벽하게 동기화하고 싶으신 분" }
+              "The Experts — 병원, 법인, 전문직",
+              "The Scale Up — 성장 중인 소상공인/스타트업",
+              "The Resource Saver — 시간·비용 낭비 없이 한 번에 끝내고 싶은 분"
             ].map((ideal, idx) => (
               <motion.div 
                 key={idx} 
                 className={styles.idealItem}
-                initial={{ opacity: 0, x: -20 }}
-                whileInView={{ opacity: 1, x: 0 }}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.6, delay: idx * 0.1 }}
               >
-                <div className={styles.idealHeaderInner}>
-                  <span className={styles.idealTag}>{ideal.tag}</span>
-                  <h3 className={styles.idealTitle}>{ideal.title}</h3>
-                </div>
-                <p className={styles.idealDesc}>{ideal.desc}</p>
+                <h3 className={styles.idealTitle}>{ideal}</h3>
               </motion.div>
             ))}
           </div>
@@ -337,9 +331,9 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
           
           <div className={styles.pricingGrid}>
             {[
-              { title: "Standard Flow", type: "(랜딩/원페이지)", price: "₩ 399,000", desc: "비즈니스의 핵심 가치를 한 페이지에 압도적인 밀도로 압축하는 플랜", features: ["기본 5개 섹션 내외 구성의 고감도 반응형 원페이지 빌드", "비즈니스 모델 분석 기반의 전략적 화면 구성 및 카피라이팅", "컨셉에 맞는 맞춤형 비주얼 브랜딩 셋업", "구글 & AI 검색 최상위 동기화 기본 세팅", "완벽한 소유권 이전 및 월 고정 서버비 0원"] },
-              { title: "Premium Flow", type: "(공식 홈페이지)", price: "₩ 1,490,000", desc: "기업의 체급에 걸맞은 선명한 아이덴티티와 오프라인의 가치를 완벽히 동기화하는 플랜", pop: true, features: ["핵심 5개 페이지 구성 (회사소개, 서비스 안내, 포트폴리오, 문의 양식 등)", "One-Source Multi-Channel Sync (홈페이지 기반 PDF 동시 빌드)", "마우스 호버 및 스크롤 인터랙션 고도화 디렉팅", "초고속 글로벌 CDN 인프라 기반 배포 최적화", "Standard Flow의 모든 기본 혜택 포함"] },
-              { title: "Enterprise Flow", type: "(종합 브랜딩 패키지)", price: "₩ 2,990,000", desc: "스케일업을 위한 대규모 아카이브와 강력한 디지털 무기를 완벽하게 장착하는 플랜", features: ["대규모 정보 구조를 담아내는 다중 10개 페이지 마스터 빌드", "브랜드 아이덴티티를 극대화하는 맞춤형 인터랙션 디자인 엔지니어링", "검색 엔진 최적화(SEO) 고도화 테크니컬 세팅", "Premium Flow의 모든 하이엔드 기능 포함"] }
+              { title: "Standard", type: "(랜딩/원페이지)", price: "₩ 399,000", desc: "핵심 가치를 한 페이지에 압축하는 입문 플랜", features: ["기본 5개 섹션 내외 구성의 고감도 반응형 원페이지 빌드", "비즈니스 모델 분석 기반의 전략적 화면 구성 및 카피라이팅", "컨셉에 맞는 맞춤형 비주얼 브랜딩 셋업", "구글 & AI 검색 최상위 동기화 기본 세팅", "완벽한 소유권 이전 및 월 고정 서버비 0원"] },
+              { title: "Premium", type: "(공식 홈페이지)", price: "₩ 1,490,000", desc: "브랜드 아이덴티티를 완벽히 구현하는 대표 플랜", pop: true, features: ["핵심 5개 페이지 구성 (회사소개, 서비스 안내, 포트폴리오, 문의 양식 등)", "One-Source Multi-Channel Sync (홈페이지 기반 PDF 동시 빌드)", "마우스 호버 및 스크롤 인터랙션 고도화 디렉팅", "초고속 글로벌 CDN 인프라 기반 배포 최적화", "Standard Flow의 모든 기본 혜택 포함"] },
+              { title: "Enterprise", type: "(종합 브랜딩 패키지)", price: "₩ 2,990,000", desc: "스케일업을 위한 완전한 웹사이트를 구현하는 플랜", features: ["대규모 정보 구조를 담아내는 다중 10개 페이지 마스터 빌드", "브랜드 아이덴티티를 극대화하는 맞춤형 인터랙션 디자인 엔지니어링", "검색 엔진 최적화(SEO) 고도화 테크니컬 세팅", "Premium Flow의 모든 하이엔드 기능 포함"] }
             ].map((plan, idx) => (
               <motion.div 
                 key={idx} 
@@ -349,7 +343,7 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
                 viewport={{ once: true }}
                 transition={{ duration: 0.8, delay: idx * 0.1 }}
               >
-                {plan.pop && <div className={styles.popBadge}>MOST POPULAR</div>}
+                {plan.pop && <div className={styles.popBadge}>추천</div>}
                 <div className={styles.planHeader}>
                   <h3 className={styles.planTitle}>{plan.title}</h3>
                   <span className={styles.planType}>{plan.type}</span>
@@ -363,10 +357,11 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
             ))}
           </div>
           
-          <p className={styles.pricingNotice}>
-            ※ 모든 플랜에는 구매·연결 대행 수수료가 포함되어 있으며, '1년간 프리미엄 유지관리(도메인 관리+SSL+서버 모니터링)'가 무상으로 제공됩니다.<br/>
-            ※ 2년 차부터는 안정적인 사이트 유지 및 전담 디렉터 마크 관리를 위해 연간 유지관리 비용(Standard 연 99,000원 / Premium 연 198,000원 *부가세 포함)이 청구됩니다.
-          </p>
+          <div className={styles.pricingNotice}>
+            <p>※ 도메인 비용(연 약 2만 원대)은 고객 부담이며, 별도 대행 수수료는 없습니다.</p>
+            <p>※ [오픈 이벤트] 지금 신청하시면 1년간 프리미엄 유지관리(도메인 관리·SSL·서버 모니터링)를 무상으로 제공합니다.</p>
+            <p>※ 2년 차부터는 연간 유지관리 패키지(Standard 연 99,000원 / Premium 연 198,000원)를 선택적으로 연장하실 수 있습니다.</p>
+          </div>
         </div>
       </section>
 
@@ -387,9 +382,7 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
             {[
               { q: "완성된 웹사이트의 소스코드를 직접 소유할 수 있나요?", a: "네, 100% 가능합니다. 헤이플로우는 빌딩이 완료된 오리지널 소스코드(HTML/CSS/JS) 일체를 투명하게 파일로 인도해 드립니다. 플랫폼의 규격에 갇히는 폐쇄형 웹 빌더와 달리, 특정 솔루션에 절대 종속되지 않으므로 향후 언제 어디서나 귀사만의 자유로운 유지보수와 서버 이전이 가능합니다." },
               { q: "스마트폰이나 태블릿 등 모바일 환경에서도 잘 보이나요?", a: "네, 기본 스펙입니다. 헤이플로우가 빌딩하는 모든 페이지는 유연한 '반응형 웹사이트'로 제작됩니다. 접속하는 사용자의 기기(PC, 태블릿, 모바일) 디스플레이 환경을 실시간으로 감지하여 레이아웃이 가장 선명하고 세련된 형태로 자동 최적화됩니다." },
-              { q: "제작 기간은 얼마나 걸리나요?", a: "헤이플로우는 비효율적인 소통 구조를 생략하고 브랜드의 핵심 동선과 시각적 밀도에만 집중합니다. 대표님께서 대략적인 자료와 피드백을 전달해 주신 시점부터, 평균 3~5일 이내에 완전히 작동하는 고감도 최종본을 마주하실 수 있습니다." },
-              { q: "제작 비용 외에 추가로 발생하는 유지 비용이 있나요?", a: "기본적으로 헤이플로우는 매달 수만 원씩 유료 호스팅 월세를 내실 필요가 없도록 서버비 0원의 독립형 인프라 구조로 빌딩해 드립니다. 다만 도메인 갱신, 보안인증서(SSL) 관리, 정기 모니터링 등 신경 쓰이는 사이트 관리를 완벽하게 위임하고 싶으신 분들을 위해 2년 차부터 최소한의 연간 프리미엄 유지관리 패키지를 정찰제로 운영하고 있습니다." },
-              { q: "도메인은 정확히 무엇이며 어떻게 준비해야 하나요?", a: "도메인은 홈페이지에 진입하기 위한 주소(예: .com, .co.kr)를 뜻하며, 공통적으로 연간 약 2만 원대의 필수 리소스 비용이 발생합니다. 헤이플로우는 이에 대한 별도의 대행 수수료를 취하지 않으며, 복잡한 네임서버 신규 등록부터 서버 연결까지 전 과정을 알아서 완벽하게 세팅해 드리니 걱정하지 않으셔도 됩니다." },
+              { q: "제작 비용 외에 추가로 발생하는 유지 비용이 있나요?", a: "호스팅 서버비는 별도로 발생하지 않습니다. 현재 오픈 이벤트로 호스팅·도메인 관리·SSL·서버 모니터링을 포함한 프리미엄 유지관리를 1년간 무상으로 제공해 드립니다.\n2년 차부터는 연간 유지관리 패키지(Standard 연 99,000원 / Premium 연 198,000원)를 선택적으로 연장하실 수 있습니다.\n\n*호스팅\n쉽게 말해 온라인 빌딩의 월세입니다. 웹사이트가 24시간 인터넷에 켜져 있도록 서버에 올려두는 것으로, 일반적으로 매달 별도 비용이 발생합니다.\n\n*도메인\n홈페이지에 방문하기 위한 인터넷 주소(URL)를 의미합니다. 월간 약 2천 원의 비용이 발생합니다. .co.kr = 연 22,000원 / .com = 연 27,500원. 헤이플로우는 별도의 수수료를 취하지 않으며, 구매·연결을 대행해 드립니다.\n\n*SSL\n모든 웹사이트에 사실상 필수입니다. 주소창에 자물쇠 아이콘이 표시되는 보안 인증서로, 없으면 브라우저에서 '안전하지 않은 사이트'로 경고가 뜨며 검색 순위와 고객 신뢰도에 직접적인 영향을 줍니다." },
               { q: "구글 검색 엔진 및 AI 최상위 동기화는 정말 작동하나요?", a: "네, 확실하게 작동합니다. 단순히 눈에만 예쁜 사이트가 아니라, 구글 검색 로봇과 챗GPT, 제미나이 등 차세대 AI 비서들이 웹사이트의 정보를 가장 정확하고 빠르게 크롤링할 수 있도록 표준 시멘틱 마크업 가이드라인을 철저히 준수하여 빌딩합니다. 브랜드의 장기적인 디지털 자산 가치를 극대화하는 헤이플로우만의 핵심 기술입니다." }
             ].map((faq, idx) => (
               <div key={idx} className={`${styles.faqItem} ${openFaq === idx ? styles.faqOpen : ''}`}>
@@ -408,7 +401,7 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
                 >
                   <div className={styles.faqAnswer}>
                     <span className={styles.faqAMark}>A.</span>
-                    <p>{faq.a}</p>
+                    <p style={{ whiteSpace: "pre-line" }}>{faq.a}</p>
                   </div>
                 </motion.div>
               </div>
@@ -420,17 +413,15 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
       {/* Section 08: Contact & Footer */}
       <footer className={styles.footerSection}>
         <div className={styles.contactContainer}>
-          <h2 className={styles.contactTitle}>링크 하나로 증명되는<br/>비즈니스의 첫인상.</h2>
+          <h2 className={styles.contactTitle}>잘 되는 비즈니스엔, 그에 맞는 웹사이트가 있어야 합니다.</h2>
           <p className={styles.contactDesc}>
-            더 이상 주춤할 필요 없는 당당한 아이덴티티를 전달하세요.<br/>
-            비주얼 소음을 걷어내고, 구글과 AI가 먼저 주목하는 브랜드 본질만 남길 준비가 되셨나요?<br/>
-            몇 가지 질문에 답해주시면 24시간 이내에 디렉터가 직접 연락을 드립니다.
+            몇 가지 질문에 답해주시면 24시간 이내에 디렉터가 직접 연락드립니다.
           </p>
           <button 
             className={`${styles.ctaButton} cursor-hover`}
             onClick={handleContactOpen}
           >
-            START A PROJECT <ArrowRight className={styles.ctaIcon} />
+            프로젝트 시작하기 <ArrowRight className={styles.ctaIcon} />
           </button>
         </div>
 
