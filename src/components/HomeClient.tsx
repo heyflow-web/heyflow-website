@@ -57,12 +57,7 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
   // Hero 무한 롤링용 배열 복제 (최소 3세트 이상으로 끊김 없는 루프 보장)
   const marqueeSet = [...projects, ...projects, ...projects];
 
-  // Horizontal Scroll 로직
-  const horizontalRef = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({ target: horizontalRef });
-  const horizontalX = useTransform(scrollYProgress, [0, 1], ["0%", "-60%"]);
-
-  const isHorizontalInView = useInView(horizontalRef, { margin: "-20% 0px -20% 0px" });
+  // Horizontal Scroll 로직 (제거됨)
 
   // Conclusion Text Scroll 로직
   const conclusionRef = useRef<HTMLDivElement>(null);
@@ -197,7 +192,7 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
               viewport={{ once: true, margin: "-20%" }}
               transition={{ duration: 1 }}
             >
-              혹시 우리 브랜드도<br />이런 문제를 겪고<br />계시진 않나요?
+              혹시,<br />이런 문제를 겪고<br />계시진 않나요?
             </motion.h2>
           </div>
           
@@ -235,8 +230,8 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
         </motion.h2>
       </section>
 
-      {/* Selected Work (프로젝트 갤러리) -> Difference 로 변경 */}
-      <section className={styles.workSection}>
+      {/* Section 03: Difference (Big Numbers) */}
+      <section className={styles.statsSection}>
         <div className={styles.workHeader}>
           <motion.h2 
             className={styles.workTitle}
@@ -250,25 +245,85 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
           <p className={styles.workSubtitle}>우리가 설계한 시선의 흐름들</p>
         </div>
 
+        <div className={styles.statsGrid}>
+          {[
+            { num: "2회", desc: "웹어워드 코리아 수상" },
+            { num: "3~5일", desc: "평균 제작 완료" },
+            { num: "0원", desc: "월 호스팅 서버비" }
+          ].map((stat, idx) => (
+            <motion.div 
+              key={idx} 
+              className={styles.statCard}
+              initial={{ opacity: 0, y: 60 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-10%" }}
+              transition={{ duration: 0.8, delay: idx * 0.1 }}
+            >
+              <h3 className={styles.statNum}>{stat.num}</h3>
+              <p className={styles.statDesc}>{stat.desc}</p>
+            </motion.div>
+          ))}
+        </div>
+      </section>
+
+      {/* Section 04: Solution & Philosophy (타이틀만 남기고 압도적 차별점 전으로 이동) */}
+      <section ref={aboutRef} className={styles.aboutSection}>
+        <div className={styles.aboutContent}>
+          <motion.h2 
+            className={styles.aboutHeadline}
+            style={{ scale: aboutScale, opacity: aboutOpacity }}
+          >
+            잘 만든 웹사이트와<br />
+            잘 되는 웹사이트는 다릅니다.
+          </motion.h2>
+        </div>
+      </section>
+
+      {/* Section 05: Core Capabilities (Magazine Layout) */}
+      <section className={styles.workSection}>
+        <div className={styles.workHeader}>
+          <motion.h2 
+            className={styles.capabilitiesTitle}
+            initial={{ y: 40, opacity: 0 }} 
+            whileInView={{ y: 0, opacity: 1 }} 
+            viewport={{ once: true }} 
+            transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+          >
+            우리의 강점
+          </motion.h2>
+        </div>
+
         <div className={styles.workGrid}>
           {[
             {
-              id: "work-1",
-              title: "감도 높은 비주얼",
-              description: "웹어워드 코리아 2회 수상의 안목으로 사용자의 시선을 사로잡습니다.",
+              id: "capa-1",
+              title: "End-to-End 전략 수립",
+              description: "기획부터 제작까지, 완벽한 원스톱 프로세스",
               image: "/images/diffrence1.mp4"
             },
             {
-              id: "work-2",
-              title: "검색엔진 최적화",
-              description: "네이버·구글·AI 검색 상위에 노출되는 구조로 빌딩합니다.",
+              id: "capa-2",
+              title: "Zero Server Cost",
+              description: "월 호스팅 서버비 0원, 완벽한 소유권 이전",
               image: "/images/diffrence2.mov"
             },
             {
-              id: "work-3",
-              title: "원스톱 프로세스",
-              description: "기획·카피·디자인·배포까지, 한 번에 완성합니다.",
+              id: "capa-3",
+              title: "Multi-Channel Sync",
+              description: "웹사이트와 제안서(PDF)의 동시 빌드",
               image: "/images/diffrence3.gif"
+            },
+            {
+              id: "capa-4",
+              title: "High-End Visual",
+              description: "별도 촬영 없이, 브랜드 무드에 맞는 고감도 비주얼",
+              image: "/images/diffrence1.mp4"
+            },
+            {
+              id: "capa-5",
+              title: "Search Engine Sync",
+              description: "네이버·구글·AI 검색 상위 노출 구조",
+              image: "/images/diffrence2.mov"
             }
           ].map((project, idx) => (
             <div key={project.id} className={styles.projectCard}>
@@ -302,59 +357,6 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
               </motion.div>
             </div>
           ))}
-        </div>
-      </section>
-
-      {/* Section 03: Solution & Philosophy (타이틀만 남기고 압도적 차별점 전으로 이동) */}
-      <section ref={aboutRef} className={styles.aboutSection}>
-        <div className={styles.aboutContent}>
-          <motion.h2 
-            className={styles.aboutHeadline}
-            style={{ scale: aboutScale, opacity: aboutOpacity }}
-          >
-            잘 만든 웹사이트와<br />
-            잘 되는 웹사이트는 다릅니다.
-          </motion.h2>
-        </div>
-      </section>
-
-
-
-      {/* Section 04: Core Capabilities (Horizontal Scroll) */}
-      <section ref={horizontalRef} className={styles.capabilitiesHorizontalSection}>
-        <div className={styles.horizontalStickyContainer}>
-          <div className={styles.horizontalSectionHeader}>
-            <motion.h2 
-              className={styles.capabilitiesTitle}
-              initial={{ y: 40, opacity: 0 }} 
-              whileInView={{ y: 0, opacity: 1 }} 
-              viewport={{ once: true }} 
-              transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
-            >
-              우리의 강점
-            </motion.h2>
-          </div>
-          <motion.div style={{ x: horizontalX }} className={styles.horizontalFlexGroup}>
-            {[
-              { num: "01", title: "End-to-End Strategic Building", subtitle: "기획부터 제작까지, 완벽한 원스톱 프로세스", desc: "복잡한 기획안 없이도 됩니다. 사업 내용만 가볍게 전달해 주시면 전략적 화면 구성부터 카피라이팅, 고감도 프론트엔드 제작까지 한 번에 완성합니다." },
-              { num: "02", title: "Zero Server Cost & Full Ownership", subtitle: "월 호스팅 서버비 0원, 완벽한 소유권", desc: "플랫폼에 종속되는 웹 빌더를 거부합니다. 완성된 소스코드 소유권을 그대로 인도하고, 매달 나가는 호스팅 비용을 완전히 제거합니다. 1년간 프리미엄 유지관리가 무상으로 제공됩니다." },
-              { num: "03", title: "One-Source Multi-Channel Sync", subtitle: "웹사이트와 제안서(PDF)의 동시 빌드", desc: "웹 빌딩 한 번으로 거래처 송부용 회사소개서와 제안서가 동일한 디자인 시스템으로 완성됩니다. 단 하나의 액션으로 모든 터치포인트를 장악하세요." },
-              { num: "04", title: "High-End Visual Branding", subtitle: "별도 촬영 없이, 브랜드 무드에 맞는 고감도 비주얼", desc: "고비용 사진 촬영 없이도 브랜드 컨셉에 정확히 맞는 고감도 비주얼을 설계합니다. 리소스는 최소화하고 시각적 임팩트는 극대화합니다." },
-              { num: "05", title: "Search Engine & AI Top-Tier Sync", subtitle: "네이버·구글·AI 검색 상위 노출 구조", desc: "눈에 보이는 디자인 너머, 검색 로봇과 AI 비서가 가장 먼저 찾아내는 구조로 빌딩합니다. 브랜드의 디지털 생존 기술을 심습니다." }
-            ].map((capa, idx) => (
-              <div key={idx} className={styles.horizontalCard}>
-                <span className={styles.hCardNum}>{capa.num}</span>
-                <h3 className={styles.hCardMainTitle}>{capa.subtitle}</h3>
-                <div className={styles.hCardHoverDesc}>
-                  <p>{capa.desc}</p>
-                </div>
-              </div>
-            ))}
-            
-            {/* 끝부분 여유 마진 */}
-            <div className={styles.horizontalEndSpacer}></div>
-
-          </motion.div>
         </div>
       </section>
 
