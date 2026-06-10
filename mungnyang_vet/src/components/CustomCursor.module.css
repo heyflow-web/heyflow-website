@@ -2,58 +2,57 @@
   position: fixed;
   top: 0;
   left: 0;
-  width: 20px;
-  height: 20px;
-  background-color: var(--color-soft-terracotta);
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--color-deep-brown);
   border-radius: 50%;
   pointer-events: none;
   z-index: 9999;
   transform: translate3d(0, 0, 0);
-  transition: width 0.2s ease, height 0.2s ease, background-color 0.2s ease, border-radius 0.2s ease;
-  mix-blend-mode: multiply;
+  transition: width 0.3s ease, height 0.3s ease, border-color 0.3s ease;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-left: -10px;
-  margin-top: -10px;
-}
-
-.cursor.hovered {
-  width: 40px;
-  height: 40px;
-  background-color: var(--color-olive-green);
-  opacity: 0.5;
   margin-left: -20px;
   margin-top: -20px;
 }
 
-.cursor.section5 {
-  width: 80px;
-  height: 80px;
-  background-color: var(--color-warm-beige);
-  border: 2px solid var(--color-soft-brown);
-  opacity: 0.9;
-  mix-blend-mode: normal;
-  margin-left: -40px;
-  margin-top: -40px;
+.dot {
+  width: 4px;
+  height: 4px;
+  background-color: var(--color-deep-brown);
+  border-radius: 50%;
+  transition: background-color 0.3s ease;
 }
 
-.cursorText {
-  font-size: 12px;
-  color: var(--color-soft-brown);
-  font-weight: bold;
-  opacity: 0;
-  animation: fadeIn 0.3s forwards;
+.cursor.hovered {
+  width: 60px;
+  height: 60px;
+  margin-left: -30px;
+  margin-top: -30px;
+  border-color: var(--color-gold);
+  background-color: rgba(201, 166, 107, 0.1);
 }
 
-.section5 .cursorText {
-  opacity: 1;
+.cursor.hovered .dot {
+  background-color: var(--color-gold);
 }
 
-@keyframes fadeIn {
-  to {
-    opacity: 1;
-  }
+.cursor.darkSection {
+  border-color: var(--color-off-white);
+}
+
+.cursor.darkSection .dot {
+  background-color: var(--color-off-white);
+}
+
+.cursor.darkSection.hovered {
+  border-color: var(--color-gold);
+  background-color: rgba(201, 166, 107, 0.2);
+}
+
+.cursor.darkSection.hovered .dot {
+  background-color: var(--color-gold);
 }
 
 /* Hide default cursor on desktop */

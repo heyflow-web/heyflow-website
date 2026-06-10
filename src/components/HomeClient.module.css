@@ -345,7 +345,7 @@
 .capabilitiesHorizontalSection {
   /* 5개의 카드를 스크롤할 충분한 높이(여정)를 확보 */
   height: 400vh; 
-  background-color: #fafafa;
+  background-color: var(--bg);
   transition: background-color 0.8s ease;
 }
 
@@ -386,11 +386,12 @@
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
   padding: 3rem;
   border: 1px solid var(--border);
   border-radius: 20px;
   background: transparent;
-  gap: 1.5rem;
+  position: relative;
 }
 
 @media (max-width: 1024px) {
@@ -417,14 +418,11 @@
   font-size: 2rem;
   font-weight: 800;
   color: #666;
+  transition: opacity 0.3s ease;
 }
 
-.hCardEnTitle {
-  font-size: 1rem;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: #888;
-  font-weight: 700;
+.horizontalCard:hover .hCardNum {
+  opacity: 0;
 }
 
 .hCardMainTitle {
@@ -434,14 +432,20 @@
   word-break: keep-all;
 }
 
-.hCardDivider {
-  width: 100%;
-  height: 1px;
-  background-color: rgba(0, 0, 0, 0.1);
-  margin: 1rem 0;
+.hCardHoverDesc {
+  position: absolute;
+  top: 3rem;
+  left: 3rem;
+  right: 3rem;
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
-.hCardDesc {
+.horizontalCard:hover .hCardHoverDesc {
+  opacity: 1;
+}
+
+.hCardHoverDesc p {
   font-size: 1.1rem;
   line-height: 1.7;
   color: #555;
@@ -503,16 +507,27 @@
   display: none;
 }
 
-/* Section 06: Pricing Plan (다크모드 강제 고정) */
+/* Section 06: Pricing Plan (스크롤 시 배경이 올라오는 효과) */
 .pricingSection {
   padding: 15vh 5vw;
-  background-color: var(--bg);
-  transition: background-color 0.8s ease;
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+  background-color: transparent;
+}
+
+.pricingBg {
+  position: absolute;
+  inset: 0;
+  background-color: #111;
+  z-index: -1;
+  will-change: transform;
 }
 
 .pricingContainer {
   max-width: 1200px;
   margin: 0 auto;
+  position: relative;
 }
 
 .pricingHeader {

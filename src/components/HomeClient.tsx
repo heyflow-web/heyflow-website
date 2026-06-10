@@ -238,7 +238,13 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
       {/* Selected Work (프로젝트 갤러리) -> Difference 로 변경 */}
       <section className={styles.workSection}>
         <div className={styles.workHeader}>
-          <h2 className={styles.workTitle}>Difference.</h2>
+          <div className={styles.workTitle}>
+            <div style={{ overflow: "hidden" }}>
+              <motion.div initial={{ y: "120%", opacity: 0 }} whileInView={{ y: 0, opacity: 1 }} viewport={{ once: true }} transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}>
+                Difference.
+              </motion.div>
+            </div>
+          </div>
           <p className={styles.workSubtitle}>우리가 설계한 시선의 흐름들</p>
         </div>
 
@@ -316,7 +322,13 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
       <section ref={horizontalRef} className={styles.capabilitiesHorizontalSection}>
         <div className={styles.horizontalStickyContainer}>
           <div className={styles.horizontalSectionHeader}>
-            <h2 className={styles.capabilitiesTitle}>우리의 강점</h2>
+            <div className={styles.capabilitiesTitle}>
+              <div style={{ overflow: "hidden" }}>
+                <motion.div initial={{ y: "120%", opacity: 0 }} whileInView={{ y: 0, opacity: 1 }} viewport={{ once: true }} transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}>
+                  우리의 강점
+                </motion.div>
+              </div>
+            </div>
           </div>
           <motion.div style={{ x: horizontalX }} className={styles.horizontalFlexGroup}>
             {[
@@ -328,10 +340,10 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
             ].map((capa, idx) => (
               <div key={idx} className={styles.horizontalCard}>
                 <span className={styles.hCardNum}>{capa.num}</span>
-                <span className={styles.hCardEnTitle}>{capa.title}</span>
                 <h3 className={styles.hCardMainTitle}>{capa.subtitle}</h3>
-                <div className={styles.hCardDivider}></div>
-                <p className={styles.hCardDesc}>{capa.desc}</p>
+                <div className={styles.hCardHoverDesc}>
+                  <p>{capa.desc}</p>
+                </div>
               </div>
             ))}
             
@@ -345,15 +357,13 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
       {/* Section 05: Ideal Clients */}
       <section className={styles.idealSection}>
         <div className={styles.idealContainer}>
-          <motion.h2 
-            className={styles.sectionHeadline}
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-20%" }}
-            transition={{ duration: 1 }}
-          >
-            이런분께 저희를 추천합니다.
-          </motion.h2>
+          <div className={styles.sectionHeadline}>
+            <div style={{ overflow: "hidden" }}>
+              <motion.div initial={{ y: "120%", opacity: 0 }} whileInView={{ y: 0, opacity: 1 }} viewport={{ once: true }} transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}>
+                이런분께 저희를 추천합니다.
+              </motion.div>
+            </div>
+          </div>
           
           <div className={styles.idealList}>
             {[
@@ -381,17 +391,32 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
 
       {/* Section 06: Pricing Plan (다크모드 강제) */}
       <section ref={pricingRef} id="pricing" className={styles.pricingSection}>
+        <motion.div 
+          className={styles.pricingBg}
+          initial={{ y: "100%" }}
+          whileInView={{ y: "0%" }}
+          viewport={{ once: true, margin: "-10%" }}
+          transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+        />
         <div className={styles.pricingContainer}>
-          <motion.div 
-            className={styles.pricingHeader}
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-20%" }}
-            transition={{ duration: 1 }}
-          >
-            <h2 className={styles.sectionHeadlineCenter}>Pricing Plan</h2>
-            <p className={styles.pricingSubtitle}>복잡한 견적 조율 없이, 모든 비용은 정찰제로 투명하게 통제됩니다.</p>
-          </motion.div>
+          <div className={styles.pricingHeader}>
+            <div className={styles.sectionHeadlineCenter}>
+              <div style={{ overflow: "hidden" }}>
+                <motion.div initial={{ y: "120%", opacity: 0 }} whileInView={{ y: 0, opacity: 1 }} viewport={{ once: true }} transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}>
+                  Pricing Plan
+                </motion.div>
+              </div>
+            </div>
+            <motion.p 
+              className={styles.pricingSubtitle}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+            >
+              복잡한 견적 조율 없이, 모든 비용은 정찰제로 투명하게 통제됩니다.
+            </motion.p>
+          </div>
           
           <div className={styles.pricingGrid}>
             {[
@@ -432,15 +457,13 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
       {/* Section 07: FAQ */}
       <section ref={faqRef} id="faq" className={styles.faqSection}>
         <div className={styles.faqContainer}>
-          <motion.h2 
-            className={styles.sectionHeadline}
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-20%" }}
-            transition={{ duration: 1 }}
-          >
-            FAQ
-          </motion.h2>
+          <div className={styles.sectionHeadline}>
+            <div style={{ overflow: "hidden" }}>
+              <motion.div initial={{ y: "120%", opacity: 0 }} whileInView={{ y: 0, opacity: 1 }} viewport={{ once: true }} transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}>
+                FAQ
+              </motion.div>
+            </div>
+          </div>
           
           <div className={styles.faqList}>
             {[
@@ -477,7 +500,18 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
       {/* Section 08: Contact & Footer */}
       <footer className={styles.footerSection}>
         <div className={styles.contactContainer}>
-          <h2 className={styles.contactTitle}>잘 되는 비즈니스엔,<br/>그에 맞는 웹사이트가 있어야 합니다.</h2>
+          <div className={styles.contactTitle}>
+            <div style={{ overflow: "hidden" }}>
+              <motion.div initial={{ y: "120%", opacity: 0 }} whileInView={{ y: 0, opacity: 1 }} viewport={{ once: true }} transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}>
+                잘 되는 비즈니스엔,
+              </motion.div>
+            </div>
+            <div style={{ overflow: "hidden" }}>
+              <motion.div initial={{ y: "120%", opacity: 0 }} whileInView={{ y: 0, opacity: 1 }} viewport={{ once: true }} transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1], delay: 0.15 }}>
+                그에 맞는 웹사이트가 있어야 합니다.
+              </motion.div>
+            </div>
+          </div>
           <p className={styles.contactDesc}>
             몇 가지 질문에 답해주시면 24시간 이내에 디렉터가 직접 연락드립니다.
           </p>

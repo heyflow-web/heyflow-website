@@ -6,7 +6,7 @@ import styles from "./CustomCursor.module.css";
 export default function CustomCursor() {
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [hovered, setHovered] = useState(false);
-  const [isSection5, setIsSection5] = useState(false);
+  const [isDarkSection, setIsDarkSection] = useState(false);
 
   useEffect(() => {
     const onMouseMove = (e: MouseEvent) => {
@@ -15,17 +15,17 @@ export default function CustomCursor() {
 
     const onMouseOver = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
-      if (target.closest("a") || target.closest("button") || target.closest(".magnetic-card")) {
+      if (target.closest("a") || target.closest("button") || target.closest(".magnetic-card") || target.closest(".cursor-pointer")) {
         setHovered(true);
       } else {
         setHovered(false);
       }
 
-      // Check if we are inside Section 5
-      if (target.closest("#section5")) {
-        setIsSection5(true);
+      // Check if we are inside a dark section
+      if (target.closest(".dark-section")) {
+        setIsDarkSection(true);
       } else {
-        setIsSection5(false);
+        setIsDarkSection(false);
       }
     };
 
@@ -40,12 +40,12 @@ export default function CustomCursor() {
 
   return (
     <div
-      className={`${styles.cursor} ${hovered ? styles.hovered : ""} ${isSection5 ? styles.section5 : ""}`}
+      className={`${styles.cursor} ${hovered ? styles.hovered : ""} ${isDarkSection ? styles.darkSection : ""}`}
       style={{
         transform: `translate3d(${position.x}px, ${position.y}px, 0)`,
       }}
     >
-      {isSection5 && <span className={styles.cursorText}>Touch🐾</span>}
+      <div className={styles.dot}></div>
     </div>
   );
 }
