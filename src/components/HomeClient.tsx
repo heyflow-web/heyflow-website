@@ -134,8 +134,8 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
           <div className={styles.problemScrollRight}>
             {[
               "실제 가치에 비해 너무 가벼워 보이는 공식 웹사이트",
-              "브랜드를 전혀 이해하지 못하는 대행사와의 소통으로 낭비된 시간",
-              "구글 검색창과 AI 비서들의 답변에서 완전히 누락된 존재감"
+              "네이버·구글에서 검색해도 내 홈페이지는 보이지 않는 상황",
+              "브랜드를 이해 못 하는 대행사와 소통하며 낭비된 시간과 비용"
             ].map((text, idx) => (
               <motion.div 
                 key={idx} 
