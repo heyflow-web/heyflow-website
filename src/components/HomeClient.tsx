@@ -237,8 +237,8 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
         <div className={styles.statsGrid}>
           {[
             { num: "3회", desc: "웹어워드 코리아 수상" },
-            { num: "3일", desc: "평균 제작 완료" },
-            { num: "0원", desc: "월 호스팅 서버비" }
+            { num: "0원", desc: "월 호스팅 서버비" },
+            { num: "3일", desc: "평균 제작 완료" }
           ].map((stat, idx) => (
             <motion.div 
               key={idx} 
