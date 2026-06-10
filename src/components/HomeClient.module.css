@@ -74,7 +74,7 @@
 .marqueeTrack {
   display: flex;
   width: max-content;
-  animation: scrollMarquee 40s linear infinite;
+  animation: scrollMarquee 100s linear infinite;
 }
 
 .marqueeGroup {
