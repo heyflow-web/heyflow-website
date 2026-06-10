@@ -770,6 +770,23 @@
   transform: translateX(10px);
 }
 
+@media (max-width: 768px) {
+  .contactTitle {
+    font-size: 1.5rem;
+    line-height: 1.4;
+    word-break: keep-all;
+  }
+  .contactDesc {
+    font-size: 1rem;
+    padding: 0 1rem;
+    word-break: keep-all;
+  }
+  .ctaButton {
+    padding: 1rem 2rem;
+    font-size: 1rem;
+  }
+}
+
 .footerBottom {
   display: flex;
   flex-direction: column;
