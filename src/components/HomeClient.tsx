@@ -57,13 +57,7 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
   // Hero 무한 롤링용 배열 복제 (최소 3세트 이상으로 끊김 없는 루프 보장)
   const marqueeSet = [...projects, ...projects, ...projects];
 
-  // Difference Text Scroll 로직
-  const statsRef = useRef<HTMLDivElement>(null);
-  const { scrollYProgress: statsProgress } = useScroll({
-    target: statsRef,
-    offset: ["start end", "end start"]
-  });
-  const diffX = useTransform(statsProgress, [0, 1], ["-5%", "25%"]);
+
   // Conclusion Text Scroll 로직
   const conclusionRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress: cProgress } = useScroll({
@@ -236,21 +230,7 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
       </section>
 
       {/* Section 03: Difference (Big Numbers) */}
-      <section ref={statsRef} className={styles.statsSection}>
-        <div className={styles.workHeader}>
-          <motion.div style={{ x: diffX }}>
-            <motion.h2 
-              className={styles.workTitle}
-              initial={{ y: 40, opacity: 0 }} 
-              whileInView={{ y: 0, opacity: 1 }} 
-              viewport={{ once: true }} 
-              transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
-            >
-              Difference.
-            </motion.h2>
-          </motion.div>
-          <p className={styles.workSubtitle}>우리가 설계한 시선의 흐름들</p>
-        </div>
+      <section className={styles.statsSection}>
 
         <div className={styles.statsGrid}>
           {[
@@ -382,7 +362,7 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
             viewport={{ once: true }} 
             transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
           >
-            이런분께 저희를 추천합니다.
+            이런분께 추천합니다.
           </motion.h2>
           
           <div className={styles.idealList}>
