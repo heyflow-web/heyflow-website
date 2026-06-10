@@ -64,7 +64,7 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
               >
-                오프라인에서 증명된 가치,
+                잘 되는 비즈니스엔,
               </motion.div>
             </div>
             <div style={{ overflow: "hidden" }}>
@@ -73,7 +73,7 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1], delay: 0.15 }}
               >
-                온라인에서도 동일한 밀도로.
+                그에 맞는 웹사이트가 있어야 합니다.
               </motion.div>
             </div>
           </div>
@@ -83,8 +83,8 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, ease: "easeOut", delay: 0.6 }}
           >
-            헤이플로우는 불필요한 비주얼 노이즈를 제어하고,<br />
-            지금 비즈니스의 체급에 완벽히 동기화된 선명한 웹사이트를 빌딩합니다.
+            헤이플로우는 당신의 브랜드가 마땅히 받아야 할<br />
+            첫인상을 선명하게 설계합니다.
           </motion.p>
         </div>
         
