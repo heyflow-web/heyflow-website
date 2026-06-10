@@ -226,7 +226,7 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
           style={{ scale: cScale, opacity: cOpacity }}
         >
           이 중 단 하나라도 해당한다면,<br />
-          현재의 웹사이트는 브랜드를 대변하는 무기가 아니라<br />
+          현재의 웹사이트는 브랜드의 무기가 아니라<br />
           <span className={styles.conclusionHighlight}>감점 요인입니다.</span>
         </motion.h2>
       </section>
@@ -236,8 +236,8 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
 
         <div className={styles.statsGrid}>
           {[
-            { num: "2회", desc: "웹어워드 코리아 수상" },
-            { num: "3~5일", desc: "평균 제작 완료" },
+            { num: "3회", desc: "웹어워드 코리아 수상" },
+            { num: "3일", desc: "평균 제작 완료" },
             { num: "0원", desc: "월 호스팅 서버비" }
           ].map((stat, idx) => (
             <motion.div 

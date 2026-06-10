@@ -853,3 +853,29 @@
     display: none;
   }
 }
+
+/* Mobile Typography & Spacing Fixes */
+@media (max-width: 768px) {
+  .problemSection, .conclusionSection, .aboutSection, .workSection, .statsSection, .idealSection, .pricingSection, .faqSection {
+    padding: 10vh 5vw !important;
+  }
+  .heroTitle, .sectionTitle, .conclusionText {
+    font-size: clamp(2rem, 8vw, 2.5rem) !important;
+  }
+  .problemHugeItem p {
+    font-size: clamp(1.8rem, 6vw, 2.2rem) !important;
+  }
+  .workTitle {
+    font-size: clamp(2.5rem, 10vw, 3.5rem) !important;
+  }
+  .capaName {
+    font-size: clamp(1.5rem, 6vw, 2rem) !important;
+  }
+  .capaList {
+    gap: 6vh !important;
+    margin-top: 5vh !important;
+  }
+  .problemSection {
+    gap: 10vh !important;
+  }
+}
