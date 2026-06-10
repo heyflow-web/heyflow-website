@@ -151,27 +151,6 @@ export default function GlobalContact() {
               </button>
             </header>
 
-            {step > 0 && step < 6 && (
-              <button 
-                onClick={() => setStep(prev => prev - 1)}
-                className={`cursor-hover`}
-                style={{
-                  position: "absolute",
-                  top: "85px", // 헤더(40px) 바로 아래에 위치
-                  left: "5vw", // 헤더의 left 여백과 동일하게 맞춤
-                  background: "none",
-                  border: "none",
-                  color: "var(--gray)",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "8px",
-                  fontSize: "0.85rem",
-                  zIndex: 20
-                }}
-              >
-                <ArrowLeft size={16} /> 뒤로가기
-              </button>
-            )}
 
             <main className={styles.modalBody}>
               <AnimatePresence mode="wait">
@@ -212,7 +191,12 @@ export default function GlobalContact() {
                     animate="animate"
                     exit="exit"
                   >
-                    <span className={styles.questionHighlight}>01 / 05</span>
+                    <div className={styles.questionHighlight} style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                      <button onClick={() => setStep(prev => prev - 1)} className="cursor-hover" style={{ background: "none", border: "none", color: "inherit", display: "flex", alignItems: "center", padding: 0 }}>
+                        <ArrowLeft size={24} />
+                      </button>
+                      <span>01 / 05</span>
+                    </div>
                     <label className={styles.questionLabel}>귀하의 성함과 브랜드(기업)명을 알려주세요.</label>
                     <input 
                       ref={inputRef}
@@ -239,7 +223,12 @@ export default function GlobalContact() {
                     animate="animate"
                     exit="exit"
                   >
-                    <span className={styles.questionHighlight}>02 / 05</span>
+                    <div className={styles.questionHighlight} style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                      <button onClick={() => setStep(prev => prev - 1)} className="cursor-hover" style={{ background: "none", border: "none", color: "inherit", display: "flex", alignItems: "center", padding: 0 }}>
+                        <ArrowLeft size={24} />
+                      </button>
+                      <span>02 / 05</span>
+                    </div>
                     <label className={styles.questionLabel}>
                       프로젝트의 형태를 선택해 주세요.<span className={styles.subLabel} style={{ fontSize: "1.5rem", color: "#777777", marginLeft: "12px", verticalAlign: "baseline" }}>(중복 가능)</span>
                     </label>
@@ -291,7 +280,12 @@ export default function GlobalContact() {
                     animate="animate"
                     exit="exit"
                   >
-                    <span className={styles.questionHighlight}>03 / 05</span>
+                    <div className={styles.questionHighlight} style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                      <button onClick={() => setStep(prev => prev - 1)} className="cursor-hover" style={{ background: "none", border: "none", color: "inherit", display: "flex", alignItems: "center", padding: 0 }}>
+                        <ArrowLeft size={24} />
+                      </button>
+                      <span>03 / 05</span>
+                    </div>
                     <label className={styles.questionLabel}>우리가 함께 해결해야할 문제는 무엇인가요?</label>
                     <input 
                       ref={inputRef}
@@ -318,7 +312,12 @@ export default function GlobalContact() {
                     animate="animate"
                     exit="exit"
                   >
-                    <span className={styles.questionHighlight}>04 / 05</span>
+                    <div className={styles.questionHighlight} style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                      <button onClick={() => setStep(prev => prev - 1)} className="cursor-hover" style={{ background: "none", border: "none", color: "inherit", display: "flex", alignItems: "center", padding: 0 }}>
+                        <ArrowLeft size={24} />
+                      </button>
+                      <span>04 / 05</span>
+                    </div>
                     <label className={styles.questionLabel}>프로젝트의 예산 범위를 선택해 주세요.</label>
                     <div className={styles.budgetGrid}>
                       <button className={`${styles.budgetButton} cursor-hover`} style={{ fontSize: "1.5rem", padding: "1.2rem" }} onClick={() => handleBudgetSelect("100만 원 이하")}>
@@ -344,7 +343,12 @@ export default function GlobalContact() {
                     animate="animate"
                     exit="exit"
                   >
-                    <span className={styles.questionHighlight}>05 / 05</span>
+                    <div className={styles.questionHighlight} style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                      <button onClick={() => setStep(prev => prev - 1)} className="cursor-hover" style={{ background: "none", border: "none", color: "inherit", display: "flex", alignItems: "center", padding: 0 }}>
+                        <ArrowLeft size={24} />
+                      </button>
+                      <span>05 / 05</span>
+                    </div>
                     <label className={styles.questionLabel}>회신받으실 이메일과 연락처를 남겨주세요.</label>
                     <input 
                       ref={inputRef}
