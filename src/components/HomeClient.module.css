@@ -131,12 +131,14 @@
     align-items: flex-start;
     gap: 8vw;
   }
+  .problemStickyLeft {
+    position: sticky;
+    top: 25vh; /* 스크롤 시 이 위치에서 딱 멈춥니다 */
+  }
 }
 
 .problemStickyLeft {
   flex: 1;
-  position: sticky;
-  top: 25vh; /* 스크롤 시 이 위치에서 딱 멈춥니다 */
   z-index: 10;
 }
 
