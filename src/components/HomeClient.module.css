@@ -351,27 +351,31 @@
 .horizontalStickyContainer {
   position: sticky;
   top: 0;
-  height: 100vh; /* 화면에 딱 맞춰 고정 */
+  height: 100vh;
   width: 100%;
   overflow: hidden;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  position: relative;
 }
 
 .horizontalSectionHeader {
-  position: absolute;
-  top: 15vh;
-  left: 5vw;
-  z-index: 10;
+  padding-left: 5vw;
+  margin-bottom: 3rem;
+  flex-shrink: 0;
+}
+
+.capabilitiesTitle {
+  font-size: clamp(2.5rem, 5vw, 4.5rem);
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -0.04em;
 }
 
 .horizontalFlexGroup {
   display: flex;
   align-items: stretch;
   padding-left: 5vw;
-  padding-top: 10vh;
   will-change: transform;
   gap: 3vw;
 }
@@ -390,7 +394,7 @@
 
 @media (max-width: 1024px) {
   .horizontalSectionHeader {
-    top: 10vh;
+    margin-bottom: 2rem;
   }
   .horizontalCard {
     width: 50vw;
@@ -400,10 +404,7 @@
 
 @media (max-width: 768px) {
   .horizontalSectionHeader {
-    top: 8vh;
-  }
-  .horizontalFlexGroup {
-    padding-top: 15vh;
+    margin-bottom: 1.5rem;
   }
   .horizontalCard {
     width: 80vw;
@@ -802,6 +803,69 @@
     gap: 0.2rem;
   }
   .legalRow .divider {
+    display: none;
+  }
+}
+
+/* Anchor Side Navigation */
+.anchorNav {
+  position: fixed;
+  top: 45%;
+  right: 1.5rem;
+  transform: translateY(-50%);
+  z-index: 90;
+  display: flex;
+  flex-direction: column;
+  background: rgba(20, 20, 20, 0.4);
+  backdrop-filter: blur(8px);
+  padding: 1.5rem 1.2rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.05);
+}
+
+.anchorNav ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.anchorNav li {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: rgba(255,255,255,0.3);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: right;
+  position: relative;
+  letter-spacing: -0.02em;
+}
+
+.anchorNav li:hover {
+  color: rgba(255,255,255,0.7);
+}
+
+.anchorActive {
+  color: #fff !important;
+}
+
+.anchorActive::before {
+  content: "";
+  position: absolute;
+  right: -1.2rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background-color: #fff;
+  box-shadow: 0 0 8px rgba(255,255,255,0.8);
+}
+
+@media (max-width: 1024px) {
+  .anchorNav {
     display: none;
   }
 }

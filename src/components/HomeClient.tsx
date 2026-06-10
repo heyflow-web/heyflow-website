@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { motion, useScroll, useTransform, useInView } from "framer-motion";
+import { motion, useScroll, useTransform, useInView, AnimatePresence } from "framer-motion";
 import { ArrowRight, Plus, Minus } from "lucide-react";
 import Link from "next/link";
 import styles from "./HomeClient.module.css";
@@ -15,6 +15,44 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
   const isProblemInView = useInView(problemRef, { margin: "-40% 0px -40% 0px" });
 
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+
+  // 앵커 메뉴 로직
+  const [activeSection, setActiveSection] = useState("");
+  const [showNav, setShowNav] = useState(false);
+  const pricingRef = useRef<HTMLDivElement>(null);
+  const faqRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowNav(window.scrollY > window.innerHeight * 0.8);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          setActiveSection(entry.target.id);
+        }
+      });
+    }, { rootMargin: "-30% 0px -30% 0px", threshold: 0 });
+    
+    if (problemRef.current) observer.observe(problemRef.current);
+    if (pricingRef.current) observer.observe(pricingRef.current);
+    if (faqRef.current) observer.observe(faqRef.current);
+    
+    return () => observer.disconnect();
+  }, []);
+
+  const scrollToSection = (id: string) => {
+    const el = document.getElementById(id);
+    if (el) {
+      const top = el.getBoundingClientRect().top + window.scrollY;
+      window.scrollTo({ top, behavior: "smooth" });
+    }
+  };
 
   // Hero 무한 롤링용 배열 복제 (최소 3세트 이상으로 끊김 없는 루프 보장)
   const marqueeSet = [...projects, ...projects, ...projects];
@@ -54,6 +92,24 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
 
   return (
     <div ref={containerRef} className={styles.homeContainer}>
+      <AnimatePresence>
+        {showNav && (
+          <motion.nav 
+            className={styles.anchorNav}
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 50 }}
+            transition={{ duration: 0.3 }}
+          >
+            <ul>
+              <li className={activeSection === "problem" ? styles.anchorActive : ""} onClick={() => scrollToSection("problem")}>왜 헤이플로우일까요?</li>
+              <li className={activeSection === "pricing" ? styles.anchorActive : ""} onClick={() => scrollToSection("pricing")}>가격안내</li>
+              <li className={activeSection === "faq" ? styles.anchorActive : ""} onClick={() => scrollToSection("faq")}>자주묻는 질문</li>
+            </ul>
+          </motion.nav>
+        )}
+      </AnimatePresence>
+
       {/* Section 01: Hero Section */}
       <section className={styles.heroSection}>
         <div className={styles.heroTopContent}>
@@ -117,7 +173,7 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
       </section>
 
       {/* Section 02: Problem Section (Sticky Layout) */}
-      <section ref={problemRef} className={styles.problemSection}>
+      <section ref={problemRef} id="problem" className={styles.problemSection}>
         <div className={styles.problemStickyContainer}>
           <div className={styles.problemStickyLeft}>
             <motion.h2 
@@ -255,7 +311,7 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
       <section ref={horizontalRef} className={styles.capabilitiesHorizontalSection}>
         <div className={styles.horizontalStickyContainer}>
           <div className={styles.horizontalSectionHeader}>
-            <h2 className={styles.workTitle}>압도적 차별점 5</h2>
+            <h2 className={styles.capabilitiesTitle}>압도적 차별점</h2>
           </div>
           <motion.div style={{ x: horizontalX }} className={styles.horizontalFlexGroup}>
             {[
@@ -316,7 +372,7 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
       </section>
 
       {/* Section 06: Pricing Plan (다크모드 강제) */}
-      <section className={styles.pricingSection}>
+      <section ref={pricingRef} id="pricing" className={styles.pricingSection}>
         <div className={styles.pricingContainer}>
           <motion.div 
             className={styles.pricingHeader}
@@ -366,7 +422,7 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
       </section>
 
       {/* Section 07: FAQ */}
-      <section className={styles.faqSection}>
+      <section ref={faqRef} id="faq" className={styles.faqSection}>
         <div className={styles.faqContainer}>
           <motion.h2 
             className={styles.sectionHeadline}
