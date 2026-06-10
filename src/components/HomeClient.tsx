@@ -7,9 +7,7 @@ import Link from "next/link";
 import dynamic from "next/dynamic";
 import styles from "./HomeClient.module.css";
 import { Project } from "@/lib/notion";
-
-// Lottie Player는 브라우저 전용 모듈이므로 SSR 시 제외
-const Player = dynamic(() => import('@lottiefiles/react-lottie-player').then(mod => mod.Player), { ssr: false });
+import LottiePlayer from "./LottiePlayer";
 
 export default function HomeClient({ projects = [] }: { projects?: Project[] }) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -326,13 +324,7 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
                 transition={{ duration: 0.8, delay: 0.1 }}
               >
                 {project.image.endsWith('.json') ? (
-                  <Player
-                    src={project.image}
-                    autoplay
-                    loop
-                    style={{ width: '100%', height: '100%', display: 'block' }}
-                    rendererSettings={{ preserveAspectRatio: idx === 1 ? 'xMinYMid slice' : 'xMidYMid slice' }}
-                  />
+                  <LottiePlayer src={project.image} alignLeft={idx === 1} />
                 ) : project.image.endsWith('.mp4') || project.image.endsWith('.mov') ? (
                   <video 
                     src={project.image} 

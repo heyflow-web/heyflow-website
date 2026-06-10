@@ -12,6 +12,8 @@
     "@lottiefiles/react-lottie-player": "^3.6.0",
     "@notionhq/client": "^5.22.0",
     "framer-motion": "^12.40.0",
+    "lottie-react": "^2.4.1",
+    "lottie-web": "^5.13.0",
     "lucide-react": "^1.17.0",
     "next": "16.2.7",
     "notion-to-md": "^3.1.9",
