@@ -4,8 +4,12 @@ import { useEffect, useRef, useState } from "react";
 import { motion, useScroll, useTransform, useInView, AnimatePresence } from "framer-motion";
 import { ArrowRight, Plus, Minus } from "lucide-react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import styles from "./HomeClient.module.css";
 import { Project } from "@/lib/notion";
+
+// Lottie Player는 브라우저 전용 모듈이므로 SSR 시 제외
+const Player = dynamic(() => import('@lottiefiles/react-lottie-player').then(mod => mod.Player), { ssr: false });
 
 export default function HomeClient({ projects = [] }: { projects?: Project[] }) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -286,31 +290,31 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
               id: "capa-1",
               title: "End-to-End 전략 수립",
               description: "기획부터 제작까지, 완벽한 원스톱 프로세스",
-              image: "/images/diffrence1.mp4"
+              image: "/images/difference1.json"
             },
             {
               id: "capa-2",
               title: "Zero Server Cost",
               description: "월 호스팅 서버비 0원, 완벽한 소유권 이전",
-              image: "/images/diffrence2.mov"
+              image: "/images/difference2.json"
             },
             {
               id: "capa-3",
               title: "Multi-Channel Sync",
               description: "웹사이트와 제안서(PDF)의 동시 빌드",
-              image: "/images/diffrence3.gif"
+              image: "/images/difference3.json"
             },
             {
               id: "capa-4",
               title: "High-End Visual",
               description: "별도 촬영 없이, 브랜드 무드에 맞는 고감도 비주얼",
-              image: "/images/diffrence1.mp4"
+              image: "/images/difference1.json"
             },
             {
               id: "capa-5",
               title: "Search Engine Sync",
               description: "네이버·구글·AI 검색 상위 노출 구조",
-              image: "/images/diffrence2.mov"
+              image: "/images/difference2.json"
             }
           ].map((project, idx) => (
             <div key={project.id} className={`${styles.capaCard} ${idx % 2 === 1 ? styles.capaReverse : ''}`}>
@@ -321,7 +325,14 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
                 viewport={{ once: true, margin: "-10%" }}
                 transition={{ duration: 0.8, delay: 0.1 }}
               >
-                {project.image.endsWith('.mp4') || project.image.endsWith('.mov') ? (
+                {project.image.endsWith('.json') ? (
+                  <Player
+                    src={project.image}
+                    autoplay
+                    loop
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                  />
+                ) : project.image.endsWith('.mp4') || project.image.endsWith('.mov') ? (
                   <video 
                     src={project.image} 
                     className={styles.projectImage} 
