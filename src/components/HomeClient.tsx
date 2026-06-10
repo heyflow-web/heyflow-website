@@ -60,10 +60,9 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
   // Horizontal Scroll 로직
   const horizontalRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: horizontalRef });
-  const horizontalX = useTransform(scrollYProgress, [0, 1], ["0%", "-40%"]);
+  const horizontalX = useTransform(scrollYProgress, [0, 1], ["0%", "-60%"]);
 
   const isHorizontalInView = useInView(horizontalRef, { margin: "-20% 0px -20% 0px" });
-  const isPricingInView = useInView(pricingRef, { margin: "-20% 0px -20% 0px" });
 
   // Conclusion Text Scroll 로직
   const conclusionRef = useRef<HTMLDivElement>(null);
@@ -75,8 +74,8 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
   const cOpacity = useTransform(cProgress, [0, 0.3, 0.8, 1], [0, 1, 1, 0]);
 
   useEffect(() => {
-    // Problem, Horizontal, Pricing 섹션에서 글로벌 다크모드 적용 (CSS transition으로 페이드인 효과 연출)
-    if (isProblemInView || isHorizontalInView || isPricingInView) {
+    // Problem, Horizontal 섹션에서 글로벌 다크모드 적용 (CSS transition으로 페이드인 효과 연출)
+    if (isProblemInView || isHorizontalInView) {
       document.body.classList.add("dark-theme");
     } else {
       document.body.classList.remove("dark-theme");
@@ -85,7 +84,7 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
     return () => {
       document.body.classList.remove("dark-theme");
     };
-  }, [isProblemInView, isHorizontalInView, isPricingInView]);
+  }, [isProblemInView, isHorizontalInView]);
 
   const toggleFaq = (index: number) => {
     setOpenFaq(openFaq === index ? null : index);
