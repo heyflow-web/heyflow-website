@@ -82,9 +82,12 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
   const aboutScale = useTransform(aboutProgress, [0, 1], [0.6, 1.2]);
   const aboutOpacity = useTransform(aboutProgress, [0, 0.5, 1], [0, 1, 1]);
 
+  // Pricing Section 다크모드용 InView
+  const isPricingInView = useInView(pricingRef, { margin: "-40% 0px -40% 0px" });
+
   useEffect(() => {
-    // Problem, Horizontal 섹션에서 글로벌 다크모드 적용 (CSS transition으로 페이드인 효과 연출)
-    if (isProblemInView || isHorizontalInView) {
+    // Problem, Horizontal, Pricing 섹션에서 글로벌 다크모드 적용
+    if (isProblemInView || isHorizontalInView || isPricingInView) {
       document.body.classList.add("dark-theme");
     } else {
       document.body.classList.remove("dark-theme");
@@ -93,7 +96,7 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
     return () => {
       document.body.classList.remove("dark-theme");
     };
-  }, [isProblemInView, isHorizontalInView]);
+  }, [isProblemInView, isHorizontalInView, isPricingInView]);
 
   const toggleFaq = (index: number) => {
     setOpenFaq(openFaq === index ? null : index);
@@ -313,7 +316,7 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
       <section ref={horizontalRef} className={styles.capabilitiesHorizontalSection}>
         <div className={styles.horizontalStickyContainer}>
           <div className={styles.horizontalSectionHeader}>
-            <h2 className={styles.capabilitiesTitle}>압도적 차별점</h2>
+            <h2 className={styles.capabilitiesTitle}>우리의 강점</h2>
           </div>
           <motion.div style={{ x: horizontalX }} className={styles.horizontalFlexGroup}>
             {[
@@ -349,7 +352,7 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
             viewport={{ once: true, margin: "-20%" }}
             transition={{ duration: 1 }}
           >
-            이런 비즈니스라면,<br/>헤이플로우가 가장 확실한 답안지입니다.
+            이런분께 저희를 추천합니다.
           </motion.h2>
           
           <div className={styles.idealList}>

@@ -1,0 +1,56 @@
+@import "tailwindcss";
+
+@theme {
+  --color-warm-beige: #FDFBF7;
+  --color-soft-terracotta: #E07A5F;
+  --color-olive-green: #81B29A;
+  --color-cozy-white: #FFFFFF;
+  --color-dark-gray: #333333;
+  --color-soft-brown: #8D7B68;
+  
+  --font-sans: var(--font-pretendard), Arial, Helvetica, sans-serif;
+  
+  --shadow-soft: 0 10px 40px -10px rgba(141, 123, 104, 0.15);
+}
+
+:root {
+  --background: var(--color-warm-beige);
+  --foreground: var(--color-dark-gray);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #2C2825;
+    --foreground: #FDFBF7;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+}
+
+/* Custom Scrollbar for cozy feel */
+::-webkit-scrollbar {
+  width: 10px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-warm-beige);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-soft-brown);
+  border-radius: 5px;
+}
+
+/* Base Utility Classes for Typography */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+p {
+  line-height: 1.6;
+}

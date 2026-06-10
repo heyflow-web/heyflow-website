@@ -208,7 +208,7 @@
 .aboutSection {
   display: flex;
   align-items: center;
-  padding: 15vh 5vw 5vh 5vw;
+  padding: 15vh 5vw 30vh 5vw;
   background-color: var(--bg);
   transition: background-color 0.8s ease;
 }
@@ -504,9 +504,8 @@
 /* Section 06: Pricing Plan (다크모드 강제 고정) */
 .pricingSection {
   padding: 15vh 5vw;
-  /* 완전히 독립적인 다크 테마 적용 */
-  background-color: #000;
-  color: #fff;
+  background-color: var(--bg);
+  transition: background-color 0.8s ease;
 }
 
 .pricingContainer {
