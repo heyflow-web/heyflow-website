@@ -223,58 +223,10 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
         </motion.h2>
       </section>
 
-      {/* Section 03: Solution & Philosophy */}
-      <section className={styles.aboutSection}>
-        <div className={styles.aboutContent}>
-          <motion.h2 
-            className={styles.aboutHeadline}
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-20%" }}
-            transition={{ duration: 1 }}
-          >
-            잘 만든 웹사이트와<br />
-            잘 되는 웹사이트는 다릅니다.
-          </motion.h2>
-          
-          <motion.p 
-            className={styles.aboutDesc}
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-20%" }}
-            transition={{ duration: 1, delay: 0.2 }}
-          >
-            검색되고, 신뢰를 주고, 실제로 고객을 불러오는 것.<br />
-            그게 잘 되는 웹사이트입니다.
-          </motion.p>
-          
-          <motion.p 
-            className={styles.aboutDesc}
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-20%" }}
-            transition={{ duration: 1, delay: 0.4 }}
-          >
-            헤이플로우는 웹어워드 코리아 2회 수상의 비주얼 안목으로 사용자의 시선이 머무는 동선을 설계하고,<br />
-            동시에 네이버·구글·AI 검색 상위에 노출되는 구조로 빌딩합니다.
-          </motion.p>
-
-          <motion.p 
-            className={styles.aboutDesc}
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-20%" }}
-            transition={{ duration: 1, delay: 0.6 }}
-          >
-            눈에 보이는 격조, 눈에 보이지 않는 생존 기술.
-          </motion.p>
-        </div>
-      </section>
-
-      {/* Selected Work (프로젝트 갤러리) */}
+      {/* Selected Work (프로젝트 갤러리) -> Difference 로 변경 */}
       <section className={styles.workSection}>
         <div className={styles.workHeader}>
-          <h2 className={styles.workTitle}>Selected Work.</h2>
+          <h2 className={styles.workTitle}>Difference.</h2>
           <p className={styles.workSubtitle}>우리가 설계한 시선의 흐름들</p>
         </div>
 
@@ -327,6 +279,24 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
           </Link>
         </div>
       </section>
+
+      {/* Section 03: Solution & Philosophy (타이틀만 남기고 압도적 차별점 전으로 이동) */}
+      <section className={styles.aboutSection}>
+        <div className={styles.aboutContent}>
+          <motion.h2 
+            className={styles.aboutHeadline}
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-20%" }}
+            transition={{ duration: 1 }}
+          >
+            잘 만든 웹사이트와<br />
+            잘 되는 웹사이트는 다릅니다.
+          </motion.h2>
+        </div>
+      </section>
+
+
 
       {/* Section 04: Core Capabilities (Horizontal Scroll) */}
       <section ref={horizontalRef} className={styles.capabilitiesHorizontalSection}>

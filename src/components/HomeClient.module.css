@@ -206,10 +206,9 @@
 
 /* Section 03: About / Solution */
 .aboutSection {
-  min-height: 100vh;
   display: flex;
   align-items: center;
-  padding: 15vh 5vw;
+  padding: 15vh 5vw 5vh 5vw;
   background-color: var(--bg);
   transition: background-color 0.8s ease;
 }
@@ -291,7 +290,7 @@
 
 .imageWrapper {
   width: 100%;
-  aspect-ratio: 4/3;
+  aspect-ratio: 16/9;
   overflow: hidden;
   background-color: var(--border);
   position: relative;
