@@ -142,7 +142,7 @@ a {
 
 .gallery {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 400px), 1fr));
   gap: 4vw 3vw;
 }
 
@@ -233,4 +233,13 @@ a {
 
 .project-card:hover .project-arrow {
   transform: translateX(5px) translateY(-5px);
+}
+
+@media (max-width: 768px) {
+  .navbar {
+    padding: 0 8vw !important;
+  }
+  .container {
+    padding: 10vh 10vw !important;
+  }
 }

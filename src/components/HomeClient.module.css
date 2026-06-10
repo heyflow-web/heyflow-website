@@ -857,7 +857,7 @@
 /* Mobile Typography & Spacing Fixes */
 @media (max-width: 768px) {
   .problemSection, .conclusionSection, .aboutSection, .workSection, .statsSection, .idealSection, .pricingSection, .faqSection {
-    padding: 10vh 5vw !important;
+    padding: 10vh 10vw !important;
   }
   .heroTitle, .sectionTitle, .conclusionText {
     font-size: clamp(2rem, 8vw, 2.5rem) !important;

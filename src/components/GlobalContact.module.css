@@ -255,4 +255,10 @@
     right: 1.5rem;
     padding: 1rem 2rem;
   }
+  .modalHeader {
+    padding: 2.5rem 10vw !important;
+  }
+  .modalBody {
+    padding: 20px 10vw !important;
+  }
 }
