@@ -308,13 +308,13 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
               id: "capa-4",
               title: "High-End Visual",
               description: "별도 촬영 없이, 브랜드 무드에 맞는 고감도 비주얼",
-              image: "/images/difference1.json"
+              image: "/images/difference4.json"
             },
             {
               id: "capa-5",
               title: "Search Engine Sync",
               description: "네이버·구글·AI 검색 상위 노출 구조",
-              image: "/images/difference2.json"
+              image: "/images/difference5.json"
             }
           ].map((project, idx) => (
             <div key={project.id} className={`${styles.capaCard} ${idx % 2 === 1 ? styles.capaReverse : ''}`}>
@@ -330,8 +330,8 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
                     src={project.image}
                     autoplay
                     loop
-                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                    rendererSettings={{ preserveAspectRatio: 'xMidYMid slice' }}
+                    style={{ width: '100%', height: '100%', display: 'block' }}
+                    rendererSettings={{ preserveAspectRatio: idx === 1 ? 'xMinYMid slice' : 'xMidYMid slice' }}
                   />
                 ) : project.image.endsWith('.mp4') || project.image.endsWith('.mov') ? (
                   <video 
