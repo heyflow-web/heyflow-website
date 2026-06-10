@@ -1,79 +1,82 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import styles from "./Section2.module.css";
 
 export default function Section2() {
   const [scrollY, setScrollY] = useState(0);
+  const sectionRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     const handleScroll = () => {
-      setScrollY(window.scrollY);
+      if (!sectionRef.current) return;
+      const rect = sectionRef.current.getBoundingClientRect();
+      // Only track scroll if section is in or near viewport
+      if (rect.top < window.innerHeight && rect.bottom > 0) {
+        setScrollY(window.scrollY - rect.top);
+      }
     };
-
-    window.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   return (
-    <section id="section2" className="relative w-full py-32 bg-[#FDFBF7] overflow-hidden">
-      <div className="container mx-auto px-6 max-w-6xl">
-        <div className="flex flex-col lg:flex-row items-center gap-16">
-          {/* Left: Image with Parallax */}
-          <div className="w-full lg:w-1/2 relative" style={{ transform: `translateY(${scrollY * 0.1 - 50}px)` }}>
-            <div className={`relative w-full aspect-[4/5] rounded-3xl overflow-hidden shadow-[0_20px_60px_-15px_rgba(141,123,104,0.3)] ${styles.imageWrapper}`}>
-              <Image 
-                src="/images/vet_profile.png" 
-                alt="멍냥동물병원 원장님" 
-                fill
-                className="object-cover"
-              />
-            </div>
-            <div className="absolute -bottom-8 -right-8 w-48 h-48 bg-[#FDFBF7] rounded-full flex items-center justify-center p-2 shadow-sm border border-[#E07A5F]/20">
-              <svg viewBox="0 0 100 100" className="w-full h-full text-[#E07A5F] animate-spin-slow">
-                <path id="curve" d="M 50, 50 m -35, 0 a 35,35 0 1,1 70,0 a 35,35 0 1,1 -70,0" fill="transparent"/>
-                <text className="text-[12px] font-bold tracking-widest" fill="currentColor">
-                  <textPath href="#curve" startOffset="0%">
-                    MUNGNYANG ANIMAL CLINIC • SINCE 2026 • 
-                  </textPath>
-                </text>
-              </svg>
-              <div className="absolute inset-0 flex items-center justify-center text-3xl">🐾</div>
-            </div>
+    <section id="section2" ref={sectionRef} className="w-full py-40 bg-[#F8F5F0] relative overflow-hidden">
+      <div className="container mx-auto px-6 max-w-6xl relative z-10">
+        
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
+          
+          {/* Left: Thin Line Title area */}
+          <div className="lg:col-span-4 flex flex-col justify-center border-t border-b border-[#EAE6DF] py-12 relative">
+            <h3 className="font-serif-title tracking-widest text-[#C9A66B] mb-6">ABOUT US</h3>
+            <h2 className="text-4xl md:text-5xl font-bold text-[#1A1310] leading-snug">
+              어느 날,<br/>
+              문득 아플 때
+            </h2>
+            <div 
+              className="absolute left-0 w-px bg-[#2C1E16] opacity-20"
+              style={{ top: 0, height: '100%', transform: `translateY(${scrollY * 0.1}px)` }}
+            />
           </div>
 
-          {/* Right: Text with Parallax */}
-          <div className="w-full lg:w-1/2" style={{ transform: `translateY(${-scrollY * 0.05 + 50}px)` }}>
-            <h2 className="text-3xl lg:text-4xl font-bold text-[#333333] mb-8 leading-snug">
-              "말 못 하는 아이들의 눈빛을 <br className="hidden lg:block"/>읽는 일은 기술이 아니라<br/> <span className="text-[#81B29A]">관심</span>에서 시작됩니다."
-            </h2>
+          {/* Right: Content & Image Parallax */}
+          <div className="lg:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
             
-            <div className="space-y-6 text-[#8D7B68] text-lg leading-relaxed">
-              <p>
-                병원의 문을 열고 들어오는 순간부터 아이들은 긴장합니다. 
-                낯선 냄새, 차가운 바닥, 그리고 불안해하는 보호자의 마음까지 아이들은 온몸으로 느끼죠.
+            <div className="space-y-6 order-2 md:order-1">
+              <p className="text-xl font-bold text-[#2C1E16]">
+                가장 먼저 생각나는<br/>
+                따뜻하고 전문적인 공간이길 바랍니다.
               </p>
-              <p>
-                그래서 저희 멍냥동물병원은 서두르지 않습니다. 
-                충분히 냄새를 맡게 해주고, 조심스럽게 인사를 건네며, 
-                아이가 스스로 마음을 열 때까지 기다립니다.
+              <div className="w-8 h-px bg-[#C9A66B]" />
+              <p className="text-[#3E2723] leading-relaxed font-light">
+                말 못 하는 작은 아이들이 보내는 미세한 신호들.<br/>
+                우리는 그 작은 목소리에 귀 기울이고, 보호자님의 불안한 마음까지 섬세하게 어루만집니다.<br/><br/>
+                첨단 의료 장비와 수년간의 임상 경험을 바탕으로,
+                정확한 진단과 꼭 필요한 치료만을 제안합니다.
+                가족의 마음으로 진심을 다하는 곳, 멍냥동물병원입니다.
               </p>
-              <p>
-                진심은 언제나 통한다는 것을 믿기에, 
-                우리는 오늘도 가장 낮은 자세로 아이들과 눈을 맞춥니다.
-              </p>
+              <div className="pt-8">
+                <p className="font-serif-title tracking-widest text-[#1A1310] font-bold">REPRESENTATIVE DIRECTOR</p>
+                <p className="text-[#C9A66B] font-bold mt-1">Dr. Kim Mung Nyang</p>
+              </div>
             </div>
 
-            <div className="mt-12 flex items-center gap-4">
-              <div className="font-writing text-3xl text-[#333333] transform -rotate-2">
-                대표원장 이진심
-              </div>
-              <div className="w-20 h-px bg-[#8D7B68]/30"></div>
+            <div className="relative aspect-[3/4] w-full order-1 md:order-2 overflow-hidden bg-[#EAE6DF]">
+              <Image 
+                src="/images/doctor.png" 
+                alt="대표원장" 
+                fill 
+                className="object-cover grayscale hover:grayscale-0 transition-all duration-700"
+                style={{ transform: `translateY(${scrollY * 0.05}px) scale(1.05)` }}
+              />
             </div>
+
           </div>
         </div>
       </div>
+      
+      {/* Background Decorative Line */}
+      <div className="absolute top-0 right-1/3 w-px h-full bg-[#EAE6DF]" />
     </section>
   );
 }

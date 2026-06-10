@@ -238,13 +238,15 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
       {/* Selected Work (프로젝트 갤러리) -> Difference 로 변경 */}
       <section className={styles.workSection}>
         <div className={styles.workHeader}>
-          <div className={styles.workTitle}>
-            <div style={{ overflow: "hidden" }}>
-              <motion.div initial={{ y: "120%", opacity: 0 }} whileInView={{ y: 0, opacity: 1 }} viewport={{ once: true }} transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}>
-                Difference.
-              </motion.div>
-            </div>
-          </div>
+          <motion.h2 
+            className={styles.workTitle}
+            initial={{ y: 40, opacity: 0 }} 
+            whileInView={{ y: 0, opacity: 1 }} 
+            viewport={{ once: true }} 
+            transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+          >
+            Difference.
+          </motion.h2>
           <p className={styles.workSubtitle}>우리가 설계한 시선의 흐름들</p>
         </div>
 
@@ -322,13 +324,15 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
       <section ref={horizontalRef} className={styles.capabilitiesHorizontalSection}>
         <div className={styles.horizontalStickyContainer}>
           <div className={styles.horizontalSectionHeader}>
-            <div className={styles.capabilitiesTitle}>
-              <div style={{ overflow: "hidden" }}>
-                <motion.div initial={{ y: "120%", opacity: 0 }} whileInView={{ y: 0, opacity: 1 }} viewport={{ once: true }} transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}>
-                  우리의 강점
-                </motion.div>
-              </div>
-            </div>
+            <motion.h2 
+              className={styles.capabilitiesTitle}
+              initial={{ y: 40, opacity: 0 }} 
+              whileInView={{ y: 0, opacity: 1 }} 
+              viewport={{ once: true }} 
+              transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+            >
+              우리의 강점
+            </motion.h2>
           </div>
           <motion.div style={{ x: horizontalX }} className={styles.horizontalFlexGroup}>
             {[
@@ -357,13 +361,15 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
       {/* Section 05: Ideal Clients */}
       <section className={styles.idealSection}>
         <div className={styles.idealContainer}>
-          <div className={styles.sectionHeadline}>
-            <div style={{ overflow: "hidden" }}>
-              <motion.div initial={{ y: "120%", opacity: 0 }} whileInView={{ y: 0, opacity: 1 }} viewport={{ once: true }} transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}>
-                이런분께 저희를 추천합니다.
-              </motion.div>
-            </div>
-          </div>
+          <motion.h2 
+            className={styles.sectionHeadline}
+            initial={{ y: 40, opacity: 0 }} 
+            whileInView={{ y: 0, opacity: 1 }} 
+            viewport={{ once: true }} 
+            transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+          >
+            이런분께 저희를 추천합니다.
+          </motion.h2>
           
           <div className={styles.idealList}>
             {[
@@ -400,13 +406,15 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
         />
         <div className={styles.pricingContainer}>
           <div className={styles.pricingHeader}>
-            <div className={styles.sectionHeadlineCenter}>
-              <div style={{ overflow: "hidden" }}>
-                <motion.div initial={{ y: "120%", opacity: 0 }} whileInView={{ y: 0, opacity: 1 }} viewport={{ once: true }} transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}>
-                  Pricing Plan
-                </motion.div>
-              </div>
-            </div>
+            <motion.h2 
+              className={styles.sectionHeadlineCenter}
+              initial={{ y: 40, opacity: 0 }} 
+              whileInView={{ y: 0, opacity: 1 }} 
+              viewport={{ once: true }} 
+              transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+            >
+              Pricing Plan
+            </motion.h2>
             <motion.p 
               className={styles.pricingSubtitle}
               initial={{ opacity: 0, y: 20 }}
@@ -457,13 +465,15 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
       {/* Section 07: FAQ */}
       <section ref={faqRef} id="faq" className={styles.faqSection}>
         <div className={styles.faqContainer}>
-          <div className={styles.sectionHeadline}>
-            <div style={{ overflow: "hidden" }}>
-              <motion.div initial={{ y: "120%", opacity: 0 }} whileInView={{ y: 0, opacity: 1 }} viewport={{ once: true }} transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}>
-                FAQ
-              </motion.div>
-            </div>
-          </div>
+          <motion.h2 
+            className={styles.sectionHeadline}
+            initial={{ y: 40, opacity: 0 }} 
+            whileInView={{ y: 0, opacity: 1 }} 
+            viewport={{ once: true }} 
+            transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+          >
+            FAQ
+          </motion.h2>
           
           <div className={styles.faqList}>
             {[
@@ -500,18 +510,14 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
       {/* Section 08: Contact & Footer */}
       <footer className={styles.footerSection}>
         <div className={styles.contactContainer}>
-          <div className={styles.contactTitle}>
-            <div style={{ overflow: "hidden" }}>
-              <motion.div initial={{ y: "120%", opacity: 0 }} whileInView={{ y: 0, opacity: 1 }} viewport={{ once: true }} transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}>
-                잘 되는 비즈니스엔,
-              </motion.div>
-            </div>
-            <div style={{ overflow: "hidden" }}>
-              <motion.div initial={{ y: "120%", opacity: 0 }} whileInView={{ y: 0, opacity: 1 }} viewport={{ once: true }} transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1], delay: 0.15 }}>
-                그에 맞는 웹사이트가 있어야 합니다.
-              </motion.div>
-            </div>
-          </div>
+          <h2 className={styles.contactTitle}>
+            <motion.div initial={{ y: 40, opacity: 0 }} whileInView={{ y: 0, opacity: 1 }} viewport={{ once: true }} transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}>
+              잘 되는 비즈니스엔,
+            </motion.div>
+            <motion.div initial={{ y: 40, opacity: 0 }} whileInView={{ y: 0, opacity: 1 }} viewport={{ once: true }} transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1], delay: 0.15 }}>
+              그에 맞는 웹사이트가 있어야 합니다.
+            </motion.div>
+          </h2>
           <p className={styles.contactDesc}>
             몇 가지 질문에 답해주시면 24시간 이내에 디렉터가 직접 연락드립니다.
           </p>

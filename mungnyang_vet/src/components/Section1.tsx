@@ -12,40 +12,43 @@ export default function Section1() {
   }, []);
 
   return (
-    <section className="relative w-full h-screen flex items-center justify-center overflow-hidden">
+    <section className="relative w-full h-screen flex items-center justify-center overflow-hidden bg-[#2C1E16]">
       {/* Background Image */}
       <div className={`absolute inset-0 z-0 ${styles.bgImageContainer}`}>
         <Image 
           src="/images/hero_bg.png" 
-          alt="따뜻한 로비에서 아이들을 안아주는 원장님" 
+          alt="프리미엄 멍냥 동물병원" 
           fill
           priority
-          className="object-cover"
+          className="object-cover opacity-60 mix-blend-luminosity"
         />
-        {/* Glow Effect Overlay */}
-        <div className={`absolute inset-0 bg-gradient-to-t from-[#FDFBF7] via-[#FDFBF7]/50 to-transparent ${mounted ? styles.glowActive : styles.glowInactive}`} />
+        {/* Dark Gradient Overlay */}
+        <div className={`absolute inset-0 bg-gradient-to-t from-[#1A1310] via-transparent to-[#1A1310]/50 ${mounted ? styles.glowActive : styles.glowInactive}`} />
       </div>
 
       {/* Content */}
       <div className="relative z-10 container mx-auto px-6 mt-32 flex flex-col items-center text-center">
-        {/* Handwriting SVG */}
-        <div className="mb-6 h-12 flex justify-center items-center">
-          <svg viewBox="0 0 400 50" className={styles.handwritingSvg}>
-            <text x="50%" y="50%" dominantBaseline="middle" textAnchor="middle" className={styles.handwritingText}>
-              안녕하세요, 멍냥동물병원입니다.
-            </text>
-          </svg>
-        </div>
+        <h2 className={`font-serif-title text-[#C9A66B] text-xl md:text-2xl tracking-[0.2em] mb-4 ${mounted ? 'animate-fade-in-up' : 'opacity-0'}`} style={{ animationDelay: '0.5s' }}>
+          MUNGNYANG CLINIC
+        </h2>
+        
+        <div className={`w-px h-16 bg-gradient-to-b from-[#C9A66B] to-transparent mb-8 ${mounted ? styles.lineGrow : 'opacity-0'}`} style={{ animationDelay: '1s' }} />
 
-        <h1 className={`text-4xl md:text-5xl lg:text-6xl font-bold text-[#333333] mb-6 leading-tight ${mounted ? styles.fadeInUp : 'opacity-0'}`} style={{ animationDelay: '1s' }}>
-          겁이 많은 아이도,<br className="hidden md:block"/> 걱정 가득한 보호자도<br />
-          <span className="text-[#E07A5F]">편안하게 쉬어갈 수 있도록.</span>
+        <h1 className={`text-4xl md:text-6xl lg:text-7xl font-bold text-[#F8F5F0] mb-8 leading-tight tracking-tight ${mounted ? 'animate-fade-in-up' : 'opacity-0'}`} style={{ animationDelay: '1.2s' }}>
+          진심을 다하는,<br className="hidden md:block"/> 
+          <span className="text-[#E5CD9C]">프리미엄 주치의</span>
         </h1>
 
-        <p className={`text-lg md:text-xl text-[#8D7B68] max-w-2xl mt-4 ${mounted ? styles.fadeInUp : 'opacity-0'}`} style={{ animationDelay: '1.2s' }}>
+        <p className={`text-lg md:text-xl text-[#EAE6DF] font-light max-w-2xl mt-4 tracking-wide ${mounted ? 'animate-fade-in-up' : 'opacity-0'}`} style={{ animationDelay: '1.5s' }}>
           말 못 하는 아이들의 눈빛을 읽고, 보호자의 불안을 덜어주는<br/>
-          가장 따뜻한 주치의가 되겠습니다.
+          가장 따뜻하고 전문적인 케어 시스템
         </p>
+      </div>
+      
+      {/* Scroll Indicator */}
+      <div className="absolute bottom-12 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 z-10">
+        <span className="text-[#C9A66B] font-serif-title text-xs tracking-widest uppercase">Scroll</span>
+        <div className={styles.scrollLine}></div>
       </div>
     </section>
   );

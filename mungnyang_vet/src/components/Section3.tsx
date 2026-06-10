@@ -1,95 +1,55 @@
-"use client";
-
-import { useRef, useState } from "react";
 import Image from "next/image";
-import styles from "./Section3.module.css";
 
-const rooms = [
-  {
-    id: 1,
-    image: "/images/room1.png",
-    title: "스트레스 없는 고양이 전용 대기실",
-    desc: "강아지 친구들과 마주치지 않도록 분리된 안락한 공간입니다.",
-  },
-  {
-    id: 2,
-    image: "/images/room2.png",
-    title: "보호자와 함께 머무는 회복실",
-    desc: "아이가 깨어날 때 가장 먼저 보호자의 냄새를 맡을 수 있습니다.",
-  },
-  {
-    id: 3,
-    image: "/images/room3.png",
-    title: "햇살이 따뜻하게 드는 진료실",
-    desc: "차가운 스텐레스 대신 따뜻한 나무 테이블에서 진료를 시작합니다.",
-  },
+const spaces = [
+  { id: 1, title: "RECEPTION", subtitle: "따뜻한 마중이 있는 대기실", img: "/images/space_1.png" },
+  { id: 2, title: "CLINIC", subtitle: "햇살이 드는 진료실", img: "/images/space_2.png" },
+  { id: 3, title: "RECOVERY", subtitle: "안정감을 주는 회복실", img: "/images/space_3.png" },
 ];
 
 export default function Section3() {
-  const sliderRef = useRef<HTMLDivElement>(null);
-  const [isDragging, setIsDragging] = useState(false);
-  const [startX, setStartX] = useState(0);
-  const [scrollLeft, setScrollLeft] = useState(0);
-
-  const onPointerDown = (e: React.PointerEvent) => {
-    if (!sliderRef.current) return;
-    setIsDragging(true);
-    setStartX(e.pageX - sliderRef.current.offsetLeft);
-    setScrollLeft(sliderRef.current.scrollLeft);
-    // Remove smooth scroll behavior during drag
-    sliderRef.current.style.scrollBehavior = "auto";
-  };
-
-  const onPointerMove = (e: React.PointerEvent) => {
-    if (!isDragging || !sliderRef.current) return;
-    e.preventDefault();
-    const x = e.pageX - sliderRef.current.offsetLeft;
-    const walk = (x - startX) * 2; // Scroll speed multiplier
-    sliderRef.current.scrollLeft = scrollLeft - walk;
-  };
-
-  const onPointerUp = () => {
-    setIsDragging(false);
-    if (sliderRef.current) {
-      // Restore smooth behavior for snap if needed
-      sliderRef.current.style.scrollBehavior = "smooth";
-    }
-  };
-
   return (
-    <section id="section3" className="w-full py-32 bg-[#FFFFFF] overflow-hidden">
-      <div className="container mx-auto px-6 max-w-6xl mb-12">
-        <h2 className="text-3xl lg:text-4xl font-bold text-[#333333]">
-          다정한 공간 둘러보기
-        </h2>
-        <p className="text-[#8D7B68] mt-4 text-lg">
-          우리 병원은 이렇게 아늑하고 안전한 곳이에요. <br className="hidden md:block"/>
-          마우스로 사진을 밀어보세요.
-        </p>
-      </div>
-
-      <div 
-        ref={sliderRef}
-        className={`flex gap-6 overflow-x-auto px-6 md:px-20 pb-16 pt-4 ${styles.sliderContainer} ${isDragging ? styles.dragging : ''}`}
-        onPointerDown={onPointerDown}
-        onPointerMove={onPointerMove}
-        onPointerUp={onPointerUp}
-        onPointerLeave={onPointerUp}
-      >
-        {rooms.map((room) => (
-          <div key={room.id} className={`flex-shrink-0 w-[85vw] md:w-[60vw] lg:w-[45vw] ${styles.slideItem}`}>
-            <div className="relative w-full aspect-[4/3] rounded-3xl overflow-hidden shadow-soft mb-6 cursor-grab active:cursor-grabbing">
-              <Image 
-                src={room.image} 
-                alt={room.title} 
-                fill 
-                className="object-cover select-none pointer-events-none" 
-              />
-            </div>
-            <h3 className="text-2xl font-bold text-[#333333] mb-2">{room.title}</h3>
-            <p className="text-[#8D7B68]">{room.desc}</p>
+    <section id="section3" className="w-full py-32 bg-[#F8F5F0] border-t border-[#EAE6DF]">
+      <div className="container mx-auto px-6 max-w-7xl">
+        <div className="flex flex-col md:flex-row justify-between items-end mb-16 border-b border-[#EAE6DF] pb-8">
+          <div>
+            <h3 className="font-serif-title tracking-widest text-[#C9A66B] mb-4">FACILITIES</h3>
+            <h2 className="text-3xl md:text-4xl font-bold text-[#1A1310]">
+              두려움을 지우는<br/>다정한 공간
+            </h2>
           </div>
-        ))}
+          <p className="text-[#3E2723] mt-6 md:mt-0 max-w-md md:text-right font-light">
+            차가운 백색소음 대신 따뜻한 햇살과 부드러운 음악이 흐릅니다.<br/>
+            아이들이 본능적으로 안심할 수 있는 공간을 설계했습니다.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {spaces.map((space) => (
+            <div key={space.id} className="group cursor-pointer">
+              <div className="relative aspect-[3/4] w-full overflow-hidden mb-6 bg-[#EAE6DF]">
+                <Image 
+                  src={space.img} 
+                  alt={space.subtitle} 
+                  fill 
+                  className="object-cover grayscale group-hover:grayscale-0 transition-all duration-700 group-hover:scale-105" 
+                />
+                {/* Hover overlay */}
+                <div className="absolute inset-0 bg-[#2C1E16]/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center">
+                  <span className="text-[#F8F5F0] border border-[#F8F5F0] px-6 py-2 uppercase tracking-widest text-sm font-serif-title">View</span>
+                </div>
+              </div>
+              <div className="flex items-center justify-between border-b border-[#EAE6DF] pb-4 group-hover:border-[#C9A66B] transition-colors duration-300">
+                <div>
+                  <h4 className="font-serif-title text-[#1A1310] text-xl font-bold tracking-wider">{space.title}</h4>
+                  <p className="text-[#8D7B68] text-sm mt-1">{space.subtitle}</p>
+                </div>
+                <div className="text-[#C9A66B] opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  →
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </section>
   );
