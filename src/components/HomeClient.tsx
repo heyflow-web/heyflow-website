@@ -236,19 +236,19 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
               id: "work-1",
               title: "감도 높은 비주얼",
               description: "웹어워드 코리아 2회 수상의 안목으로 사용자의 시선을 사로잡습니다.",
-              image: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=800&auto=format&fit=crop"
+              image: "/images/diffrence1.mp4"
             },
             {
               id: "work-2",
               title: "검색엔진 최적화",
               description: "네이버·구글·AI 검색 상위에 노출되는 구조로 빌딩합니다.",
-              image: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=800&auto=format&fit=crop"
+              image: "/images/diffrence2.mov"
             },
             {
               id: "work-3",
               title: "원스톱 프로세스",
               description: "기획·카피·디자인·배포까지, 한 번에 완성합니다.",
-              image: "https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?q=80&w=800&auto=format&fit=crop"
+              image: "/images/diffrence3.gif"
             }
           ].map((project, idx) => (
             <div key={project.id} className={styles.projectCard}>
@@ -260,8 +260,19 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
                 style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}
               >
                 <div className={styles.imageWrapper}>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={project.image} alt={project.title} className={styles.projectImage} />
+                  {project.image.endsWith('.mp4') || project.image.endsWith('.mov') ? (
+                    <video 
+                      src={project.image} 
+                      className={styles.projectImage} 
+                      autoPlay 
+                      loop 
+                      muted 
+                      playsInline 
+                    />
+                  ) : (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img src={project.image} alt={project.title} className={styles.projectImage} />
+                  )}
                 </div>
                 <div className={styles.projectInfo}>
                   <span className={styles.projectNumber}>0{idx + 1}</span>
