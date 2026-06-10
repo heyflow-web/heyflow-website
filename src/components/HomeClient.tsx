@@ -57,8 +57,13 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
   // Hero 무한 롤링용 배열 복제 (최소 3세트 이상으로 끊김 없는 루프 보장)
   const marqueeSet = [...projects, ...projects, ...projects];
 
-  // Horizontal Scroll 로직 (제거됨)
-
+  // Difference Text Scroll 로직
+  const statsRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress: statsProgress } = useScroll({
+    target: statsRef,
+    offset: ["start end", "end start"]
+  });
+  const diffX = useTransform(statsProgress, [0, 1], ["-5%", "25%"]);
   // Conclusion Text Scroll 로직
   const conclusionRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress: cProgress } = useScroll({
@@ -231,17 +236,19 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
       </section>
 
       {/* Section 03: Difference (Big Numbers) */}
-      <section className={styles.statsSection}>
+      <section ref={statsRef} className={styles.statsSection}>
         <div className={styles.workHeader}>
-          <motion.h2 
-            className={styles.workTitle}
-            initial={{ y: 40, opacity: 0 }} 
-            whileInView={{ y: 0, opacity: 1 }} 
-            viewport={{ once: true }} 
-            transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
-          >
-            Difference.
-          </motion.h2>
+          <motion.div style={{ x: diffX }}>
+            <motion.h2 
+              className={styles.workTitle}
+              initial={{ y: 40, opacity: 0 }} 
+              whileInView={{ y: 0, opacity: 1 }} 
+              viewport={{ once: true }} 
+              transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+            >
+              Difference.
+            </motion.h2>
+          </motion.div>
           <p className={styles.workSubtitle}>우리가 설계한 시선의 흐름들</p>
         </div>
 
@@ -279,11 +286,11 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
         </div>
       </section>
 
-      {/* Section 05: Core Capabilities (Magazine Layout) */}
+      {/* Section 05: Core Capabilities (Side-by-side Layout) */}
       <section className={styles.workSection}>
         <div className={styles.workHeader}>
           <motion.h2 
-            className={styles.capabilitiesTitle}
+            className={styles.workTitle}
             initial={{ y: 40, opacity: 0 }} 
             whileInView={{ y: 0, opacity: 1 }} 
             viewport={{ once: true }} 
@@ -293,7 +300,7 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
           </motion.h2>
         </div>
 
-        <div className={styles.workGrid}>
+        <div className={styles.capaList}>
           {[
             {
               id: "capa-1",
@@ -326,34 +333,39 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
               image: "/images/diffrence2.mov"
             }
           ].map((project, idx) => (
-            <div key={project.id} className={styles.projectCard}>
+            <div key={project.id} className={`${styles.capaCard} ${idx % 2 === 1 ? styles.capaReverse : ''}`}>
               <motion.div 
+                className={styles.capaImageWrapper}
                 initial={{ opacity: 0, y: 60 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-10%" }}
-                transition={{ duration: 0.8, delay: idx * 0.1 }}
-                style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}
+                transition={{ duration: 0.8, delay: 0.1 }}
               >
-                <div className={styles.imageWrapper}>
-                  {project.image.endsWith('.mp4') || project.image.endsWith('.mov') ? (
-                    <video 
-                      src={project.image} 
-                      className={styles.projectImage} 
-                      autoPlay 
-                      loop 
-                      muted 
-                      playsInline 
-                    />
-                  ) : (
-                    /* eslint-disable-next-line @next/next/no-img-element */
-                    <img src={project.image} alt={project.title} className={styles.projectImage} />
-                  )}
-                </div>
-                <div className={styles.projectInfo}>
-                  <span className={styles.projectNumber}>0{idx + 1}</span>
-                  <h3 className={styles.projectName}>{project.title}</h3>
-                  <p className={styles.projectCategory}>{project.description}</p>
-                </div>
+                {project.image.endsWith('.mp4') || project.image.endsWith('.mov') ? (
+                  <video 
+                    src={project.image} 
+                    className={styles.projectImage} 
+                    autoPlay 
+                    loop 
+                    muted 
+                    playsInline 
+                  />
+                ) : (
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img src={project.image} alt={project.title} className={styles.projectImage} />
+                )}
+              </motion.div>
+              
+              <motion.div 
+                className={styles.capaInfo}
+                initial={{ opacity: 0, x: idx % 2 === 1 ? -40 : 40 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true, margin: "-10%" }}
+                transition={{ duration: 0.8, delay: 0.2 }}
+              >
+                <span className={styles.capaNumber}>0{idx + 1}</span>
+                <h3 className={styles.capaName}>{project.title}</h3>
+                <p className={styles.capaDesc}>{project.description}</p>
               </motion.div>
             </div>
           ))}
