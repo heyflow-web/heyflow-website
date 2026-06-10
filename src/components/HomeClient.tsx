@@ -16,6 +16,9 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
 
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
+  // Hero 무한 롤링용 배열 복제 (최소 3세트 이상으로 끊김 없는 루프 보장)
+  const marqueeSet = [...projects, ...projects, ...projects];
+
   // Horizontal Scroll 로직
   const horizontalRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: horizontalRef });
@@ -53,7 +56,7 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
     <div ref={containerRef} className={styles.homeContainer}>
       {/* Section 01: Hero Section */}
       <section className={styles.heroSection}>
-        <div className={styles.heroContent}>
+        <div className={styles.heroTopContent}>
           <div className={styles.heroTitle}>
             <div style={{ overflow: "hidden" }}>
               <motion.div 
@@ -85,18 +88,31 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
           </motion.p>
         </div>
         
+        {/* Infinite Carousel (Bottom 40%) */}
         <motion.div 
-          className={styles.scrollIndicator}
+          className={styles.heroCarouselContainer}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 1.5, duration: 1 }}
+          transition={{ duration: 1.5, delay: 0.8 }}
         >
-          <span className={styles.scrollText}>scroll down</span>
-          <motion.div 
-            className={styles.scrollLine}
-            animate={{ height: ["0px", "60px", "0px"], y: [0, 0, 60] }}
-            transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
-          />
+          <div className={styles.marqueeTrack}>
+            <div className={styles.marqueeGroup}>
+              {marqueeSet.map((proj, idx) => (
+                <div key={`g1-${idx}`} className={styles.marqueeItem}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={proj.pcImage} alt={proj.title} className={styles.marqueeImage} />
+                </div>
+              ))}
+            </div>
+            <div className={styles.marqueeGroup}>
+              {marqueeSet.map((proj, idx) => (
+                <div key={`g2-${idx}`} className={styles.marqueeItem}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={proj.pcImage} alt={proj.title} className={styles.marqueeImage} />
+                </div>
+              ))}
+            </div>
+          </div>
         </motion.div>
       </section>
 

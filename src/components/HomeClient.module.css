@@ -26,22 +26,27 @@
 
 /* Section 01: Hero */
 .heroSection {
-  min-height: 100vh;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 0;
+  position: relative;
+  background-color: var(--bg);
+  transition: background-color 0.8s ease;
+  overflow: hidden;
+}
+
+.heroTopContent {
+  flex: 1;
   display: flex;
   flex-direction: column;
   justify-content: center;
   padding: 0 5vw;
-  position: relative;
-  background-color: var(--bg);
-  transition: background-color 0.8s ease;
-}
-
-.heroContent {
-  max-width: 1200px;
+  padding-top: 10vh;
 }
 
 .heroTitle {
-  /* 폰트 사이즈 1단계 축소 */
   font-size: clamp(2.5rem, 5vw, 4.5rem);
   font-weight: 800;
   line-height: 1.2;
@@ -56,28 +61,54 @@
   max-width: 600px;
 }
 
-.scrollIndicator {
-  position: absolute;
-  bottom: 8vh; 
-  left: 50%;
-  transform: translateX(-50%);
+/* Infinite Carousel */
+.heroCarouselContainer {
+  height: 35vh;
+  width: 100vw;
+  overflow: hidden;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 1rem;
+  background-color: var(--bg);
+  padding-bottom: 4vh;
 }
 
-.scrollText {
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.2em;
-  font-weight: 600;
+.marqueeTrack {
+  display: flex;
+  width: max-content;
+  animation: scrollMarquee 40s linear infinite;
 }
 
-.scrollLine {
-  width: 1px;
-  background-color: var(--text);
-  height: 60px;
+.marqueeGroup {
+  display: flex;
+  gap: 1.5vw;
+  padding-right: 1.5vw;
+}
+
+.marqueeItem {
+  height: 28vh;
+  aspect-ratio: 16/9;
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+  background-color: var(--border);
+  border-radius: 4px;
+}
+
+.marqueeImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: grayscale(20%);
+  transition: filter 0.5s ease;
+}
+
+.marqueeItem:hover .marqueeImage {
+  filter: grayscale(0%);
+}
+
+@keyframes scrollMarquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
 }
 
 /* Section 02: Problem Section (Sticky Scroll Layout) */
