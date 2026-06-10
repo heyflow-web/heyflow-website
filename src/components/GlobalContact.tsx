@@ -188,7 +188,7 @@ export default function GlobalContact() {
                   >
                     <h2 className={styles.introTitle}>Let's flow together.</h2>
                     <p className={styles.introDesc}>
-                      비주얼 소음을 걷어내고, 브랜드 본질만 남길 준비가 되셨나요?<br />
+                      웹사이트를 만들기위한 준비가 되셨나요?<br />
                       아래의 몇 가지 질문에 답해주시면 24시간 이내에 디렉터가 직접 연락을 드립니다.
                     </p>
                     <button className={`${styles.startButton} cursor-hover`} onClick={() => setStep(1)}>
@@ -197,7 +197,7 @@ export default function GlobalContact() {
 
                     <div className={styles.kakaoLinkWrapper}>
                       긴급한 프로젝트이거나 빠른 상담이 필요하신가요? 
-                      <a href="#" className={`${styles.kakaoLink} cursor-hover`}>카카오톡 디렉터 직통 채널</a>
+                      <a href="#" className={`${styles.kakaoLink} cursor-hover`}>카카오톡 문의</a>
                     </div>
                   </motion.div>
                 )}
