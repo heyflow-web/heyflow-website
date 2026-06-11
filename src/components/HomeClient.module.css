@@ -42,7 +42,7 @@
   display: flex;
   flex-direction: column;
   justify-content: center; /* 다시 중앙 정렬로 변경하여 텍스트 영역 내 상하 여백을 동일하게 맞춤 */
-  padding: 0 5vw;
+  padding: 0 10vw;
 }
 
 .heroTitle {
@@ -240,7 +240,7 @@
 
 /* Selected Work (프로젝트 갤러리) */
 .workSection {
-  padding: 15vh 5vw;
+  padding: 15vh 10vw;
   background-color: var(--bg);
   transition: background-color 0.8s ease;
 }

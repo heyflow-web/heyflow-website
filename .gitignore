@@ -39,7 +39,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-
+pdf_venv/
 token.json
-client_secret_*.json
-
+client_secret*.json
+mungnyang_vet/
