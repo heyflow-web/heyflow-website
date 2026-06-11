@@ -286,32 +286,20 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
           {[
             {
               id: "capa-1",
-              title: "End-to-End 전략 수립",
-              description: "기획부터 제작까지, 완벽한 원스톱 프로세스",
+              title: "원스톱 프로세스",
+              description: "기획부터 제작까지, 전략적으로 완성도를 높입니다.",
               image: "/images/difference1.json"
             },
             {
               id: "capa-2",
-              title: "Zero Server Cost",
-              description: "월 호스팅 서버비 0원, 완벽한 소유권 이전",
-              image: "/images/difference2.json"
-            },
-            {
-              id: "capa-3",
-              title: "Multi-Channel Sync",
-              description: "웹사이트와 제안서(PDF)의 동시 빌드",
-              image: "/images/difference3.json"
-            },
-            {
-              id: "capa-4",
-              title: "High-End Visual",
-              description: "별도 촬영 없이, 브랜드 무드에 맞는 고감도 비주얼",
+              title: "감도 높은 비주얼",
+              description: "브랜드 무드에 맞는 이미지 생성으로 감각을 높입니다.",
               image: "/images/difference4.json"
             },
             {
-              id: "capa-5",
-              title: "Search Engine Sync",
-              description: "네이버·구글·AI 검색 상위 노출 구조",
+              id: "capa-3",
+              title: "SEO 검색엔진 최적화",
+              description: "네이버·구글·AI 검색의 최적화로 성과를 높입니다.",
               image: "/images/difference5.json"
             }
           ].map((project, idx) => (
