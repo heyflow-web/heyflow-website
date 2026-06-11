@@ -21,6 +21,9 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
   const darkZoneRef = useRef<HTMLDivElement>(null);
   const isDarkZoneInView = useInView(darkZoneRef, { margin: "-20% 0px -20% 0px" });
 
+  const workSectionRef = useRef<HTMLElement>(null);
+  const isWorkSectionInView = useInView(workSectionRef, { margin: "0px" });
+
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   // 앵커 메뉴 로직
@@ -87,8 +90,8 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
   const isPricingInView = useInView(pricingRef, { margin: "-40% 0px -40% 0px" });
 
   useEffect(() => {
-    // Hero, DarkZone, Pricing 섹션에서 글로벌 다크모드 적용
-    if (isHeroInView || isDarkZoneInView || isPricingInView) {
+    // Hero, DarkZone, Work, Pricing 섹션에서 글로벌 다크모드 적용
+    if (isHeroInView || isDarkZoneInView || isWorkSectionInView || isPricingInView) {
       document.body.classList.add("dark-theme");
     } else {
       document.body.classList.remove("dark-theme");
@@ -97,7 +100,7 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
     return () => {
       document.body.classList.remove("dark-theme");
     };
-  }, [isHeroInView, isDarkZoneInView, isPricingInView]);
+  }, [isHeroInView, isDarkZoneInView, isWorkSectionInView, isPricingInView]);
 
   const toggleFaq = (index: number) => {
     setOpenFaq(openFaq === index ? null : index);
@@ -264,21 +267,32 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
       </section>
 
       {/* Section 04: Solution & Philosophy (타이틀만 남기고 압도적 차별점 전으로 이동) */}
-      <section ref={aboutRef} className={styles.aboutSection}>
+      <section className={styles.aboutSection}>
         <div className={styles.aboutContent}>
-          <motion.h2 
-            className={styles.aboutHeadline}
-            style={{ scale: aboutScale, opacity: aboutOpacity }}
-          >
-            잘 만든 웹사이트와<br />
-            잘 되는 웹사이트는 다릅니다.
-          </motion.h2>
+          <h2 className={styles.aboutHeadline} style={{ overflow: "hidden" }}>
+            <motion.div
+              initial={{ x: -100, opacity: 0 }}
+              whileInView={{ x: 0, opacity: 1 }}
+              viewport={{ once: true, margin: "-10%" }}
+              transition={{ duration: 0.8, ease: "easeOut" }}
+            >
+              잘 만든 웹사이트와
+            </motion.div>
+            <motion.div
+              initial={{ x: 100, opacity: 0 }}
+              whileInView={{ x: 0, opacity: 1 }}
+              viewport={{ once: true, margin: "-10%" }}
+              transition={{ duration: 0.8, ease: "easeOut" }}
+            >
+              잘 되는 웹사이트는 다릅니다.
+            </motion.div>
+          </h2>
         </div>
       </section>
       </div>
 
       {/* Section 05: Core Capabilities (Side-by-side Layout) */}
-      <section className={styles.workSection}>
+      <section ref={workSectionRef} className={styles.workSection}>
         <div className={styles.workHeader}>
           <motion.h2 
             className={styles.workTitle}
