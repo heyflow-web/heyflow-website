@@ -529,7 +529,7 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
             <div className={styles.legalRow}>
               <span>주소: 경기도 화성시 동탄구 동탄중심상가2길 8, 4층 401-하46호</span>
               <span className={styles.divider}>|</span>
-              <span>이메일: travel202@naver.com</span>
+              <span>이메일: team.archivehey@gmail.com</span>
               <span className={styles.divider}>|</span>
               <span>TEL: 0507-1395-1381</span>
             </div>

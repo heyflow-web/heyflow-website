@@ -56,7 +56,7 @@ export default function PrivacyPolicy() {
           <p>회사는 개인정보 처리에 관한 업무를 총괄해서 책임지고, 개인정보 처리와 관련한 정보주체의 불만처리 및 피해구제 등을 위하여 아래와 같이 개인정보 보호책임자를 지정하고 있습니다.</p>
           <ul>
             <li>책임자: 지원규 (대표)</li>
-            <li>이메일: travel202@naver.com</li>
+            <li>이메일: team.archivehey@gmail.com</li>
             <li>전화번호: 0507-1395-1381</li>
           </ul>
         </section>
