@@ -61,7 +61,6 @@ export default function RootLayout({
             heyflow
           </a>
           <div className="nav-links">
-            <a href="/" className="nav-link">Home</a>
             <Link href="/projects" className="nav-link">Projects</Link>
           </div>
         </nav>
