@@ -90,8 +90,8 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
   const isPricingInView = useInView(pricingRef, { margin: "-40% 0px -40% 0px" });
 
   useEffect(() => {
-    // Hero, DarkZone, Work, Pricing 섹션에서 글로벌 다크모드 적용
-    if (isHeroInView || isDarkZoneInView || isWorkSectionInView || isPricingInView) {
+    // Hero, DarkZone, Pricing 섹션에서 글로벌 다크모드 적용
+    if (isHeroInView || isDarkZoneInView || isPricingInView) {
       document.body.classList.add("dark-theme");
     } else {
       document.body.classList.remove("dark-theme");
@@ -100,7 +100,7 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
     return () => {
       document.body.classList.remove("dark-theme");
     };
-  }, [isHeroInView, isDarkZoneInView, isWorkSectionInView, isPricingInView]);
+  }, [isHeroInView, isDarkZoneInView, isPricingInView]);
 
   const toggleFaq = (index: number) => {
     setOpenFaq(openFaq === index ? null : index);
@@ -271,7 +271,7 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
         <div className={styles.aboutContent}>
           <h2 className={styles.aboutHeadline} style={{ overflow: "hidden" }}>
             <motion.div
-              initial={{ x: -100, opacity: 0 }}
+              initial={{ x: "-100vw", opacity: 0 }}
               whileInView={{ x: 0, opacity: 1 }}
               viewport={{ once: true, margin: "-10%" }}
               transition={{ duration: 0.8, ease: "easeOut" }}
@@ -279,7 +279,7 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
               잘 만든 웹사이트와
             </motion.div>
             <motion.div
-              initial={{ x: 100, opacity: 0 }}
+              initial={{ x: "100vw", opacity: 0 }}
               whileInView={{ x: 0, opacity: 1 }}
               viewport={{ once: true, margin: "-10%" }}
               transition={{ duration: 0.8, ease: "easeOut" }}
