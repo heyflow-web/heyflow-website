@@ -269,24 +269,30 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
       {/* Section 04: Solution & Philosophy (타이틀만 남기고 압도적 차별점 전으로 이동) */}
       <section className={styles.aboutSection}>
         <div className={styles.aboutContent}>
-          <h2 className={styles.aboutHeadline} style={{ overflow: "hidden" }}>
+          <motion.h2 
+            className={styles.aboutHeadline} 
+            style={{ overflow: "hidden" }}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-10%" }}
+          >
             <motion.div
-              initial={{ x: "-100vw", opacity: 0 }}
-              whileInView={{ x: 0, opacity: 1 }}
-              viewport={{ once: true, margin: "-10%" }}
-              transition={{ duration: 0.8, ease: "easeOut" }}
+              variants={{
+                hidden: { x: "-100vw", opacity: 0 },
+                visible: { x: 0, opacity: 1, transition: { duration: 0.8, ease: "easeOut" } }
+              }}
             >
               잘 만든 웹사이트와
             </motion.div>
             <motion.div
-              initial={{ x: "100vw", opacity: 0 }}
-              whileInView={{ x: 0, opacity: 1 }}
-              viewport={{ once: true, margin: "-10%" }}
-              transition={{ duration: 0.8, ease: "easeOut" }}
+              variants={{
+                hidden: { x: "100vw", opacity: 0 },
+                visible: { x: 0, opacity: 1, transition: { duration: 0.8, ease: "easeOut" } }
+              }}
             >
               잘 되는 웹사이트는 다릅니다.
             </motion.div>
-          </h2>
+          </motion.h2>
         </div>
       </section>
       </div>
