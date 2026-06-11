@@ -186,7 +186,7 @@ export default function GlobalContact() {
 
                     <div className={styles.kakaoLinkWrapper}>
                       긴급한 프로젝트이거나 빠른 상담이 필요하신가요? 
-                      <a href="#" className={`${styles.kakaoLink} cursor-hover`}>카카오톡 문의</a>
+                      <a href="http://pf.kakao.com/_xacxenX/chat" target="_blank" rel="noopener noreferrer" className={`${styles.kakaoLink} cursor-hover`}>카카오톡 문의</a>
                     </div>
                   </motion.div>
                 )}

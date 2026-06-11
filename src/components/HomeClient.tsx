@@ -532,6 +532,8 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
               <span>이메일: team.archivehey@gmail.com</span>
               <span className={styles.divider}>|</span>
               <span>TEL: 0507-1395-1381</span>
+              <span className={styles.divider}>|</span>
+              <a href="http://pf.kakao.com/_xacxenX/chat" target="_blank" rel="noopener noreferrer" className="cursor-hover" style={{ fontWeight: 600 }}>카카오톡 문의</a>
             </div>
             <div className={styles.legalPolicy}>
               <Link href="/privacy" className="cursor-hover">개인정보처리방침</Link>
