@@ -13,8 +13,14 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
   const containerRef = useRef<HTMLDivElement>(null);
   
   // 섹션별 레퍼런스 (다크모드 교차 전환용)
+  const heroRef = useRef<HTMLElement>(null);
+  const isHeroInView = useInView(heroRef, { margin: "0px 0px -40% 0px" });
+
   const problemRef = useRef<HTMLDivElement>(null);
   const isProblemInView = useInView(problemRef, { margin: "-40% 0px -40% 0px" });
+
+  const statsRef = useRef<HTMLElement>(null);
+  const isStatsInView = useInView(statsRef, { margin: "-40% 0px -40% 0px" });
 
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
@@ -82,8 +88,8 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
   const isPricingInView = useInView(pricingRef, { margin: "-40% 0px -40% 0px" });
 
   useEffect(() => {
-    // Problem, Pricing 섹션에서 글로벌 다크모드 적용
-    if (isProblemInView || isPricingInView) {
+    // Hero, Stats, Pricing 섹션에서 글로벌 다크모드 적용
+    if (isHeroInView || isStatsInView || isPricingInView) {
       document.body.classList.add("dark-theme");
     } else {
       document.body.classList.remove("dark-theme");
@@ -92,7 +98,7 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
     return () => {
       document.body.classList.remove("dark-theme");
     };
-  }, [isProblemInView, isPricingInView]);
+  }, [isHeroInView, isStatsInView, isPricingInView]);
 
   const toggleFaq = (index: number) => {
     setOpenFaq(openFaq === index ? null : index);
@@ -121,7 +127,7 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
       </AnimatePresence>
 
       {/* Section 01: Hero Section */}
-      <section className={styles.heroSection}>
+      <section ref={heroRef} className={styles.heroSection}>
         <div className={styles.heroTopContent}>
           <div className={styles.heroTitle}>
             <div style={{ overflow: "hidden" }}>
@@ -232,7 +238,7 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
       </section>
 
       {/* Section 03: Difference (Big Numbers) */}
-      <section className={styles.statsSection}>
+      <section ref={statsRef} className={styles.statsSection}>
 
         <div className={styles.statsGrid}>
           {[
