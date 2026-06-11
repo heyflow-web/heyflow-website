@@ -25,6 +25,14 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
   const isWorkSectionInView = useInView(workSectionRef, { margin: "0px" });
 
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
   // 앵커 메뉴 로직
   const [activeSection, setActiveSection] = useState("");
@@ -85,6 +93,8 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
   });
   const aboutScale = useTransform(aboutProgress, [0, 1], [0.6, 1.2]);
   const aboutOpacity = useTransform(aboutProgress, [0, 0.5, 1], [0, 1, 1]);
+  const aboutXLeft = useTransform(aboutProgress, [0, 1], ["-50vw", "0vw"]);
+  const aboutXRight = useTransform(aboutProgress, [0, 1], ["50vw", "0vw"]);
 
   // Pricing Section 다크모드용 InView
   const isPricingInView = useInView(pricingRef, { margin: "-40% 0px -40% 0px" });
@@ -267,28 +277,30 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
       </section>
 
       {/* Section 04: Solution & Philosophy (타이틀만 남기고 압도적 차별점 전으로 이동) */}
-      <section className={styles.aboutSection}>
+      <section ref={aboutRef} className={styles.aboutSection}>
         <div className={styles.aboutContent}>
           <motion.h2 
             className={styles.aboutHeadline} 
-            style={{ overflow: "hidden" }}
-            initial="hidden"
-            whileInView="visible"
+            style={isMobile ? { overflow: "hidden" } : { overflow: "hidden", opacity: aboutOpacity }}
+            initial={isMobile ? "hidden" : undefined}
+            whileInView={isMobile ? "visible" : undefined}
             viewport={{ once: true, margin: "-10%" }}
           >
             <motion.div
-              variants={{
+              style={isMobile ? undefined : { x: aboutXLeft }}
+              variants={isMobile ? {
                 hidden: { x: "-100vw", opacity: 0 },
                 visible: { x: 0, opacity: 1, transition: { duration: 0.8, ease: "easeOut" } }
-              }}
+              } : undefined}
             >
               잘 만든 웹사이트와
             </motion.div>
             <motion.div
-              variants={{
+              style={isMobile ? undefined : { x: aboutXRight }}
+              variants={isMobile ? {
                 hidden: { x: "100vw", opacity: 0 },
                 visible: { x: 0, opacity: 1, transition: { duration: 0.8, ease: "easeOut" } }
-              }}
+              } : undefined}
             >
               잘 되는 웹사이트는 다릅니다.
             </motion.div>
