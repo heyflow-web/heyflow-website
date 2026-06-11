@@ -11,16 +11,15 @@ import LottiePlayer from "./LottiePlayer";
 
 export default function HomeClient({ projects = [] }: { projects?: Project[] }) {
   const containerRef = useRef<HTMLDivElement>(null);
-  
   // 섹션별 레퍼런스 (다크모드 교차 전환용)
-  const heroRef = useRef<HTMLElement>(null);
-  const isHeroInView = useInView(heroRef, { margin: "0px 0px -40% 0px" });
+  const heroRef = useRef<HTMLDivElement>(null);
+  const isHeroInView = useInView(heroRef, { margin: "0px" });
 
   const problemRef = useRef<HTMLDivElement>(null);
   const isProblemInView = useInView(problemRef, { margin: "-40% 0px -40% 0px" });
 
-  const statsRef = useRef<HTMLElement>(null);
-  const isStatsInView = useInView(statsRef, { margin: "-40% 0px -40% 0px" });
+  const darkZoneRef = useRef<HTMLDivElement>(null);
+  const isDarkZoneInView = useInView(darkZoneRef, { margin: "-20% 0px -20% 0px" });
 
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
@@ -72,7 +71,7 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
     target: conclusionRef,
     offset: ["start end", "end start"]
   });
-  const cScale = useTransform(cProgress, [0, 0.5, 1], [1.5, 1, 0.8]);
+  const cScale = useTransform(cProgress, [0, 0.5, 1], [0.5, 1, 1.2]);
   const cOpacity = useTransform(cProgress, [0, 0.3, 0.8, 1], [0, 1, 1, 0]);
 
   // About Headline Scroll 로직
@@ -88,8 +87,8 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
   const isPricingInView = useInView(pricingRef, { margin: "-40% 0px -40% 0px" });
 
   useEffect(() => {
-    // Hero, Stats, Pricing 섹션에서 글로벌 다크모드 적용
-    if (isHeroInView || isStatsInView || isPricingInView) {
+    // Hero, DarkZone, Pricing 섹션에서 글로벌 다크모드 적용
+    if (isHeroInView || isDarkZoneInView || isPricingInView) {
       document.body.classList.add("dark-theme");
     } else {
       document.body.classList.remove("dark-theme");
@@ -98,7 +97,7 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
     return () => {
       document.body.classList.remove("dark-theme");
     };
-  }, [isHeroInView, isStatsInView, isPricingInView]);
+  }, [isHeroInView, isDarkZoneInView, isPricingInView]);
 
   const toggleFaq = (index: number) => {
     setOpenFaq(openFaq === index ? null : index);
@@ -127,7 +126,9 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
       </AnimatePresence>
 
       {/* Section 01: Hero Section */}
-      <section ref={heroRef} className={styles.heroSection}>
+      <section className={styles.heroSection}>
+        {/* Trigger div for Hero Dark Mode (Top 10vh) */}
+        <div ref={heroRef} style={{ position: "absolute", top: 0, height: "10vh", width: "100%", pointerEvents: "none" }} />
         <div className={styles.heroTopContent}>
           <div className={styles.heroTitle}>
             <div style={{ overflow: "hidden" }}>
@@ -225,20 +226,21 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
         </div>
       </section>
 
-      {/* Section 02.5: Conclusion Section */}
-      <section ref={conclusionRef} className={styles.conclusionSection}>
-        <motion.h2 
-          className={styles.conclusionText}
-          style={{ scale: cScale, opacity: cOpacity }}
-        >
-          이 중 단 하나라도 해당한다면,<br />
-          현재의 웹사이트는 브랜드의 무기가 아니라<br />
-          <span className={styles.conclusionHighlight}>감점 요인입니다.</span>
-        </motion.h2>
-      </section>
+      <div ref={darkZoneRef}>
+        {/* Section 02.5: Conclusion Section */}
+        <section ref={conclusionRef} className={styles.conclusionSection}>
+          <motion.h2 
+            className={styles.conclusionText}
+            style={{ scale: cScale, opacity: cOpacity }}
+          >
+            이 중 단 하나라도 해당한다면,<br />
+            현재의 웹사이트는 브랜드의 무기가 아니라<br />
+            <span className={styles.conclusionHighlight}>감점 요인입니다.</span>
+          </motion.h2>
+        </section>
 
-      {/* Section 03: Difference (Big Numbers) */}
-      <section ref={statsRef} className={styles.statsSection}>
+        {/* Section 03: Difference (Big Numbers) */}
+        <section className={styles.statsSection}>
 
         <div className={styles.statsGrid}>
           {[
@@ -273,6 +275,7 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
           </motion.h2>
         </div>
       </section>
+      </div>
 
       {/* Section 05: Core Capabilities (Side-by-side Layout) */}
       <section className={styles.workSection}>
