@@ -16,6 +16,7 @@ export interface Project {
   description: string;
   pcImage: string;
   mobileImage: string;
+  heroImage?: string;
   link: string;
   content?: string;
 }
@@ -80,6 +81,7 @@ export async function getProjects(): Promise<Project[]> {
         description: getPropertyValue(page.properties['Description'], 'rich_text'),
         pcImage: getPropertyValue(page.properties['PC Image'], 'files'),
         mobileImage: getPropertyValue(page.properties['Mobile Image'], 'files'),
+        heroImage: getPropertyValue(page.properties['Hero Image'], 'files') || getPropertyValue(page.properties['PC Image'], 'files'),
         link: getPropertyValue(page.properties['Link'], 'url'),
       };
     });
@@ -108,6 +110,7 @@ export async function getProject(id: string): Promise<Project | null> {
       description: getPropertyValue(page.properties['Description'], 'rich_text'),
       pcImage: getPropertyValue(page.properties['PC Image'], 'files'),
       mobileImage: getPropertyValue(page.properties['Mobile Image'], 'files'),
+      heroImage: getPropertyValue(page.properties['Hero Image'], 'files') || getPropertyValue(page.properties['PC Image'], 'files'),
       link: getPropertyValue(page.properties['Link'], 'url'),
       content: mdString.parent || '',
     };

@@ -186,7 +186,7 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
               {marqueeSet.map((proj, idx) => (
                 <Link href={`/projects/${proj.id}`} key={`g1-${idx}`} className={`${styles.marqueeItem} cursor-hover`}>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={proj.pcImage} alt={proj.title} className={styles.marqueeImage} />
+                  <img src={proj.heroImage || proj.pcImage} alt={proj.title} className={styles.marqueeImage} />
                 </Link>
               ))}
             </div>
@@ -194,7 +194,7 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
               {marqueeSet.map((proj, idx) => (
                 <Link href={`/projects/${proj.id}`} key={`g2-${idx}`} className={`${styles.marqueeItem} cursor-hover`}>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={proj.pcImage} alt={proj.title} className={styles.marqueeImage} />
+                  <img src={proj.heroImage || proj.pcImage} alt={proj.title} className={styles.marqueeImage} />
                 </Link>
               ))}
             </div>
