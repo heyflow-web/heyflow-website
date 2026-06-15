@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, CornerDownLeft, ArrowLeft } from "lucide-react";
 import styles from "./GlobalContact.module.css";
+import Logo from "./Logo";
 
 export default function GlobalContact() {
   const [isOpen, setIsOpen] = useState(false);
@@ -162,7 +163,7 @@ export default function GlobalContact() {
             transition={{ duration: 0.6, ease: "easeInOut" }}
           >
             <header className={styles.modalHeader}>
-              <div className={styles.modalBrand}>heyflow</div>
+              <div className={styles.modalBrand}><Logo /></div>
               <button 
                 className={`${styles.closeButton} cursor-hover`} 
                 onClick={() => setIsOpen(false)}

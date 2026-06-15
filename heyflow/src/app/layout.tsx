@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 import Link from "next/link";
 import GlobalContact from "@/components/GlobalContact";
 import CustomCursor from "@/components/CustomCursor";
+import Logo from "@/components/Logo";
+
+const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://heyflow.kr"),
@@ -62,8 +63,8 @@ export default function RootLayout({
     <html lang="ko">
       <body className={inter.variable}>
         <nav className="navbar">
-          <a href="/" className="nav-brand">
-            heyflow
+          <a href="/" className="nav-brand" aria-label="HeyFlow">
+            <Logo />
           </a>
           <div className="nav-links">
             <Link href="/projects" className="nav-link">Projects</Link>
