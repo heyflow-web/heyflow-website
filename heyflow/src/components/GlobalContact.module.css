@@ -294,6 +294,65 @@
   letter-spacing: -0.02em;
 }
 
+/* Internal Privacy Modal */
+.internalPrivacyModal {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--bg);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  padding: 2.5rem;
+  border-radius: inherit;
+}
+
+.privacyModalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.privacyModalHeader h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0;
+}
+
+.privacyModalHeader button {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: var(--text);
+  padding: 0;
+}
+
+.privacyModalContent {
+  flex: 1;
+  overflow-y: auto;
+  text-align: left;
+  padding-right: 1rem;
+}
+
+.privacyModalContent h4 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+  color: var(--text);
+}
+
+.privacyModalContent p {
+  font-size: 0.95rem;
+  color: var(--gray);
+  line-height: 1.6;
+  margin: 0;
+}
+
 @media (max-width: 768px) {
   .floatingButton {
     bottom: 1.5rem;

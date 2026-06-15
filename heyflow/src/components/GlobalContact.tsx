@@ -10,6 +10,7 @@ export default function GlobalContact() {
   const [step, setStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isConsentChecked, setIsConsentChecked] = useState(false);
+  const [showPrivacy, setShowPrivacy] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     problem: "",
@@ -125,6 +126,7 @@ export default function GlobalContact() {
           setStep(0);
           setFormData({ name: "", problem: "", budget: "", projectTypes: [], contact: "" });
           setIsConsentChecked(false);
+          setShowPrivacy(false);
         }, 600);
       }, 4500);
     }
@@ -389,7 +391,9 @@ export default function GlobalContact() {
                         <span className={styles.consentText}>
                           [필수] 개인정보 수집 및 이용에 동의합니다.
                         </span>
-                        <a href="/privacy" target="_blank" rel="noopener noreferrer" className={`${styles.privacyLink} cursor-hover`}>(전문 보기)</a>
+                        <button type="button" onClick={() => setShowPrivacy(true)} className={`${styles.privacyLink} cursor-hover`} style={{ background: 'none', border: 'none', padding: 0 }}>
+                          (전문 보기)
+                        </button>
                       </label>
                       <p className={styles.consentDetail}>
                         수집 목적: 프로젝트 문의 및 상담 / 항목: 이름, 연락처, 프로젝트 정보 / 보유 기간: 상담 종료 후 1년<br/>(동의 거부 시 원활한 상담이 제한될 수 있습니다.)
@@ -405,6 +409,34 @@ export default function GlobalContact() {
                     </div>
                   </motion.div>
                 )}
+
+                {/* Internal Privacy Modal */}
+                <AnimatePresence>
+                  {showPrivacy && (
+                    <motion.div 
+                      className={styles.internalPrivacyModal}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 20 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <div className={styles.privacyModalHeader}>
+                        <h3>개인정보처리방침</h3>
+                        <button type="button" className="cursor-hover" onClick={() => setShowPrivacy(false)}>✕</button>
+                      </div>
+                      <div className={styles.privacyModalContent}>
+                        <h4>1. 개인정보의 수집 및 이용 목적</h4>
+                        <p>프로젝트 문의 접수, 상담 및 원활한 의사소통 경로 확보, 프로젝트 진행 시 계약 이행 및 서비스 제공</p>
+                        <h4>2. 수집하는 개인정보 항목</h4>
+                        <p>필수항목: 이름(또는 브랜드명), 연락처(전화번호 또는 이메일)</p>
+                        <h4>3. 개인정보의 보유 및 이용기간</h4>
+                        <p>원칙적으로, 개인정보 수집 및 이용 목적이 달성된 후에는 해당 정보를 지체 없이 파기합니다. (상담 종료 후 1년)</p>
+                        <h4>4. 개인정보의 파기절차 및 방법</h4>
+                        <p>수집된 정보는 목적이 달성된 후 전자적 파일 형태로 저장된 개인정보는 기록을 재생할 수 없는 기술적 방법을 사용하여 삭제합니다.</p>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
 
                 {/* Step 6: Outro */}
                 {step === 6 && (
