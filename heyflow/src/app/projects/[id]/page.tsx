@@ -1,5 +1,5 @@
 import { getProject } from '@/lib/notion';
-import Link from 'next/link';
+import BackButton from '@/components/BackButton';
 import { notFound } from 'next/navigation';
 import styles from './detail.module.css';
 import ReactMarkdown from 'react-markdown';
@@ -17,9 +17,7 @@ export default async function PortfolioDetail({ params }: { params: Promise<{ id
   return (
     <main className="container">
       <article className={styles.article}>
-        <Link href="/projects" className={styles.backBtn}>
-          &larr; Back
-        </Link>
+        <BackButton className={styles.backBtn} />
         
         <header className={styles.header}>
           <h1 className={styles.title}>{item.title}</h1>
