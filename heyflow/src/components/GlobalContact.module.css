@@ -24,6 +24,7 @@
   --text: #000000;
   --border: #e6e6e6;
   --gray: #777777;
+  --logo-color: #171719;
   position: fixed;
   inset: 0;
   background-color: var(--bg);
