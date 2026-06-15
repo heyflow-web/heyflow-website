@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, CornerDownLeft, ArrowLeft } from "lucide-react";
+import Link from "next/link";
 import styles from "./GlobalContact.module.css";
 import Logo from "./Logo";
 
@@ -163,7 +164,9 @@ export default function GlobalContact() {
             transition={{ duration: 0.6, ease: "easeInOut" }}
           >
             <header className={styles.modalHeader}>
-              <div className={styles.modalBrand}><Logo /></div>
+              <Link href="/" className={styles.modalBrand} onClick={() => setIsOpen(false)}>
+                <Logo />
+              </Link>
               <button 
                 className={`${styles.closeButton} cursor-hover`} 
                 onClick={() => setIsOpen(false)}
