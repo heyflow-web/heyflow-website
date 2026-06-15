@@ -184,18 +184,18 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
           <div className={styles.marqueeTrack}>
             <div className={styles.marqueeGroup}>
               {marqueeSet.map((proj, idx) => (
-                <div key={`g1-${idx}`} className={styles.marqueeItem}>
+                <Link href={`/projects/${proj.id}`} key={`g1-${idx}`} className={`${styles.marqueeItem} cursor-hover`}>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={proj.pcImage} alt={proj.title} className={styles.marqueeImage} />
-                </div>
+                </Link>
               ))}
             </div>
             <div className={styles.marqueeGroup}>
               {marqueeSet.map((proj, idx) => (
-                <div key={`g2-${idx}`} className={styles.marqueeItem}>
+                <Link href={`/projects/${proj.id}`} key={`g2-${idx}`} className={`${styles.marqueeItem} cursor-hover`}>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={proj.pcImage} alt={proj.title} className={styles.marqueeImage} />
-                </div>
+                </Link>
               ))}
             </div>
           </div>
