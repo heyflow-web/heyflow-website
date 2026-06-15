@@ -6,6 +6,7 @@
   --nav-bg: rgba(255, 255, 255, 0.85);
   --border: #e6e6e6;
   --gray: #777777;
+  --logo-color: #171719;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -15,6 +16,7 @@
     --nav-bg: rgba(10, 10, 10, 0.85);
     --border: #222222;
     --gray: #888888;
+    --logo-color: #ffffff;
   }
 }
 
@@ -39,6 +41,7 @@ body.dark-theme {
   --text: #ffffff;
   --nav-bg: rgba(17, 17, 17, 0.85);
   --border: #333333;
+  --logo-color: #ffffff;
 }
 
 @media (pointer: fine) {
