@@ -220,7 +220,7 @@ export default function GlobalContact() {
                       )}
                       <span>01 / 05</span>
                     </div>
-                    <label className={styles.questionLabel}>귀하의 성함과 브랜드(기업)명을 알려주세요.</label>
+                    <label className={styles.questionLabel}>귀하의 성함과 상호명을 알려주세요.</label>
                     <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
                       <input 
                         ref={inputRef}
