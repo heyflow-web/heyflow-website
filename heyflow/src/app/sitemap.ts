@@ -1,8 +1,17 @@
 import { MetadataRoute } from 'next';
+import { getProjects } from '@/lib/notion';
 
-export default function sitemap(): MetadataRoute.Sitemap {
-  // TODO: 추후 실제 연결될 도메인으로 변경해야 합니다.
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = 'https://heyflow.kr';
+
+  // 노션에서 포트폴리오 목록을 불러와서 사이트맵에 추가
+  const projects = await getProjects();
+  const projectUrls = projects.map((project) => ({
+    url: `${baseUrl}/projects/${project.id}`,
+    lastModified: new Date(),
+    changeFrequency: 'weekly' as const,
+    priority: 0.6,
+  }));
 
   return [
     {
@@ -17,5 +26,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'monthly',
       priority: 0.8,
     },
+    ...projectUrls,
   ];
 }
