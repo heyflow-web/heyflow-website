@@ -73,6 +73,7 @@
   position: relative;
   max-height: 80vh; /* 화면을 넘어가면 스크롤되도록 */
   overflow-y: auto;
+  scrollbar-gutter: stable;
   padding: 20px 0;
   margin: 0 auto;
 }
@@ -139,6 +140,7 @@
   line-height: 1.3;
   margin-bottom: 3rem;
   letter-spacing: -0.02em;
+  word-break: keep-all;
 }
 
 .questionHighlight {
