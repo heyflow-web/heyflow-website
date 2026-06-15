@@ -78,7 +78,7 @@ export default function GlobalContact() {
       setIsSubmitting(true);
       try {
         // 구글 Apps Script로 데이터 전송 (CORS 우회를 위해 text/plain 사용 및 no-cors 모드 강제)
-        await fetch("https://script.google.com/macros/s/AKfycbyIrDhKilhQdIxE4pVCuI0cj9vLgpvul_I0YxnsINfaUij8kIwxmdPYUaYlZPL7eDgu/exec", {
+        await fetch("https://script.google.com/macros/s/AKfycbxA353tz79KQPkl-uurKI4CkxIJ_N30hAIzMHxYncLW1aw42aH-gOkUrq0mnvelR66r/exec", {
           method: "POST",
           mode: "no-cors",
           headers: {
