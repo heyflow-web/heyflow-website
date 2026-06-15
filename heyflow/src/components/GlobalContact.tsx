@@ -13,10 +13,12 @@ export default function GlobalContact() {
   const [showPrivacy, setShowPrivacy] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
+    brand: "",
     problem: "",
     budget: "",
     projectTypes: [] as string[],
-    contact: "",
+    email: "",
+    phone: "",
   });
 
   const inputRef = useRef<HTMLInputElement>(null);
@@ -60,13 +62,13 @@ export default function GlobalContact() {
   const handleNext = async () => {
     if (isSubmitting) return; // 전송 중 중복 입력 방지
 
-    if (step === 1 && !formData.name) return;
+    if (step === 1 && (!formData.name || !formData.brand)) return;
     if (step === 2 && formData.projectTypes.length === 0) return;
     if (step === 3 && !formData.problem) return;
     
     // 마지막 제출 단계 (step 5)
     if (step === 5) {
-      if (!formData.contact) return;
+      if (!formData.email || !formData.phone) return;
       if (!isConsentChecked) {
         alert("개인정보 수집 및 이용에 동의해 주세요.");
         return;
@@ -124,7 +126,7 @@ export default function GlobalContact() {
         // 모달 애니메이션 끝난 후 상태 초기화
         setTimeout(() => {
           setStep(0);
-          setFormData({ name: "", problem: "", budget: "", projectTypes: [], contact: "" });
+          setFormData({ name: "", brand: "", problem: "", budget: "", projectTypes: [], email: "", phone: "" });
           setIsConsentChecked(false);
           setShowPrivacy(false);
         }, 600);
@@ -218,15 +220,25 @@ export default function GlobalContact() {
                       <span>01 / 05</span>
                     </div>
                     <label className={styles.questionLabel}>귀하의 성함과 브랜드(기업)명을 알려주세요.</label>
-                    <input 
-                      ref={inputRef}
-                      type="text" 
-                      className={styles.textInput} 
-                      placeholder="ex. 김헤이 / 헤이플로우"
-                      value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      onKeyDown={handleKeyDown}
-                    />
+                    <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+                      <input 
+                        ref={inputRef}
+                        type="text" 
+                        className={styles.textInput} 
+                        placeholder="성함 (ex. 김헤이)"
+                        value={formData.name}
+                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                        onKeyDown={handleKeyDown}
+                      />
+                      <input 
+                        type="text" 
+                        className={styles.textInput} 
+                        placeholder="브랜드 또는 기업명 (ex. 헤이플로우)"
+                        value={formData.brand}
+                        onChange={(e) => setFormData({ ...formData, brand: e.target.value })}
+                        onKeyDown={handleKeyDown}
+                      />
+                    </div>
                     <div className={styles.guideText}>
                       작성 후 Enter를 누르세요 <CornerDownLeft size={16} />
                     </div>
@@ -370,15 +382,25 @@ export default function GlobalContact() {
                       <span>05 / 05</span>
                     </div>
                     <label className={styles.questionLabel}>회신받으실 이메일과 연락처를 남겨주세요.</label>
-                    <input 
-                      ref={inputRef}
-                      type="text" 
-                      className={styles.textInput} 
-                      placeholder="ex. hellow@flow.com / 010-0000-0000"
-                      value={formData.contact}
-                      onChange={(e) => setFormData({ ...formData, contact: e.target.value })}
-                      onKeyDown={handleKeyDown}
-                    />
+                    <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+                      <input 
+                        ref={inputRef}
+                        type="email" 
+                        className={styles.textInput} 
+                        placeholder="이메일 주소 (ex. hello@heyflow.kr)"
+                        value={formData.email}
+                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                        onKeyDown={handleKeyDown}
+                      />
+                      <input 
+                        type="tel" 
+                        className={styles.textInput} 
+                        placeholder="연락처 (ex. 010-0000-0000)"
+                        value={formData.phone}
+                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                        onKeyDown={handleKeyDown}
+                      />
+                    </div>
 
                     <div className={styles.consentWrapper}>
                       <label className={styles.consentLabel}>
