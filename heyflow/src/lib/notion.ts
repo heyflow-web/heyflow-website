@@ -60,8 +60,8 @@ export async function getProjects(): Promise<Project[]> {
       body: JSON.stringify({
         sorts: [
           {
-            timestamp: 'created_time',
-            direction: 'descending',
+            property: 'Order',
+            direction: 'ascending',
           },
         ],
       }),
