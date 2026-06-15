@@ -241,9 +241,15 @@
 
 /* Selected Work (프로젝트 갤러리) */
 .workSection {
-  padding: 15vh 10vw;
+  padding: 15vh 5vw;
   background-color: var(--bg);
   transition: background-color 0.8s ease;
+}
+
+.workContainer {
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
 }
 
 .workHeader {

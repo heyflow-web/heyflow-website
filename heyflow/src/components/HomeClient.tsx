@@ -311,7 +311,8 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
 
       {/* Section 05: Core Capabilities (Side-by-side Layout) */}
       <section ref={workSectionRef} className={styles.workSection}>
-        <div className={styles.workHeader}>
+        <div className={styles.workContainer}>
+          <div className={styles.workHeader}>
           <motion.h2 
             className={styles.workTitle}
             initial={{ y: 40, opacity: 0 }} 
@@ -382,6 +383,7 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
               </motion.div>
             </div>
           ))}
+        </div>
         </div>
       </section>
 
