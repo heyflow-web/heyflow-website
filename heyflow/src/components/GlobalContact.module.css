@@ -307,6 +307,8 @@
   flex-direction: column;
   padding: 2.5rem;
   border-radius: inherit;
+  border: 2px solid #111;
+  box-sizing: border-box;
 }
 
 .privacyModalHeader {
