@@ -225,7 +225,7 @@ export default function GlobalContact() {
                         ref={inputRef}
                         type="text" 
                         className={styles.textInput} 
-                        placeholder="성함 (ex. 김헤이)"
+                        placeholder="성함"
                         value={formData.name}
                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                         onKeyDown={handleKeyDown}
@@ -233,15 +233,20 @@ export default function GlobalContact() {
                       <input 
                         type="text" 
                         className={styles.textInput} 
-                        placeholder="브랜드 또는 기업명 (ex. 헤이플로우)"
+                        placeholder="브랜드 또는 기업명"
                         value={formData.brand}
                         onChange={(e) => setFormData({ ...formData, brand: e.target.value })}
                         onKeyDown={handleKeyDown}
                       />
                     </div>
-                    <div className={styles.guideText}>
-                      작성 후 Enter를 누르세요 <CornerDownLeft size={16} />
-                    </div>
+                    <button 
+                      className={`${styles.startButton} cursor-hover`} 
+                      style={{ marginTop: '2rem', opacity: (formData.name && formData.brand) ? 1 : 0.5 }}
+                      onClick={handleNext}
+                      disabled={!formData.name || !formData.brand}
+                    >
+                      다음으로 <ArrowRight size={20} style={{ display: 'inline', verticalAlign: 'middle', marginLeft: '8px' }} />
+                    </button>
                   </motion.div>
                 )}
 
@@ -323,14 +328,19 @@ export default function GlobalContact() {
                       ref={inputRef}
                       type="text" 
                       className={styles.textInput} 
-                      placeholder="ex. 기존 사이트의 디자인 개선"
+                      placeholder="현재 겪고 계신 문제나 목표를 적어주세요"
                       value={formData.problem}
                       onChange={(e) => setFormData({ ...formData, problem: e.target.value })}
                       onKeyDown={handleKeyDown}
                     />
-                    <div className={styles.guideText}>
-                      작성 후 Enter를 누르세요 <CornerDownLeft size={16} />
-                    </div>
+                    <button 
+                      className={`${styles.startButton} cursor-hover`} 
+                      style={{ marginTop: '2rem', opacity: formData.problem ? 1 : 0.5 }}
+                      onClick={handleNext}
+                      disabled={!formData.problem}
+                    >
+                      다음으로 <ArrowRight size={20} style={{ display: 'inline', verticalAlign: 'middle', marginLeft: '8px' }} />
+                    </button>
                   </motion.div>
                 )}
 
@@ -387,7 +397,7 @@ export default function GlobalContact() {
                         ref={inputRef}
                         type="email" 
                         className={styles.textInput} 
-                        placeholder="이메일 주소 (ex. hello@heyflow.kr)"
+                        placeholder="이메일 주소"
                         value={formData.email}
                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                         onKeyDown={handleKeyDown}
@@ -395,7 +405,7 @@ export default function GlobalContact() {
                       <input 
                         type="tel" 
                         className={styles.textInput} 
-                        placeholder="연락처 (ex. 010-0000-0000)"
+                        placeholder="연락처"
                         value={formData.phone}
                         onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                         onKeyDown={handleKeyDown}
@@ -422,13 +432,14 @@ export default function GlobalContact() {
                       </p>
                     </div>
 
-                    <div className={styles.guideText}>
-                      {isSubmitting ? (
-                        "안전하게 암호화하여 전송 중입니다..."
-                      ) : (
-                        <>작성 완료 후 Enter를 누르시면 제출됩니다 <CornerDownLeft size={16} /></>
-                      )}
-                    </div>
+                    <button 
+                      className={`${styles.startButton} cursor-hover`} 
+                      style={{ marginTop: '2rem', opacity: (formData.email && formData.phone && isConsentChecked && !isSubmitting) ? 1 : 0.5 }}
+                      onClick={handleNext}
+                      disabled={!formData.email || !formData.phone || !isConsentChecked || isSubmitting}
+                    >
+                      {isSubmitting ? "안전하게 암호화하여 전송 중..." : "제출하기"} <ArrowRight size={20} style={{ display: 'inline', verticalAlign: 'middle', marginLeft: '8px' }} />
+                    </button>
                   </motion.div>
                 )}
 
