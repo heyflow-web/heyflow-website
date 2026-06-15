@@ -239,14 +239,20 @@ export default function GlobalContact() {
                         onKeyDown={handleKeyDown}
                       />
                     </div>
-                    <button 
-                      className={`${styles.startButton} cursor-hover`} 
-                      style={{ marginTop: '2rem', opacity: (formData.name && formData.brand) ? 1 : 0.5 }}
-                      onClick={handleNext}
-                      disabled={!formData.name || !formData.brand}
-                    >
-                      다음으로 <ArrowRight size={20} style={{ display: 'inline', verticalAlign: 'middle', marginLeft: '8px' }} />
-                    </button>
+                    <AnimatePresence>
+                      {(formData.name.trim().length > 0 && formData.brand.trim().length > 0) && (
+                        <motion.button 
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: 10 }}
+                          className={`${styles.startButton} cursor-hover`} 
+                          style={{ marginTop: '2rem' }}
+                          onClick={handleNext}
+                        >
+                          다음으로 <ArrowRight size={20} style={{ display: 'inline', verticalAlign: 'middle', marginLeft: '8px' }} />
+                        </motion.button>
+                      )}
+                    </AnimatePresence>
                   </motion.div>
                 )}
 
@@ -296,14 +302,20 @@ export default function GlobalContact() {
                         );
                       })}
                     </div>
-                    <button 
-                       className={`${styles.startButton} cursor-hover`} 
-                       style={{ marginTop: '2rem', opacity: formData.projectTypes.length > 0 ? 1 : 0.5 }}
-                       onClick={handleNext}
-                       disabled={formData.projectTypes.length === 0}
-                    >
-                      다음으로 <ArrowRight size={20} style={{ display: 'inline', verticalAlign: 'middle', marginLeft: '8px' }} />
-                    </button>
+                    <AnimatePresence>
+                      {formData.projectTypes.length > 0 && (
+                        <motion.button 
+                           initial={{ opacity: 0, y: 10 }}
+                           animate={{ opacity: 1, y: 0 }}
+                           exit={{ opacity: 0, y: 10 }}
+                           className={`${styles.startButton} cursor-hover`} 
+                           style={{ marginTop: '2rem' }}
+                           onClick={handleNext}
+                        >
+                          다음으로 <ArrowRight size={20} style={{ display: 'inline', verticalAlign: 'middle', marginLeft: '8px' }} />
+                        </motion.button>
+                      )}
+                    </AnimatePresence>
                   </motion.div>
                 )}
 
@@ -333,14 +345,20 @@ export default function GlobalContact() {
                       onChange={(e) => setFormData({ ...formData, problem: e.target.value })}
                       onKeyDown={handleKeyDown}
                     />
-                    <button 
-                      className={`${styles.startButton} cursor-hover`} 
-                      style={{ marginTop: '2rem', opacity: formData.problem ? 1 : 0.5 }}
-                      onClick={handleNext}
-                      disabled={!formData.problem}
-                    >
-                      다음으로 <ArrowRight size={20} style={{ display: 'inline', verticalAlign: 'middle', marginLeft: '8px' }} />
-                    </button>
+                    <AnimatePresence>
+                      {formData.problem.trim().length > 0 && (
+                        <motion.button 
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: 10 }}
+                          className={`${styles.startButton} cursor-hover`} 
+                          style={{ marginTop: '2rem' }}
+                          onClick={handleNext}
+                        >
+                          다음으로 <ArrowRight size={20} style={{ display: 'inline', verticalAlign: 'middle', marginLeft: '8px' }} />
+                        </motion.button>
+                      )}
+                    </AnimatePresence>
                   </motion.div>
                 )}
 
@@ -432,14 +450,21 @@ export default function GlobalContact() {
                       </p>
                     </div>
 
-                    <button 
-                      className={`${styles.startButton} cursor-hover`} 
-                      style={{ marginTop: '2rem', opacity: (formData.email && formData.phone && isConsentChecked && !isSubmitting) ? 1 : 0.5 }}
-                      onClick={handleNext}
-                      disabled={!formData.email || !formData.phone || !isConsentChecked || isSubmitting}
-                    >
-                      {isSubmitting ? "안전하게 암호화하여 전송 중..." : "제출하기"} <ArrowRight size={20} style={{ display: 'inline', verticalAlign: 'middle', marginLeft: '8px' }} />
-                    </button>
+                    <AnimatePresence>
+                      {(formData.email.trim().length > 0 && formData.phone.trim().length > 0) && (
+                        <motion.button 
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: 10 }}
+                          className={`${styles.startButton} cursor-hover`} 
+                          style={{ marginTop: '2rem', opacity: (!isConsentChecked || isSubmitting) ? 0.5 : 1 }}
+                          onClick={handleNext}
+                          disabled={isSubmitting}
+                        >
+                          {isSubmitting ? "안전하게 암호화하여 전송 중..." : "제출하기"} <ArrowRight size={20} style={{ display: 'inline', verticalAlign: 'middle', marginLeft: '8px' }} />
+                        </motion.button>
+                      )}
+                    </AnimatePresence>
                   </motion.div>
                 )}
 
