@@ -249,6 +249,51 @@
   margin-top: 2rem;
 }
 
+/* Privacy Consent */
+.consentWrapper {
+  margin-top: 1.5rem;
+  padding: 1.2rem;
+  background: rgba(120, 120, 120, 0.05);
+  border-radius: 8px;
+  text-align: left;
+}
+
+.consentLabel {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  cursor: pointer;
+  font-size: 1.1rem;
+  color: var(--text);
+  margin-bottom: 0.8rem;
+}
+
+.consentCheckbox {
+  width: 1.2rem;
+  height: 1.2rem;
+  cursor: pointer;
+  accent-color: var(--text);
+}
+
+.consentText {
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+
+.privacyLink {
+  color: var(--gray);
+  text-decoration: underline;
+  font-size: 1rem;
+  margin-left: auto;
+}
+
+.consentDetail {
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--gray);
+  letter-spacing: -0.02em;
+}
+
 @media (max-width: 768px) {
   .floatingButton {
     bottom: 1.5rem;

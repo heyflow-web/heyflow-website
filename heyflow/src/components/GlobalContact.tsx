@@ -9,6 +9,7 @@ export default function GlobalContact() {
   const [isOpen, setIsOpen] = useState(false);
   const [step, setStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isConsentChecked, setIsConsentChecked] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     problem: "",
@@ -65,6 +66,10 @@ export default function GlobalContact() {
     // 마지막 제출 단계 (step 5)
     if (step === 5) {
       if (!formData.contact) return;
+      if (!isConsentChecked) {
+        alert("개인정보 수집 및 이용에 동의해 주세요.");
+        return;
+      }
       
       setIsSubmitting(true);
       try {
@@ -119,6 +124,7 @@ export default function GlobalContact() {
         setTimeout(() => {
           setStep(0);
           setFormData({ name: "", problem: "", budget: "", projectTypes: [], contact: "" });
+          setIsConsentChecked(false);
         }, 600);
       }, 4500);
     }
@@ -371,6 +377,25 @@ export default function GlobalContact() {
                       onChange={(e) => setFormData({ ...formData, contact: e.target.value })}
                       onKeyDown={handleKeyDown}
                     />
+
+                    <div className={styles.consentWrapper}>
+                      <label className={styles.consentLabel}>
+                        <input 
+                          type="checkbox" 
+                          checked={isConsentChecked} 
+                          onChange={(e) => setIsConsentChecked(e.target.checked)} 
+                          className={styles.consentCheckbox}
+                        />
+                        <span className={styles.consentText}>
+                          [필수] 개인정보 수집 및 이용에 동의합니다.
+                        </span>
+                        <a href="/privacy" target="_blank" rel="noopener noreferrer" className={`${styles.privacyLink} cursor-hover`}>(전문 보기)</a>
+                      </label>
+                      <p className={styles.consentDetail}>
+                        수집 목적: 프로젝트 문의 및 상담 / 항목: 이름, 연락처, 프로젝트 정보 / 보유 기간: 상담 종료 후 1년<br/>(동의 거부 시 원활한 상담이 제한될 수 있습니다.)
+                      </p>
+                    </div>
+
                     <div className={styles.guideText}>
                       {isSubmitting ? (
                         "안전하게 암호화하여 전송 중입니다..."
