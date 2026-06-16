@@ -475,7 +475,10 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
                   <span className={styles.planType}>{plan.type}</span>
                 </div>
                 <p className={styles.planDesc}>{plan.desc}</p>
-                <div className={styles.planPrice}>{plan.price}</div>
+                <div className={styles.planPrice}>
+                  {plan.price}
+                  <span className={styles.vatText}>(VAT 별도)</span>
+                </div>
                 <ul className={styles.planFeatures}>
                   {plan.features.map((f, i) => <li key={i}>{f}</li>)}
                 </ul>
