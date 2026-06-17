@@ -281,7 +281,7 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
         <div className={styles.aboutContent}>
           <motion.h2 
             className={styles.aboutHeadline} 
-            style={isMobile ? { overflow: "hidden" } : { overflow: "hidden", opacity: aboutOpacity }}
+            style={isMobile ? { overflow: "visible" } : { overflow: "visible", opacity: aboutOpacity }}
             initial={isMobile ? "hidden" : undefined}
             whileInView={isMobile ? "visible" : undefined}
             viewport={{ once: true, margin: "-10%" }}
