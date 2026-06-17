@@ -6,9 +6,10 @@ import lottie, { AnimationItem } from "lottie-web";
 interface LottiePlayerProps {
   src: string;
   alignLeft?: boolean;
+  speed?: number;
 }
 
-export default function LottiePlayer({ src, alignLeft = false }: LottiePlayerProps) {
+export default function LottiePlayer({ src, alignLeft = false, speed = 1.5 }: LottiePlayerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -28,6 +29,7 @@ export default function LottiePlayer({ src, alignLeft = false }: LottiePlayerPro
             preserveAspectRatio: alignLeft ? 'xMinYMid slice' : 'xMidYMid slice',
           }
         });
+        anim.setSpeed(speed);
       }
     }, { threshold: 0.1 });
 
