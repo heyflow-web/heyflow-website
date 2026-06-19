@@ -3,8 +3,32 @@ import BackButton from '@/components/BackButton';
 import { notFound } from 'next/navigation';
 import styles from './detail.module.css';
 import ReactMarkdown from 'react-markdown';
+import type { Metadata } from 'next';
 
 export const revalidate = 60; // 1분 단위 재검증
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params;
+  const item = await getProject(id);
+
+  if (!item) {
+    return {
+      title: 'Not Found | heyflow',
+      description: '페이지를 찾을 수 없습니다.'
+    };
+  }
+
+  return {
+    title: `${item.title} | heyflow 포트폴리오`,
+    description: item.description || `헤이플로우의 ${item.title} 제작 포트폴리오입니다.`,
+    openGraph: {
+      title: `${item.title} | heyflow 포트폴리오`,
+      description: item.description || `헤이플로우의 ${item.title} 제작 포트폴리오입니다.`,
+      url: `https://heyflow.kr/projects/${id}`,
+      images: item.pcImage ? [{ url: item.pcImage }] : [],
+    }
+  };
+}
 
 export default async function PortfolioDetail({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
