@@ -457,7 +457,7 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
           
           <div className={styles.pricingGrid}>
             {[
-              { title: "Standard", type: "(랜딩/원페이지)", price: "₩ 399,000", desc: "핵심 가치를 한 페이지에 압축하는 입문 플랜", features: ["기본 5개 섹션 반응형 원페이지", "비즈니스 분석 & 맞춤 카피라이팅", "브랜드 맞춤형 비주얼 디자인", "구글·AI 검색(SEO) 기본 세팅", "자체 관리자 페이지 및 운영 가이드 제공"] },
+              { title: "Standard", type: "(랜딩/원페이지)", price: "₩ 590,000", desc: "핵심 가치를 한 페이지에 압축하는 입문 플랜", features: ["기본 5개 섹션 반응형 원페이지", "비즈니스 분석 & 맞춤 카피라이팅", "브랜드 맞춤형 비주얼 디자인", "구글·AI 검색(SEO) 기본 세팅", "자체 관리자 페이지 및 운영 가이드 제공"] },
               { title: "Premium", type: "(공식 홈페이지)", price: "₩ 1,490,000", desc: "브랜드 아이덴티티를 완벽히 구현하는 대표 플랜", pop: true, features: ["핵심 5개 페이지 (소개, 서비스, 포트폴리오 등)", "홈페이지 ↔ PDF 자동 변환 구축", "고감도 인터랙션 빌드", "초고속 글로벌 CDN 서버 배포", "Standard 플랜 혜택 모두 포함"] },
               { title: "Enterprise", type: "(종합 브랜딩 패키지)", price: "₩ 2,990,000", desc: "스케일업을 위한 완전한 웹사이트를 구현하는 플랜", features: ["대규모 10개 다중 페이지 마스터 빌드", "브랜드 맞춤형 하이엔드 인터랙션", "테크니컬 검색 엔진 최적화(SEO)", "Premium 플랜 혜택 모두 포함"] }
             ].map((plan, idx) => (
