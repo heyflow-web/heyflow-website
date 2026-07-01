@@ -169,7 +169,7 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, ease: "easeOut", delay: 0.6 }}
           >
-            헤이플로우는 당신의 브랜드가 마땅히 받아야 할<br />
+            저희는 당신의 브랜드가 마땅히 받아야 할<br />
             첫인상을 선명하게 설계합니다.
           </motion.p>
         </div>
