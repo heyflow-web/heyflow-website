@@ -40,7 +40,7 @@ ${category} 관련 핵심 키워드 검색 시 상위 노출이 유리하도록 
 
 const mdToBlocks = (mdString) => {
   const blocks = [];
-  const lines = mdString.split('\\n');
+  const lines = mdString.split('\n');
   for (const line of lines) {
     if (line.startsWith('# ')) {
       blocks.push({ heading_1: { rich_text: [{ text: { content: line.substring(2) } }] } });

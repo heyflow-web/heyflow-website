@@ -122,13 +122,20 @@
 .longText h3 {
   opacity: 1; /* 헤드라인은 완전히 짙은 컬러로 강조 */
   font-weight: 600;
-  margin-top: 1.5rem; /* 헤딩 여백도 줄임 */
-  margin-bottom: 0.5rem;
+  margin-top: 1.2rem; /* 1.5rem에서 줄임 */
+  margin-bottom: 0.3rem; /* 0.5rem에서 줄임 */
   color: var(--text);
 }
 
 .longText p, 
 .longText ul, 
 .longText li {
-  margin-bottom: 0.5rem; /* 기존 1rem에서 절반으로 줄임 */
+  margin-bottom: 0.3rem; /* 0.5rem에서 줄임 */
+}
+
+/* 빈 줄(엔터)로 인해 생성된 빈 p 태그의 영역을 완전히 제거 */
+.longText p:empty {
+  display: none;
+  margin: 0;
+  padding: 0;
 }
