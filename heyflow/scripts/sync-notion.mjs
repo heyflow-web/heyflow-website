@@ -75,6 +75,8 @@ const getPropertyValue = (property, type) => {
         return file.type === 'external' ? file.external.url : file.file.url;
       }
       return '';
+    case 'checkbox':
+      return property.checkbox ?? true;
     default:
       return '';
   }
@@ -104,8 +106,9 @@ async function syncNotion() {
     const projects = [];
 
     for (const page of data.results) {
-      const id = page.id.split('-').join('').substring(0, 8); // 간소화된 ID
+      const id = page.id.split('-').join(''); // 고유한 전체 ID 사용
       const title = getPropertyValue(page.properties['Name'], 'title');
+      const slug = title ? title.trim().replace(/\s+/g, '-').replace(/[^a-zA-Z0-9가-힣\-]/g, '').toLowerCase() : id;
       console.log(`\n📦 프로젝트 분석 중: ${title || id}`);
 
       const rawPcImage = getPropertyValue(page.properties['PC Image'], 'files');
@@ -117,14 +120,16 @@ async function syncNotion() {
 
       // 파일 다운로드 (병렬 처리)
       const [pcImage, mobileImage, heroImage] = await Promise.all([
-        downloadMedia(rawPcImage, id, 'pc'),
-        downloadMedia(rawMobileImage, id, 'mobile'),
-        downloadMedia(rawHeroImage, id, 'hero')
+        downloadMedia(rawPcImage, slug, 'pc'),
+        downloadMedia(rawMobileImage, slug, 'mobile'),
+        downloadMedia(rawHeroImage, slug, 'hero')
       ]);
 
       // 컨텐츠 마크다운 변환
       const mdblocks = await n2m.pageToMarkdown(page.id);
       const mdString = n2m.toMarkdownString(mdblocks);
+
+      const showInHero = page.properties['Hero'] ? getPropertyValue(page.properties['Hero'], 'checkbox') : true;
 
       projects.push({
         id: page.id,
@@ -135,6 +140,7 @@ async function syncNotion() {
         heroImage,
         link: getPropertyValue(page.properties['Link'], 'url'),
         content: mdString.parent || '',
+        showInHero,
       });
     }
 

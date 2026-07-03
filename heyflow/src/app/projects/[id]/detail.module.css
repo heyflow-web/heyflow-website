@@ -111,8 +111,24 @@
 .longText {
   font-size: 16px;
   font-weight: 400;
-  line-height: 1.8;
+  line-height: 1.6; /* 기존 1.8에서 줄임 */
   white-space: pre-wrap;
   color: var(--text);
-  opacity: 0.45; /* 가장 부드러운 컬러 (본문 텍스트) */
+  opacity: 0.6; /* 본문 텍스트도 살짝 가독성 개선 */
+}
+
+.longText h1,
+.longText h2,
+.longText h3 {
+  opacity: 1; /* 헤드라인은 완전히 짙은 컬러로 강조 */
+  font-weight: 600;
+  margin-top: 1.5rem; /* 헤딩 여백도 줄임 */
+  margin-bottom: 0.5rem;
+  color: var(--text);
+}
+
+.longText p, 
+.longText ul, 
+.longText li {
+  margin-bottom: 0.5rem; /* 기존 1rem에서 절반으로 줄임 */
 }

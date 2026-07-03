@@ -54,9 +54,6 @@ export default async function PortfolioDetail({ params }: { params: Promise<{ id
 
         <div className={styles.content}>
           {item.description && <p className={styles.desc}>{item.description}</p>}
-          <div className={styles.longText}>
-            <ReactMarkdown>{item.content || ''}</ReactMarkdown>
-          </div>
         </div>
 
         <div className={styles.imageGallery}>
@@ -70,6 +67,12 @@ export default async function PortfolioDetail({ params }: { params: Promise<{ id
               <img src={item.mobileImage} alt={`${item.title} Mobile`} className={styles.image} />
             </div>
           )}
+        </div>
+
+        <div className={styles.content}>
+          <div className={styles.longText}>
+            <ReactMarkdown>{item.content || ''}</ReactMarkdown>
+          </div>
         </div>
       </article>
     </main>

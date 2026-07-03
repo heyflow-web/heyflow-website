@@ -9,6 +9,7 @@ export interface Project {
   heroImage?: string;
   link: string;
   content?: string;
+  showInHero?: boolean;
 }
 
 export async function getProjects(): Promise<Project[]> {

@@ -1,5 +1,4 @@
 "use client";
-import Image from "next/image";
 
 import { useEffect, useRef, useState } from "react";
 import { motion, useScroll, useTransform, useInView, AnimatePresence } from "framer-motion";
@@ -74,7 +73,8 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
   };
 
   // Hero 무한 롤링용 배열 복제 (최소 3세트 이상으로 끊김 없는 루프 보장)
-  const marqueeSet = [...projects, ...projects, ...projects];
+  const heroProjects = projects.filter(p => p.showInHero !== false);
+  const marqueeSet = [...heroProjects, ...heroProjects, ...heroProjects];
 
 
   // Conclusion Text Scroll 로직
@@ -186,13 +186,11 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
             <div className={styles.marqueeGroup}>
               {marqueeSet.map((proj, idx) => (
                 <Link href={`/projects/${proj.id}`} key={`g1-${idx}`} className={`${styles.marqueeItem} cursor-hover`}>
-                  <Image 
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img 
                     src={proj.heroImage || proj.pcImage} 
                     alt={proj.title} 
                     className={styles.marqueeImage} 
-                    width={400} 
-                    height={300} 
-                    style={{ objectFit: 'cover' }} 
                   />
                 </Link>
               ))}
@@ -200,13 +198,11 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
             <div className={styles.marqueeGroup}>
               {marqueeSet.map((proj, idx) => (
                 <Link href={`/projects/${proj.id}`} key={`g2-${idx}`} className={`${styles.marqueeItem} cursor-hover`}>
-                  <Image 
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img 
                     src={proj.heroImage || proj.pcImage} 
                     alt={proj.title} 
                     className={styles.marqueeImage} 
-                    width={400} 
-                    height={300} 
-                    style={{ objectFit: 'cover' }} 
                   />
                 </Link>
               ))}
