@@ -56,11 +56,24 @@ const mapPageToProject = (page: any): Project => {
 
 export async function getProjects(): Promise<Project[]> {
   try {
-    const response = await notion.databases.query({
-      database_id: DATABASE_ID,
-      sorts: [{ property: 'Order', direction: 'ascending' }],
+    const res = await fetch(`https://api.notion.com/v1/databases/${DATABASE_ID}/query`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.NOTION_API_KEY}`,
+        'Notion-Version': '2022-06-28',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        sorts: [{ property: 'Order', direction: 'ascending' }],
+      }),
     });
-    return response.results.map(mapPageToProject);
+
+    if (!res.ok) {
+      throw new Error(`Notion API error: ${res.statusText}`);
+    }
+
+    const data = await res.json();
+    return data.results.map(mapPageToProject);
   } catch (error) {
     console.error("Error fetching getProjects:", error);
     return [];
