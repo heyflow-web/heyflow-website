@@ -3,6 +3,7 @@ import BackButton from '@/components/BackButton';
 import { notFound } from 'next/navigation';
 import styles from './detail.module.css';
 import ReactMarkdown from 'react-markdown';
+import remarkBreaks from 'remark-breaks';
 import type { Metadata } from 'next';
 
 export const revalidate = 60; // 1분 단위 재검증
@@ -71,7 +72,7 @@ export default async function PortfolioDetail({ params }: { params: Promise<{ id
 
         <div className={styles.content}>
           <div className={styles.longText}>
-            <ReactMarkdown>{item.content || ''}</ReactMarkdown>
+            <ReactMarkdown remarkPlugins={[remarkBreaks]}>{item.content || ''}</ReactMarkdown>
           </div>
         </div>
       </article>

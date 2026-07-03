@@ -17,6 +17,15 @@ const notion = new Client({ auth: process.env.NOTION_API_KEY });
 const n2m = new NotionToMarkdown({ notionClient: notion });
 const DATABASE_ID = process.env.NOTION_DATABASE_ID!;
 
+// 사용자가 노션에서 엔터로 생성한 빈 단락을 보존하기 위한 커스텀 변환기
+n2m.setCustomTransformer('paragraph', async (block) => {
+  const { paragraph } = block as any;
+  if (!paragraph.rich_text || paragraph.rich_text.length === 0) {
+    return '&nbsp;';
+  }
+  return false;
+});
+
 const getPropertyValue = (property: any, type: string) => {
   if (!property) return '';
   switch (type) {
