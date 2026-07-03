@@ -3,7 +3,6 @@ import path from 'path';
 import { pipeline } from 'stream/promises';
 import { fileURLToPath } from 'url';
 import { Client } from '@notionhq/client';
-import { NotionToMarkdown } from 'notion-to-md';
 import dotenv from 'dotenv';
 
 // ESM 환경에서 __dirname 설정
@@ -16,7 +15,6 @@ dotenv.config({ path: path.resolve(rootDir, '.env.local') });
 dotenv.config({ path: path.resolve(rootDir, '.env') });
 
 const notion = new Client({ auth: process.env.NOTION_API_KEY });
-const n2m = new NotionToMarkdown({ notionClient: notion });
 const DATABASE_ID = process.env.NOTION_DATABASE_ID;
 
 if (!DATABASE_ID) {
@@ -119,35 +117,14 @@ async function syncNotion() {
       if (!rawHeroImage && rawPcImage) rawHeroImage = rawPcImage;
 
       // 파일 다운로드 (병렬 처리)
-      const [pcImage, mobileImage, heroImage] = await Promise.all([
+      await Promise.all([
         downloadMedia(rawPcImage, slug, 'pc'),
         downloadMedia(rawMobileImage, slug, 'mobile'),
         downloadMedia(rawHeroImage, slug, 'hero')
       ]);
-
-      // 컨텐츠 마크다운 변환
-      const mdblocks = await n2m.pageToMarkdown(page.id);
-      const mdString = n2m.toMarkdownString(mdblocks);
-
-      const showInHero = page.properties['Hero'] ? getPropertyValue(page.properties['Hero'], 'checkbox') : true;
-
-      projects.push({
-        id: page.id,
-        title,
-        description: getPropertyValue(page.properties['Description'], 'rich_text'),
-        pcImage,
-        mobileImage,
-        heroImage,
-        link: getPropertyValue(page.properties['Link'], 'url'),
-        content: mdString.parent || '',
-        showInHero,
-      });
     }
 
-    // data.json 저장
-    const dataPath = path.join(rootDir, 'src', 'data.json');
-    fs.writeFileSync(dataPath, JSON.stringify(projects, null, 2));
-    console.log(`\n🎉 모든 다운로드가 완료되었습니다. 데이터가 ${dataPath} 에 저장되었습니다.`);
+    console.log(`\n🎉 이미지 로컬 동기화 완료! 텍스트는 API를 통해 실시간으로 갱신됩니다.`);
 
   } catch (error) {
     console.error("❌ 노션 동기화 중 에러 발생:", error);
