@@ -33,7 +33,7 @@
   padding: 0;
   position: relative;
   background-color: var(--bg);
-  transition: background-color 0.8s ease;
+  transition: background-color 0.8s cubic-bezier(0.16, 1, 0.3, 1);
   overflow: hidden;
 }
 
@@ -67,7 +67,7 @@
   overflow: hidden;
   display: flex;
   align-items: center;
-  background-color: var(--bg);
+  background-color: transparent;
   padding-bottom: 5vh;
 }
 
@@ -90,7 +90,7 @@
   flex-shrink: 0;
   position: relative;
   overflow: hidden;
-  background-color: var(--border);
+  background-color: transparent;
   border-radius: 4px;
 }
 
@@ -113,9 +113,9 @@
 
 /* Section 02: Problem Section (Sticky Scroll Layout) */
 .problemSection {
-  padding: 15vh 5vw;
+  padding: 10vh 5vw 15vh; /* top padding 15vh -> 10vh 로 줄임 */
   background-color: var(--bg);
-  transition: background-color 0.8s ease, color 0.8s ease;
+  transition: background-color 0.8s cubic-bezier(0.16, 1, 0.3, 1), color 0.8s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .problemStickyContainer {
@@ -188,7 +188,7 @@
   justify-content: center;
   align-items: center;
   background-color: var(--bg);
-  transition: background-color 0.8s ease, color 0.8s ease;
+  transition: background-color 0.8s cubic-bezier(0.16, 1, 0.3, 1), color 0.8s cubic-bezier(0.16, 1, 0.3, 1);
   overflow: hidden;
 }
 
@@ -211,7 +211,7 @@
   align-items: center;
   padding: 15vh 5vw 30vh 5vw;
   background-color: var(--bg);
-  transition: background-color 0.8s ease;
+  transition: background-color 0.8s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .aboutContent {
@@ -243,7 +243,7 @@
 .workSection {
   padding: 15vh 5vw;
   background-color: var(--bg);
-  transition: background-color 0.8s ease;
+  transition: background-color 0.8s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .workContainer {
@@ -403,7 +403,7 @@
 .idealSection {
   padding: 30vh 5vw 15vh 5vw;
   background-color: var(--bg);
-  transition: background-color 0.8s ease;
+  transition: background-color 0.8s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .idealContainer {
@@ -612,7 +612,7 @@
 .faqSection {
   padding: 15vh 5vw;
   background-color: var(--bg);
-  transition: background-color 0.8s ease;
+  transition: background-color 0.8s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .faqContainer {
@@ -683,7 +683,7 @@
 /* Section 08: Contact & Footer */
 .footerSection {
   background-color: var(--bg);
-  transition: background-color 0.8s ease;
+  transition: background-color 0.8s cubic-bezier(0.16, 1, 0.3, 1);
   padding: 15vh 5vw 4vw 5vw;
   display: flex;
   flex-direction: column;

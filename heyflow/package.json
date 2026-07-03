@@ -3,8 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
+    "sync": "node scripts/sync-notion.mjs",
+    "dev": "npm run sync && next dev",
+    "build": "npm run sync && next build",
     "start": "next start",
     "lint": "eslint"
   },
@@ -26,6 +27,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "dotenv": "^17.4.2",
     "eslint": "^9",
     "eslint-config-next": "16.2.7",
     "typescript": "^5"

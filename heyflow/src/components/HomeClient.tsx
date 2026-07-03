@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 
 import { useEffect, useRef, useState } from "react";
 import { motion, useScroll, useTransform, useInView, AnimatePresence } from "framer-motion";
@@ -185,16 +186,28 @@ export default function HomeClient({ projects = [] }: { projects?: Project[] }) 
             <div className={styles.marqueeGroup}>
               {marqueeSet.map((proj, idx) => (
                 <Link href={`/projects/${proj.id}`} key={`g1-${idx}`} className={`${styles.marqueeItem} cursor-hover`}>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={proj.heroImage || proj.pcImage} alt={proj.title} className={styles.marqueeImage} />
+                  <Image 
+                    src={proj.heroImage || proj.pcImage} 
+                    alt={proj.title} 
+                    className={styles.marqueeImage} 
+                    width={400} 
+                    height={300} 
+                    style={{ objectFit: 'cover' }} 
+                  />
                 </Link>
               ))}
             </div>
             <div className={styles.marqueeGroup}>
               {marqueeSet.map((proj, idx) => (
                 <Link href={`/projects/${proj.id}`} key={`g2-${idx}`} className={`${styles.marqueeItem} cursor-hover`}>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={proj.heroImage || proj.pcImage} alt={proj.title} className={styles.marqueeImage} />
+                  <Image 
+                    src={proj.heroImage || proj.pcImage} 
+                    alt={proj.title} 
+                    className={styles.marqueeImage} 
+                    width={400} 
+                    height={300} 
+                    style={{ objectFit: 'cover' }} 
+                  />
                 </Link>
               ))}
             </div>

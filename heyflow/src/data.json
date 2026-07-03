@@ -1,11 +1,102 @@
 [
   {
-    "id": 1,
+    "id": "37ab1670-3d4f-8000-935c-e10489a89903",
+    "title": "피부과 반응형 웹사이트",
+    "description": "안티에이징 특화 시술을 강조하는 프리미엄 메디컬 브랜드의 웹사이트 구축 프로젝트입니다. 1:1 맞춤형 진료 프로세스의 강점을 직관적으로 시각화하는 데 집중했습니다.\n\n[Design Strategy]\n\nVisual Concept:\n정제된 베이지 톤을 메인으로 사용하고, 피부의 매끄러운 결과 은은한 광채를 은유하는 추상적인 그래픽 요소를 활용해 하이엔드 감성을 극대화했습니다.\n\nLayout & UI:\n절제된 레이아웃과 미니멀한 모던 감각을 적용하여, 감각적이면서도 메디컬 브랜드가 지녀야 할 깊은 신뢰감을 동시에 전달하고자 했습니다.",
+    "pcImage": "/images/projects/proj-37ab1670-pc.png",
+    "mobileImage": "/images/projects/proj-37ab1670-mobile.png",
+    "heroImage": "/images/projects/proj-37ab1670-hero.png",
+    "link": "https://aurora-dermatology.vercel.app/",
+    "content": ""
+  },
+  {
+    "id": "37bb1670-3d4f-8004-9bb4-cf05537ff057",
+    "title": "강남 B정형외과 반응형 홈페이지 제작",
+    "description": "강남 B성형외과의 브랜드 가치를 높이는 프리미엄 웹사이트 제작 사례입니다. 전환율을 극대화하는 UI/UX 설계를 진행했습니다.",
+    "pcImage": "/images/projects/proj-37bb1670-pc.png",
+    "mobileImage": "/images/projects/proj-37bb1670-mobile.png",
+    "heroImage": "/images/projects/proj-37bb1670-hero.png",
+    "link": "",
+    "content": ""
+  },
+  {
+    "id": "37bb1670-3d4f-8012-b132-e7c94d162b31",
+    "title": "동탄 피부과 반응형 홈페이지",
+    "description": "안티에이징 특화 시술을 강조하는 프리미엄 메디컬 브랜드의 웹사이트 구축 프로젝트입니다. 1:1 맞춤형 진료 프로세스의 강점을 직관적으로 시각화하는 데 집중했습니다.\n\n[Design Strategy]\n\nVisual Concept:\n정제된 베이지 톤을 메인으로 사용하고, 피부의 매끄러운 결과 은은한 광채를 은유하는 추상적인 그래픽 요소를 활용해 하이엔드 감성을 극대화했습니다.\n\nLayout & UI:\n절제된 레이아웃과 미니멀한 모던 감각을 적용하여, 감각적이면서도 메디컬 브랜드가 지녀야 할 깊은 신뢰감을 동시에 전달하고자 했습니다.",
+    "pcImage": "/images/projects/proj-37bb1670-pc.png",
+    "mobileImage": "/images/projects/proj-37bb1670-mobile.png",
+    "heroImage": "/images/projects/proj-37bb1670-hero.png",
+    "link": "",
+    "content": ""
+  },
+  {
+    "id": "380b1670-3d4f-809c-82d2-e22c8c7afe14",
+    "title": "강남 피부과 반응형 홈페이지",
+    "description": "",
+    "pcImage": "/images/projects/proj-380b1670-pc.png",
+    "mobileImage": "/images/projects/proj-380b1670-mobile.png",
+    "heroImage": "/images/projects/proj-380b1670-hero.png",
+    "link": "",
+    "content": ""
+  },
+  {
+    "id": "380b1670-3d4f-80ac-bd50-ec196574e504",
+    "title": "뷰티 디바이스 반응형 홈페이지",
+    "description": "",
+    "pcImage": "/images/projects/proj-380b1670-pc.png",
+    "mobileImage": "",
+    "heroImage": "/images/projects/proj-380b1670-hero.png",
+    "link": "",
+    "content": ""
+  },
+  {
+    "id": "380b1670-3d4f-80c6-9e7a-da6a5eec1c67",
+    "title": "정형외과 홈페이지형 블로그",
+    "description": "",
+    "pcImage": "/images/projects/proj-380b1670-pc.png",
+    "mobileImage": "/images/projects/proj-380b1670-mobile.png",
+    "heroImage": "/images/projects/proj-380b1670-hero.png",
+    "link": "",
+    "content": ""
+  },
+  {
+    "id": "380b1670-3d4f-80ad-a2c7-d798ed5acecb",
+    "title": "치과 홈페이지형 블로그",
+    "description": "",
+    "pcImage": "/images/projects/proj-380b1670-pc.png",
+    "mobileImage": "",
+    "heroImage": "/images/projects/proj-380b1670-hero.png",
+    "link": "",
+    "content": ""
+  },
+  {
+    "id": "380b1670-3d4f-8019-8421-d1ff3a3b9a5f",
+    "title": "치과 홈페이지형 블로그",
+    "description": "",
+    "pcImage": "/images/projects/proj-380b1670-pc.png",
+    "mobileImage": "/images/projects/proj-380b1670-mobile.png",
+    "heroImage": "/images/projects/proj-380b1670-hero.png",
+    "link": "",
+    "content": ""
+  },
+  {
+    "id": "380b1670-3d4f-80ca-ab2f-e9d83818a943",
+    "title": "한의원 홈페이지형 블로그",
+    "description": "",
+    "pcImage": "/images/projects/proj-380b1670-pc.png",
+    "mobileImage": "/images/projects/proj-380b1670-mobile.png",
+    "heroImage": "/images/projects/proj-380b1670-hero.png",
+    "link": "",
+    "content": ""
+  },
+  {
+    "id": "380b1670-3d4f-80db-a685-f1cfb7855230",
     "title": "피부과 반응형 웹사이트",
     "description": "",
-    "content": "안티에이징 특화 시술을 강조하는 프리미엄 메디컬 브랜드의 웹사이트 구축 프로젝트입니다. 1:1 맞춤형 진료 프로세스의 강점을 직관적으로 시각화하는 데 집중했습니다.\n\n[Design Strategy]\n\nVisual Concept: \n정제된 베이지 톤을 메인으로 사용하고, 피부의 매끄러운 결과 은은한 광채를 은유하는 추상적인 그래픽 요소를 활용해 하이엔드 감성을 극대화했습니다.\n\nLayout & UI: \n절제된 레이아웃과 미니멀한 모던 감각을 적용하여, 감각적이면서도 메디컬 브랜드가 지녀야 할 깊은 신뢰감을 동시에 전달하고자 했습니다.",
-    "pcImage": "/images/aurora_pc.png",
-    "mobileImage": "/images/aurora_mobile.png",
-    "link": "https://aurora-dermatology.vercel.app/"
+    "pcImage": "/images/projects/proj-380b1670-pc.png",
+    "mobileImage": "",
+    "heroImage": "/images/projects/proj-380b1670-hero.png",
+    "link": "",
+    "content": ""
   }
 ]
