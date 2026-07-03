@@ -26,6 +26,12 @@ const getPropertyValue = (property: any, type: string) => {
       return property.rich_text?.[0]?.plain_text || '';
     case 'url':
       return property.url || '';
+    case 'files':
+      if (property.files && property.files.length > 0) {
+        const file = property.files[0];
+        return file.type === 'external' ? file.external.url : file.file.url;
+      }
+      return '';
     case 'checkbox':
       return property.checkbox ?? true;
     default:
@@ -42,13 +48,18 @@ const mapPageToProject = (page: any): Project => {
   const title = getPropertyValue(page.properties['Name'], 'title');
   const slug = slugify(title, id);
 
+  const rawPcImage = getPropertyValue(page.properties['PC Image'], 'files');
+  const rawMobileImage = getPropertyValue(page.properties['Mobile Image'], 'files');
+  let rawHeroImage = getPropertyValue(page.properties['Hero Image'], 'files');
+  if (!rawHeroImage && rawPcImage) rawHeroImage = rawPcImage;
+
   return {
     id: page.id,
     title,
     description: getPropertyValue(page.properties['Description'], 'rich_text'),
-    pcImage: `/images/projects/proj-${slug}-pc.png`,
-    mobileImage: `/images/projects/proj-${slug}-mobile.png`,
-    heroImage: `/images/projects/proj-${slug}-hero.png`,
+    pcImage: rawPcImage ? `/images/projects/proj-${slug}-pc.png` : '',
+    mobileImage: rawMobileImage ? `/images/projects/proj-${slug}-mobile.png` : '',
+    heroImage: rawHeroImage ? `/images/projects/proj-${slug}-hero.png` : '',
     link: getPropertyValue(page.properties['Link'], 'url'),
     showInHero: page.properties['Hero'] ? getPropertyValue(page.properties['Hero'], 'checkbox') : true,
   };
