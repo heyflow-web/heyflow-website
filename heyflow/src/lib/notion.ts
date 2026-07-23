@@ -196,22 +196,29 @@ export async function getInquiries(): Promise<BoardPost[]> {
       let author = company ? maskText(company) : maskText(name);
       if (!author) author = "고객";
 
+      const isNotice = page.properties['공지사항']?.checkbox || false;
       const inquiryContent = getPropertyValue(page.properties['문의내용'], 'rich_text');
-      let projectTypeStr = "홈페이지 제작"; // 기본값
-      if (inquiryContent) {
-        const match = inquiryContent.match(/프로젝트 타입:\s*(.+)/);
-        if (match && match[1]) {
-          const types = match[1].split(',');
-          projectTypeStr = types[0].trim();
-        }
-      }
       
-      const title = `${projectTypeStr} 문의가 작성되었어요.`;
+      let title = "";
+      if (isNotice) {
+        title = inquiryContent || "공지사항입니다.";
+        author = "heyflow";
+      } else {
+        let projectTypeStr = "홈페이지 제작"; // 기본값
+        if (inquiryContent) {
+          const match = inquiryContent.match(/프로젝트 타입:\s*(.+)/);
+          if (match && match[1]) {
+            const types = match[1].split(',');
+            projectTypeStr = types[0].trim();
+          }
+        }
+        title = `${projectTypeStr} 문의가 작성되었어요.`;
+      }
 
       return {
         id: page.id,
-        isNotice: false,
-        isSecret: true,
+        isNotice,
+        isSecret: !isNotice, // 공지사항은 비밀글 아님
         title,
         author,
         date: dateStr,
@@ -241,6 +248,13 @@ export async function verifyInquiry(id: string, phone: string) {
 
   try {
     const page = await notion.pages.retrieve({ page_id: id }) as any;
+    const isNotice = page.properties['공지사항']?.checkbox || false;
+
+    if (isNotice) {
+      const content = getPropertyValue(page.properties['문의내용'], 'rich_text');
+      return { success: true, data: { content, email: '', budget: '' } };
+    }
+
     const savedPhone = getPropertyValue(page.properties['연락처'], 'phone_number');
     
     // Remove dashes and spaces for comparison

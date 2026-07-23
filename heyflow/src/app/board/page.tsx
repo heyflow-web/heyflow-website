@@ -7,15 +7,14 @@ export const revalidate = 0; // Always fetch fresh data
 export default async function BoardPage() {
   const realInquiries = await getInquiries();
   
-  // Update IDs of real inquiries to be higher than dummy data
-  // Dummy max ID is 1279, so we start from 1280 + length
-  let nextId = 1280 + realInquiries.length - 1;
-  const formattedRealInquiries: BoardPost[] = realInquiries.map((inq) => ({
+  const notices = realInquiries.filter(inq => inq.isNotice);
+  const normalRealInquiries = realInquiries.filter(inq => !inq.isNotice);
+
+  let nextId = 47 + normalRealInquiries.length;
+  const formattedRealInquiries: BoardPost[] = normalRealInquiries.map((inq) => ({
     ...inq,
     displayId: (nextId--).toString(),
   }));
-
-  const notices = dummyBoardData.filter(d => d.isNotice);
   
   const maskText = (text: string) => {
     if (!text) return "고객";
@@ -27,10 +26,12 @@ export default async function BoardPage() {
 
   const projectTypes = ["반응형 웹사이트", "랜딩페이지", "제품 상세페이지", "온라인 배너(SNS 에셋 등)"];
 
-  const dummyPosts = dummyBoardData.filter(d => !d.isNotice).map((post, i) => {
+  let dummyId = 47;
+  const dummyPosts = dummyBoardData.filter(d => !d.isNotice).slice(0, 47).map((post, i) => {
     const type = projectTypes[i % projectTypes.length];
     return {
       ...post,
+      displayId: (dummyId--).toString(),
       title: `${type} 문의가 작성되었어요.`,
       author: maskText(post.author)
     };

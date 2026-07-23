@@ -1,18 +1,14 @@
 'use client';
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import styles from './board.module.css';
 import { BoardPost } from '@/lib/dummyBoardData';
 
 const ITEMS_PER_PAGE = 15;
 
 export default function BoardClient({ initialData }: { initialData: BoardPost[] }) {
+  const router = useRouter();
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectedPost, setSelectedPost] = useState<BoardPost | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [phoneInput, setPhoneInput] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [errorMsg, setErrorMsg] = useState('');
-  const [viewData, setViewData] = useState<any>(null);
 
   // Split notices and regular posts
   const notices = initialData.filter(post => post.isNotice);
@@ -23,46 +19,10 @@ export default function BoardClient({ initialData }: { initialData: BoardPost[] 
   const currentPosts = regularPosts.slice(startIndex, startIndex + ITEMS_PER_PAGE);
 
   const handlePostClick = (post: BoardPost) => {
-    setSelectedPost(post);
-    setPhoneInput('');
-    setErrorMsg('');
-    setViewData(null);
-    setIsModalOpen(true);
-  };
-
-  const closeModal = () => {
-    setIsModalOpen(false);
-    setSelectedPost(null);
-    setViewData(null);
-  };
-
-  const handleVerify = async () => {
-    if (!selectedPost) return;
-    if (!phoneInput.trim()) {
-      setErrorMsg('연락처를 입력해주세요.');
-      return;
-    }
-
-    setIsLoading(true);
-    setErrorMsg('');
-
-    try {
-      const res = await fetch('/api/inquiry/verify', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: selectedPost.id, phone: phoneInput })
-      });
-      const data = await res.json();
-
-      if (data.success) {
-        setViewData(data.data);
-      } else {
-        setErrorMsg(data.message || '인증에 실패했습니다.');
-      }
-    } catch (err) {
-      setErrorMsg('서버 오류가 발생했습니다.');
-    } finally {
-      setIsLoading(false);
+    if (post.isNotice) {
+      router.push(`/board/${post.id}?isNotice=true`);
+    } else {
+      router.push(`/board/${post.id}`);
     }
   };
 
@@ -76,9 +36,8 @@ export default function BoardClient({ initialData }: { initialData: BoardPost[] 
             <tr>
               <th className={styles.colId}>번호</th>
               <th className={styles.colTitle}>제목</th>
-              <th className={styles.colAuthor}>작성자</th>
+              <th className={styles.colAuthor}>상호명</th>
               <th className={styles.colDate}>작성일</th>
-              <th className={styles.colLikes}>추천</th>
               <th className={styles.colViews}>조회</th>
             </tr>
           </thead>
@@ -87,15 +46,14 @@ export default function BoardClient({ initialData }: { initialData: BoardPost[] 
             {notices.map(post => (
               <tr key={post.id} className={styles.noticeRow}>
                 <td>공지사항</td>
-                <td className={styles.titleCell}>
+                <td className={styles.titleCell} onClick={() => handlePostClick(post)}>
                   <div className={styles.titleWrapper}>
                     <span className={styles.noticeBadge}>{post.title}</span>
                   </div>
                 </td>
                 <td>{post.author}</td>
                 <td>{post.date}</td>
-                <td>{post.likes}</td>
-                <td>{post.views}</td>
+                <td>{post.views.toLocaleString()}</td>
               </tr>
             ))}
             
@@ -115,8 +73,7 @@ export default function BoardClient({ initialData }: { initialData: BoardPost[] 
                 </td>
                 <td>{post.author}</td>
                 <td>{post.date}</td>
-                <td>{post.likes}</td>
-                <td>{post.views}</td>
+                <td>{post.views.toLocaleString()}</td>
               </tr>
             ))}
           </tbody>
@@ -149,59 +106,6 @@ export default function BoardClient({ initialData }: { initialData: BoardPost[] 
           &gt;
         </button>
       </div>
-
-      {/* Auth & View Modal */}
-      {isModalOpen && (
-        <div className={styles.modalOverlay} onClick={closeModal}>
-          <div className={styles.modalContent} onClick={e => e.stopPropagation()}>
-            <h2 className={styles.modalTitle}>
-              {viewData ? '문의 내용' : '비밀글 열람'}
-            </h2>
-            
-            {viewData ? (
-              <>
-                <div className={styles.inquiryData}>
-                  {viewData.content || '내용이 없습니다.'}
-                </div>
-                <div className={styles.modalActions}>
-                  <button onClick={closeModal} className={styles.btnConfirm}>
-                    닫기
-                  </button>
-                </div>
-              </>
-            ) : (
-              <>
-                <p className={styles.modalDesc}>
-                  작성자만 열람할 수 있는 비밀글입니다.<br/>
-                  글 작성 시 입력하셨던 <b>연락처(전화번호)</b>를 입력해 주세요.
-                </p>
-                <input 
-                  type="text" 
-                  className={styles.modalInput}
-                  placeholder="예: 01012345678"
-                  value={phoneInput}
-                  onChange={e => setPhoneInput(e.target.value.replace(/[^0-9]/g, ''))}
-                  onKeyDown={e => e.key === 'Enter' && handleVerify()}
-                />
-                {errorMsg && <p className={styles.modalError}>{errorMsg}</p>}
-                
-                <div className={styles.modalActions}>
-                  <button onClick={closeModal} className={styles.btnCancel}>
-                    취소
-                  </button>
-                  <button 
-                    onClick={handleVerify} 
-                    className={styles.btnConfirm}
-                    disabled={isLoading}
-                  >
-                    {isLoading ? '확인 중...' : '확인'}
-                  </button>
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-      )}
     </main>
   );
 }
