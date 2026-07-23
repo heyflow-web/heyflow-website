@@ -184,9 +184,16 @@ export async function getInquiries(): Promise<BoardPost[]> {
       const createdDate = new Date(page.created_time);
       const dateStr = createdDate.toISOString().split('T')[0].replace(/-/g, '.');
       
-      // 작성자 마스킹 로직 (예: 김** 또는 회사명(김**))
-      const maskedName = name.length > 1 ? name.substring(0, 1) + '*'.repeat(name.length - 1) : name;
-      let author = company ? `${company} (${maskedName})` : maskedName;
+      // 작성자 브랜드명 기준 마스킹 로직 (두, 세 번째 글자를 ** 처리)
+      const maskText = (text: string) => {
+        if (!text) return "";
+        if (text.length === 1) return text;
+        if (text.length === 2) return text.substring(0, 1) + '*';
+        if (text.length === 3) return text.substring(0, 1) + '**';
+        return text.substring(0, 1) + '**' + text.substring(3);
+      };
+
+      let author = company ? maskText(company) : maskText(name);
       if (!author) author = "고객";
 
       // 새 문의는 모두 홈페이지 제작 문의 등 임의의 제목 표시
