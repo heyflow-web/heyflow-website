@@ -1,0 +1,116 @@
+.boardContainer {
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 8rem 1.5rem 4rem;
+}
+
+.boardTitle {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 2rem;
+  text-align: center;
+  color: #111;
+}
+
+.tableWrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.boardTable {
+  width: 100%;
+  min-width: 800px;
+  border-collapse: collapse;
+  text-align: center;
+  font-size: 14px;
+  color: #333;
+  border-top: 2px solid #333;
+}
+
+.boardTable th {
+  padding: 1.2rem 0.5rem;
+  font-weight: 600;
+  color: #555;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.boardTable td {
+  padding: 1.2rem 0.5rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.noticeRow {
+  background-color: #f8f9fa;
+  font-weight: 500;
+}
+
+.titleCell {
+  text-align: left !important;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+
+.titleCell:hover {
+  text-decoration: underline;
+}
+
+.lockIcon {
+  width: 16px;
+  height: 16px;
+  fill: #aaa;
+  flex-shrink: 0;
+}
+
+.noticeBadge {
+  font-weight: 600;
+  color: #555;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 3rem;
+}
+
+.pageBtn {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #e5e7eb;
+  background: white;
+  color: #555;
+  cursor: pointer;
+  border-radius: 4px;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.pageBtn:hover {
+  background: #f3f4f6;
+}
+
+.pageBtn.active {
+  background: #333;
+  color: white;
+  border-color: #333;
+}
+
+.pageBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Columns widths */
+.colId { width: 8%; }
+.colTitle { width: auto; }
+.colAuthor { width: 15%; }
+.colDate { width: 15%; }
+.colLikes { width: 8%; }
+.colViews { width: 8%; }
