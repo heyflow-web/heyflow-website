@@ -12,7 +12,7 @@ export default async function BoardPage() {
   let nextId = 1280 + realInquiries.length - 1;
   const formattedRealInquiries: BoardPost[] = realInquiries.map((inq) => ({
     ...inq,
-    id: (nextId--).toString(),
+    displayId: (nextId--).toString(),
   }));
 
   const notices = dummyBoardData.filter(d => d.isNotice);

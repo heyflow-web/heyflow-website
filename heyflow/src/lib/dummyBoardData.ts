@@ -7,6 +7,7 @@ export interface BoardPost {
   date: string;
   likes: number;
   views: number;
+  displayId?: string;
 }
 
 export const dummyBoardData: BoardPost[] = [

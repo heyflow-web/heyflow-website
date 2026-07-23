@@ -102,7 +102,7 @@ export default function BoardClient({ initialData }: { initialData: BoardPost[] 
             {/* 일반 게시글 렌더링 */}
             {currentPosts.map(post => (
               <tr key={post.id}>
-                <td>{post.id}</td>
+                <td>{post.displayId || post.id}</td>
                 <td className={styles.titleCell} onClick={() => handlePostClick(post)}>
                   <div className={styles.titleWrapper}>
                     {post.isSecret && (
