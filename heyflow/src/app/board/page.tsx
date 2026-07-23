@@ -25,10 +25,16 @@ export default async function BoardPage() {
     return text.substring(0, 1) + '**' + text.substring(3);
   };
 
-  const dummyPosts = dummyBoardData.filter(d => !d.isNotice).map(post => ({
-    ...post,
-    author: maskText(post.author)
-  }));
+  const projectTypes = ["반응형 웹사이트", "랜딩페이지", "제품 상세페이지", "온라인 배너(SNS 에셋 등)"];
+
+  const dummyPosts = dummyBoardData.filter(d => !d.isNotice).map((post, i) => {
+    const type = projectTypes[i % projectTypes.length];
+    return {
+      ...post,
+      title: `${type} 문의가 작성되었어요.`,
+      author: maskText(post.author)
+    };
+  });
 
   // Combine: Notices -> Real Inquiries -> Dummy Posts
   const mergedPosts = [...notices, ...formattedRealInquiries, ...dummyPosts];

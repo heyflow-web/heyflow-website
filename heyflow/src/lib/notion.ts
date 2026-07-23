@@ -196,8 +196,17 @@ export async function getInquiries(): Promise<BoardPost[]> {
       let author = company ? maskText(company) : maskText(name);
       if (!author) author = "고객";
 
-      // 새 문의는 모두 홈페이지 제작 문의 등 임의의 제목 표시
-      const title = company ? `${company} 홈페이지 제작 문의드립니다.` : "홈페이지 제작 문의드립니다.";
+      const inquiryContent = getPropertyValue(page.properties['문의내용'], 'rich_text');
+      let projectTypeStr = "홈페이지 제작"; // 기본값
+      if (inquiryContent) {
+        const match = inquiryContent.match(/프로젝트 타입:\s*(.+)/);
+        if (match && match[1]) {
+          const types = match[1].split(',');
+          projectTypeStr = types[0].trim();
+        }
+      }
+      
+      const title = `${projectTypeStr} 문의가 작성되었어요.`;
 
       return {
         id: page.id,
