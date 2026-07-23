@@ -215,3 +215,33 @@ export async function getInquiries(): Promise<BoardPost[]> {
     return [];
   }
 }
+
+export async function verifyInquiry(id: string, phone: string) {
+  if (!INQUIRY_DB_ID) return { success: false, message: "DB_ID not set" };
+
+  if (id.length < 20) {
+    return { success: false, message: "이전 더미 데이터는 보안상 조회가 불가합니다." };
+  }
+
+  try {
+    const page = await notion.pages.retrieve({ page_id: id }) as any;
+    const savedPhone = getPropertyValue(page.properties['연락처'], 'phone_number');
+    
+    // Remove dashes and spaces for comparison
+    const cleanSavedPhone = savedPhone.replace(/[^0-9]/g, '');
+    const cleanInputPhone = phone.replace(/[^0-9]/g, '');
+
+    if (cleanSavedPhone === cleanInputPhone && cleanSavedPhone !== '') {
+      const content = getPropertyValue(page.properties['문의내용'], 'rich_text');
+      const email = getPropertyValue(page.properties['이메일'], 'email');
+      const budget = getPropertyValue(page.properties['예산'], 'rich_text');
+      
+      return { success: true, data: { content, email, budget } };
+    } else {
+      return { success: false, message: "입력하신 연락처가 일치하지 않습니다." };
+    }
+  } catch (error) {
+    console.error("Error verifying inquiry:", error);
+    return { success: false, message: "해당 글을 찾을 수 없거나 서버 오류가 발생했습니다." };
+  }
+}
