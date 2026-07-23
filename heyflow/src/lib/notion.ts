@@ -47,6 +47,10 @@ const getPropertyValue = (property: any, type: string) => {
       return property.checkbox ?? true;
     case 'number':
       return property.number ?? 0;
+    case 'phone_number':
+      return property.phone_number || '';
+    case 'email':
+      return property.email || '';
     default:
       return '';
   }
@@ -127,18 +131,25 @@ export async function getProject(id: string): Promise<Project | null> {
 export async function createInquiry(data: { name: string, company: string, contact: string, email: string, budget: string, schedule: string, inquiry: string }) {
   if (!INQUIRY_DB_ID) throw new Error("NOTION_INQUIRY_DB_ID is not set");
 
+  const properties: any = {
+    '작성자명': { title: [{ text: { content: data.name || '미상' } }] },
+    '회사명': { rich_text: [{ text: { content: data.company || '' } }] },
+    '예산': { rich_text: [{ text: { content: data.budget || '' } }] },
+    '문의내용': { rich_text: [{ text: { content: data.inquiry || '' } }] },
+    '조회수': { rich_text: [{ text: { content: String(Math.floor(Math.random() * 3) + 1) } }] }
+  };
+
+  if (data.contact) {
+    properties['연락처'] = { phone_number: data.contact };
+  }
+  if (data.email) {
+    properties['이메일'] = { email: data.email };
+  }
+  // 일정(date) 필드는 ISO 8601 포맷이 아닐 수 있으므로 오류를 피하기 위해 생략 (문의내용에 포함됨)
+
   const response = await notion.pages.create({
     parent: { database_id: INQUIRY_DB_ID },
-    properties: {
-      '이름': { title: [{ text: { content: data.name || '미상' } }] },
-      '회사명': { rich_text: [{ text: { content: data.company || '' } }] },
-      '연락처': { rich_text: [{ text: { content: data.contact || '' } }] },
-      '이메일': { rich_text: [{ text: { content: data.email || '' } }] },
-      '예산': { rich_text: [{ text: { content: data.budget || '' } }] },
-      '일정': { rich_text: [{ text: { content: data.schedule || '' } }] },
-      '문의내용': { rich_text: [{ text: { content: data.inquiry || '' } }] },
-      '조회수': { number: Math.floor(Math.random() * 3) + 1 } // 초기 조회수 랜덤 1~3 부여
-    }
+    properties
   });
   return response;
 }
@@ -165,9 +176,10 @@ export async function getInquiries(): Promise<BoardPost[]> {
     const data = await res.json();
     
     return data.results.map((page: any, index: number) => {
-      const name = getPropertyValue(page.properties['이름'], 'title');
+      const name = getPropertyValue(page.properties['작성자명'], 'title');
       const company = getPropertyValue(page.properties['회사명'], 'rich_text');
-      const views = getPropertyValue(page.properties['조회수'], 'number') || (Math.floor(Math.random() * 4) + 1);
+      const viewsStr = getPropertyValue(page.properties['조회수'], 'rich_text');
+      const views = parseInt(viewsStr, 10) || (Math.floor(Math.random() * 4) + 1);
       
       const createdDate = new Date(page.created_time);
       const dateStr = createdDate.toISOString().split('T')[0].replace(/-/g, '.');
