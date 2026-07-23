@@ -42,7 +42,9 @@ export default function BoardClient({ initialData }: { initialData: BoardPost[] 
               <tr key={post.id} className={styles.noticeRow}>
                 <td>공지사항</td>
                 <td className={styles.titleCell}>
-                  <span className={styles.noticeBadge}>{post.title}</span>
+                  <div className={styles.titleWrapper}>
+                    <span className={styles.noticeBadge}>{post.title}</span>
+                  </div>
                 </td>
                 <td>{post.author}</td>
                 <td>{post.date}</td>
@@ -56,12 +58,14 @@ export default function BoardClient({ initialData }: { initialData: BoardPost[] 
               <tr key={post.id}>
                 <td>{post.id}</td>
                 <td className={styles.titleCell} onClick={handlePostClick}>
-                  {post.isSecret && (
-                    <svg className={styles.lockIcon} viewBox="0 0 24 24">
-                      <path d="M12 17a2 2 0 100-4 2 2 0 000 4zm6-9V6a6 6 0 10-12 0v2H4v14h16V8h-2zM8 6a4 4 0 118 0v2H8V6z" />
-                    </svg>
-                  )}
-                  {post.title}
+                  <div className={styles.titleWrapper}>
+                    {post.isSecret && (
+                      <svg className={styles.lockIcon} viewBox="0 0 24 24">
+                        <path d="M12 17a2 2 0 100-4 2 2 0 000 4zm6-9V6a6 6 0 10-12 0v2H4v14h16V8h-2zM8 6a4 4 0 118 0v2H8V6z" />
+                      </svg>
+                    )}
+                    {post.title}
+                  </div>
                 </td>
                 <td>{post.author}</td>
                 <td>{post.date}</td>

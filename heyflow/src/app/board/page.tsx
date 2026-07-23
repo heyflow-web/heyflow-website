@@ -16,7 +16,19 @@ export default async function BoardPage() {
   }));
 
   const notices = dummyBoardData.filter(d => d.isNotice);
-  const dummyPosts = dummyBoardData.filter(d => !d.isNotice);
+  
+  const maskText = (text: string) => {
+    if (!text) return "고객";
+    if (text.length === 1) return text;
+    if (text.length === 2) return text.substring(0, 1) + '*';
+    if (text.length === 3) return text.substring(0, 1) + '**';
+    return text.substring(0, 1) + '**' + text.substring(3);
+  };
+
+  const dummyPosts = dummyBoardData.filter(d => !d.isNotice).map(post => ({
+    ...post,
+    author: maskText(post.author)
+  }));
 
   // Combine: Notices -> Real Inquiries -> Dummy Posts
   const mergedPosts = [...notices, ...formattedRealInquiries, ...dummyPosts];

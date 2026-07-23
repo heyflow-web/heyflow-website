@@ -47,10 +47,14 @@
 
 .titleCell {
   text-align: left !important;
+  vertical-align: middle;
+  cursor: pointer;
+}
+
+.titleWrapper {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  cursor: pointer;
 }
 
 .titleCell:hover {
