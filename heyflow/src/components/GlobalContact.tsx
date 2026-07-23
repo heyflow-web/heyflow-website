@@ -78,7 +78,25 @@ export default function GlobalContact() {
       
       setIsSubmitting(true);
       try {
-        // 구글 Apps Script로 데이터 전송 (CORS 우회를 위해 text/plain 사용 및 no-cors 모드 강제)
+        // 1. 노션 문의게시판용 내부 API로 데이터 전송
+        const inquiryContent = `프로젝트 타입: ${formData.projectTypes.join(', ')}\n문제 상황: ${formData.problem}\n유입 경로: ${formData.referral}`;
+        await fetch("/api/inquiry", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name: formData.name,
+            company: formData.brand,
+            contact: formData.phone,
+            email: formData.email,
+            budget: formData.budget,
+            schedule: formData.schedule,
+            inquiry: inquiryContent,
+          }),
+        });
+
+        // 2. 구글 Apps Script로 데이터 전송 (기존 백업용)
         await fetch("https://script.google.com/macros/s/AKfycbxA353tz79KQPkl-uurKI4CkxIJ_N30hAIzMHxYncLW1aw42aH-gOkUrq0mnvelR66r/exec", {
           method: "POST",
           mode: "no-cors",
@@ -87,7 +105,7 @@ export default function GlobalContact() {
           },
           body: JSON.stringify({
             ...formData,
-            projectTypes: formData.projectTypes.join(", ") // 배열을 문자열로 변환하여 전송
+            projectTypes: formData.projectTypes.join(", ")
           }),
         });
       } catch (error) {

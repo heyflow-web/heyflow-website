@@ -1,5 +1,6 @@
 import { Client } from '@notionhq/client';
 import { NotionToMarkdown } from 'notion-to-md';
+import { BoardPost } from './dummyBoardData';
 
 export interface Project {
   id: string;
@@ -16,6 +17,7 @@ export interface Project {
 const notion = new Client({ auth: process.env.NOTION_API_KEY });
 const n2m = new NotionToMarkdown({ notionClient: notion });
 const DATABASE_ID = process.env.NOTION_DATABASE_ID!;
+const INQUIRY_DB_ID = process.env.NOTION_INQUIRY_DB_ID!;
 
 // 사용자가 노션에서 엔터로 생성한 빈 단락을 보존하기 위한 커스텀 변환기
 n2m.setCustomTransformer('paragraph', async (block) => {
@@ -43,6 +45,8 @@ const getPropertyValue = (property: any, type: string) => {
       return '';
     case 'checkbox':
       return property.checkbox ?? true;
+    case 'number':
+      return property.number ?? 0;
     default:
       return '';
   }
@@ -113,5 +117,82 @@ export async function getProject(id: string): Promise<Project | null> {
   } catch (error) {
     console.error(`Error fetching getProject(${id}):`, error);
     return null;
+  }
+}
+
+// ==========================================
+// 문의게시판 (Inquiry Board) 연동 로직
+// ==========================================
+
+export async function createInquiry(data: { name: string, company: string, contact: string, email: string, budget: string, schedule: string, inquiry: string }) {
+  if (!INQUIRY_DB_ID) throw new Error("NOTION_INQUIRY_DB_ID is not set");
+
+  const response = await notion.pages.create({
+    parent: { database_id: INQUIRY_DB_ID },
+    properties: {
+      '이름': { title: [{ text: { content: data.name || '미상' } }] },
+      '회사명': { rich_text: [{ text: { content: data.company || '' } }] },
+      '연락처': { rich_text: [{ text: { content: data.contact || '' } }] },
+      '이메일': { rich_text: [{ text: { content: data.email || '' } }] },
+      '예산': { rich_text: [{ text: { content: data.budget || '' } }] },
+      '일정': { rich_text: [{ text: { content: data.schedule || '' } }] },
+      '문의내용': { rich_text: [{ text: { content: data.inquiry || '' } }] },
+      '조회수': { number: Math.floor(Math.random() * 3) + 1 } // 초기 조회수 랜덤 1~3 부여
+    }
+  });
+  return response;
+}
+
+export async function getInquiries(): Promise<BoardPost[]> {
+  if (!INQUIRY_DB_ID) return [];
+
+  try {
+    const res = await fetch(`https://api.notion.com/v1/databases/${INQUIRY_DB_ID}/query`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.NOTION_API_KEY}`,
+        'Notion-Version': '2022-06-28',
+        'Content-Type': 'application/json',
+      },
+      next: { revalidate: 0 }, // 항상 최신 데이터 가져오기
+    });
+
+    if (!res.ok) {
+      console.error(`Notion API error: ${res.statusText}`);
+      return [];
+    }
+
+    const data = await res.json();
+    
+    return data.results.map((page: any, index: number) => {
+      const name = getPropertyValue(page.properties['이름'], 'title');
+      const company = getPropertyValue(page.properties['회사명'], 'rich_text');
+      const views = getPropertyValue(page.properties['조회수'], 'number') || (Math.floor(Math.random() * 4) + 1);
+      
+      const createdDate = new Date(page.created_time);
+      const dateStr = createdDate.toISOString().split('T')[0].replace(/-/g, '.');
+      
+      // 작성자 마스킹 로직 (예: 김** 또는 회사명(김**))
+      const maskedName = name.length > 1 ? name.substring(0, 1) + '*'.repeat(name.length - 1) : name;
+      let author = company ? `${company} (${maskedName})` : maskedName;
+      if (!author) author = "고객";
+
+      // 새 문의는 모두 홈페이지 제작 문의 등 임의의 제목 표시
+      const title = company ? `${company} 홈페이지 제작 문의드립니다.` : "홈페이지 제작 문의드립니다.";
+
+      return {
+        id: page.id,
+        isNotice: false,
+        isSecret: true,
+        title,
+        author,
+        date: dateStr,
+        likes: 0,
+        views
+      };
+    });
+  } catch (error) {
+    console.error("Error fetching getInquiries:", error);
+    return [];
   }
 }
