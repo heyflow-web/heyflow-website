@@ -178,8 +178,11 @@ export async function getInquiries(): Promise<BoardPost[]> {
     return data.results.map((page: any, index: number) => {
       const name = getPropertyValue(page.properties['작성자명'], 'title');
       const company = getPropertyValue(page.properties['브랜드명'], 'rich_text');
+      const isNotice = page.properties['공지사항']?.checkbox || false;
+      
       const viewsStr = getPropertyValue(page.properties['조회수'], 'rich_text');
-      const views = parseInt(viewsStr, 10) || (Math.floor(Math.random() * 4) + 1);
+      let views = parseInt(viewsStr, 10);
+      if (isNaN(views)) views = isNotice ? 724 : 0;
       
       const createdDate = new Date(page.created_time);
       const dateStr = createdDate.toISOString().split('T')[0].replace(/-/g, '.');
@@ -196,7 +199,6 @@ export async function getInquiries(): Promise<BoardPost[]> {
       let author = company ? maskText(company) : maskText(name);
       if (!author) author = "고객";
 
-      const isNotice = page.properties['공지사항']?.checkbox || false;
       const inquiryContent = getPropertyValue(page.properties['문의내용'], 'rich_text');
       
       let title = "";
@@ -250,8 +252,24 @@ export async function verifyInquiry(id: string, phone: string) {
     const page = await notion.pages.retrieve({ page_id: id }) as any;
     const isNotice = page.properties['공지사항']?.checkbox || false;
 
+    const viewsStr = getPropertyValue(page.properties['조회수'], 'rich_text');
+    let currentViews = parseInt(viewsStr, 10);
+    if (isNaN(currentViews)) currentViews = isNotice ? 724 : 0;
+
+    const incrementViews = () => {
+      notion.pages.update({
+        page_id: id,
+        properties: {
+          '조회수': {
+            rich_text: [{ text: { content: String(currentViews + 1) } }]
+          }
+        }
+      }).catch(err => console.error("Failed to update view count:", err));
+    };
+
     if (isNotice) {
       const content = getPropertyValue(page.properties['문의내용'], 'rich_text');
+      incrementViews();
       return { success: true, data: { content, email: '', budget: '' } };
     }
 
@@ -266,6 +284,7 @@ export async function verifyInquiry(id: string, phone: string) {
       const email = getPropertyValue(page.properties['이메일'], 'email');
       const budget = getPropertyValue(page.properties['예산'], 'rich_text');
       
+      incrementViews();
       return { success: true, data: { content, email, budget } };
     } else {
       return { success: false, message: "입력하신 연락처가 일치하지 않습니다." };
