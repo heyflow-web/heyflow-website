@@ -9,6 +9,11 @@ const ITEMS_PER_PAGE = 15;
 export default function BoardClient({ initialData }: { initialData: BoardPost[] }) {
   const router = useRouter();
   const [currentPage, setCurrentPage] = useState(1);
+  const [selectedPost, setSelectedPost] = useState<BoardPost | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [phoneInput, setPhoneInput] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
 
   // Split notices and regular posts
   const notices = initialData.filter(post => post.isNotice);
@@ -22,7 +27,46 @@ export default function BoardClient({ initialData }: { initialData: BoardPost[] 
     if (post.isNotice) {
       router.push(`/board/${post.id}?isNotice=true`);
     } else {
-      router.push(`/board/${post.id}`);
+      setSelectedPost(post);
+      setPhoneInput('');
+      setErrorMsg('');
+      setIsModalOpen(true);
+    }
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedPost(null);
+  };
+
+  const handleVerify = async () => {
+    if (!selectedPost) return;
+    if (!phoneInput) {
+      setErrorMsg('연락처를 입력해 주세요.');
+      return;
+    }
+    
+    setIsLoading(true);
+    setErrorMsg('');
+    
+    try {
+      const res = await fetch('/api/inquiry/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: selectedPost.id, phone: phoneInput })
+      });
+      const data = await res.json();
+      
+      if (data.success) {
+        closeModal();
+        router.push(`/board/${selectedPost.id}?phone=${encodeURIComponent(phoneInput)}`);
+      } else {
+        setErrorMsg(data.message || '인증에 실패했습니다.');
+      }
+    } catch (err) {
+      setErrorMsg('서버 오류가 발생했습니다.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -36,7 +80,7 @@ export default function BoardClient({ initialData }: { initialData: BoardPost[] 
             <tr>
               <th className={styles.colId}>번호</th>
               <th className={styles.colTitle}>제목</th>
-              <th className={styles.colAuthor}>상호명</th>
+              <th className={styles.colAuthor}>브랜드명</th>
               <th className={styles.colDate}>작성일</th>
               <th className={styles.colViews}>조회</th>
             </tr>
@@ -106,6 +150,39 @@ export default function BoardClient({ initialData }: { initialData: BoardPost[] 
           &gt;
         </button>
       </div>
+
+      {/* Auth Modal */}
+      {isModalOpen && (
+        <div className={styles.modalOverlay} onClick={closeModal}>
+          <div className={styles.modalContent} onClick={e => e.stopPropagation()}>
+            <h2 className={styles.modalTitle}>비밀글 열람</h2>
+            <p className={styles.modalDesc}>
+              작성자만 열람할 수 있는 비밀글입니다.<br/>
+              글 작성 시 입력하셨던 <b>연락처(전화번호)</b>를 입력해 주세요.
+            </p>
+            <input 
+              type="text" 
+              className={styles.modalInput}
+              placeholder="예: 01012345678"
+              value={phoneInput}
+              onChange={e => setPhoneInput(e.target.value.replace(/[^0-9]/g, ''))}
+              onKeyDown={e => e.key === 'Enter' && handleVerify()}
+            />
+            {errorMsg && <p className={styles.modalError}>{errorMsg}</p>}
+            
+            <div className={styles.modalActions}>
+              <button onClick={closeModal} className={styles.btnCancel}>취소</button>
+              <button 
+                onClick={handleVerify} 
+                className={styles.btnConfirm}
+                disabled={isLoading}
+              >
+                {isLoading ? '확인 중...' : '확인'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }

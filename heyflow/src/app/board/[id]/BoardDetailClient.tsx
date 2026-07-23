@@ -1,102 +1,79 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import styles from './detail.module.css';
 
 export default function BoardDetailClient({ id }: { id: string }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const isNotice = searchParams.get('isNotice') === 'true';
+  const phoneParam = searchParams.get('phone') || '';
 
-  const [phoneInput, setPhoneInput] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState('');
   const [viewData, setViewData] = useState<any>(null);
 
-  React.useEffect(() => {
-    if (isNotice) {
-      handleVerify();
-    }
-  }, [isNotice]);
-
-  const handleVerify = async () => {
-    if (!isNotice && !phoneInput) {
-      setErrorMsg('연락처를 입력해 주세요.');
-      return;
-    }
-    
-    setIsLoading(true);
-    setErrorMsg('');
-    
-    try {
-      const res = await fetch('/api/inquiry/verify', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id, phone: phoneInput })
-      });
-      const data = await res.json();
-      
-      if (data.success) {
-        setViewData(data.data);
-      } else {
-        setErrorMsg(data.message || '인증에 실패했습니다.');
+  useEffect(() => {
+    const fetchPost = async () => {
+      if (!isNotice && !phoneParam) {
+        setErrorMsg('잘못된 접근입니다. 게시판 목록에서 다시 선택해 주세요.');
+        setIsLoading(false);
+        return;
       }
-    } catch (err) {
-      setErrorMsg('서버 오류가 발생했습니다.');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+
+      try {
+        const res = await fetch('/api/inquiry/verify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id, phone: phoneParam })
+        });
+        const data = await res.json();
+        
+        if (data.success) {
+          setViewData(data.data);
+        } else {
+          setErrorMsg(data.message || '게시글을 불러올 수 없습니다.');
+        }
+      } catch (err) {
+        setErrorMsg('서버 오류가 발생했습니다.');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchPost();
+  }, [id, isNotice, phoneParam]);
 
   return (
-    <div className={styles.detailContainer}>
-      {!viewData ? (
-        <div className={styles.authBox}>
-          {isNotice ? (
-            <div style={{ textAlign: 'center', padding: '2rem' }}>
-              <span className={styles.loader} style={{ borderColor: '#ddd', borderTopColor: '#111' }}></span>
-              <p style={{ marginTop: '1rem', color: '#555' }}>공지사항을 불러오는 중입니다...</p>
-            </div>
-          ) : (
-            <>
-              <h1 className={styles.title}>비밀글 열람</h1>
-              <p className={styles.desc}>
-                작성자만 열람할 수 있는 비밀글입니다.<br/>
-                글 작성 시 입력하셨던 <b>연락처(전화번호)</b>를 입력해 주세요.
-              </p>
-              <input 
-                type="text" 
-                className={styles.input}
-                placeholder="예: 01012345678"
-                value={phoneInput}
-                onChange={e => setPhoneInput(e.target.value.replace(/[^0-9]/g, ''))}
-                onKeyDown={e => e.key === 'Enter' && handleVerify()}
-              />
-              {errorMsg && <p className={styles.error}>{errorMsg}</p>}
-              <button 
-                className={styles.btn} 
-                onClick={handleVerify}
-                disabled={isLoading}
-              >
-                {isLoading ? <span className={styles.loader}></span> : '확인'}
-              </button>
-            </>
-          )}
-          <div style={{ marginTop: '2rem' }}>
-            <button className={styles.backBtn} onClick={() => router.push('/board')}>목록으로 돌아가기</button>
-          </div>
-        </div>
-      ) : (
-        <div className={styles.contentBox}>
-          <h1 className={styles.title} style={{ textAlign: 'left', marginBottom: '2rem', borderBottom: '1px solid #eee', paddingBottom: '1rem' }}>{isNotice ? '공지사항' : '문의 내용'}</h1>
-          <div className={styles.content}>
-            {viewData.content || '내용이 없습니다.'}
-          </div>
+    <main className="container">
+      <article className={styles.article}>
+        <Link href="/board" className={styles.backBtn}>
+          &larr; Back to List
+        </Link>
+        
+        {isLoading ? (
           <div style={{ textAlign: 'center' }}>
-            <button className={styles.backBtn} onClick={() => router.push('/board')}>목록으로 돌아가기</button>
+            <span className={styles.loader}></span>
           </div>
-        </div>
-      )}
-    </div>
+        ) : errorMsg ? (
+          <div className={styles.error}>{errorMsg}</div>
+        ) : viewData ? (
+          <>
+            <header className={styles.header}>
+              <h1 className={styles.title}>
+                {isNotice ? '공지사항' : '문의 내용'}
+              </h1>
+            </header>
+            
+            <div className={styles.content}>
+              <p className={styles.desc}>
+                {viewData.content || '내용이 없습니다.'}
+              </p>
+            </div>
+          </>
+        ) : null}
+      </article>
+    </main>
   );
 }

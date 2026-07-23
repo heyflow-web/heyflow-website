@@ -177,7 +177,7 @@ export async function getInquiries(): Promise<BoardPost[]> {
     
     return data.results.map((page: any, index: number) => {
       const name = getPropertyValue(page.properties['작성자명'], 'title');
-      const company = getPropertyValue(page.properties['회사명'], 'rich_text');
+      const company = getPropertyValue(page.properties['브랜드명'], 'rich_text');
       const viewsStr = getPropertyValue(page.properties['조회수'], 'rich_text');
       const views = parseInt(viewsStr, 10) || (Math.floor(Math.random() * 4) + 1);
       
@@ -201,7 +201,7 @@ export async function getInquiries(): Promise<BoardPost[]> {
       
       let title = "";
       if (isNotice) {
-        title = inquiryContent || "공지사항입니다.";
+        title = name || "공지사항입니다.";
         author = "heyflow";
       } else {
         let projectTypeStr = "홈페이지 제작"; // 기본값
