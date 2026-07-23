@@ -178,9 +178,9 @@ export default function BoardClient({ initialData }: { initialData: BoardPost[] 
                 <input 
                   type="text" 
                   className={styles.modalInput}
-                  placeholder="예: 010-1234-5678"
+                  placeholder="예: 01012345678"
                   value={phoneInput}
-                  onChange={e => setPhoneInput(e.target.value)}
+                  onChange={e => setPhoneInput(e.target.value.replace(/[^0-9]/g, ''))}
                   onKeyDown={e => e.key === 'Enter' && handleVerify()}
                 />
                 {errorMsg && <p className={styles.modalError}>{errorMsg}</p>}

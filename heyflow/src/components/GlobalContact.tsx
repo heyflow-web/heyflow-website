@@ -447,7 +447,7 @@ export default function GlobalContact() {
                         className={styles.textInput} 
                         placeholder="연락처"
                         value={formData.phone}
-                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                        onChange={(e) => setFormData({ ...formData, phone: e.target.value.replace(/[^0-9]/g, '') })}
                         onKeyDown={handleKeyDown}
                       />
                     </div>

@@ -220,7 +220,14 @@ export async function verifyInquiry(id: string, phone: string) {
   if (!INQUIRY_DB_ID) return { success: false, message: "DB_ID not set" };
 
   if (id.length < 20) {
-    return { success: false, message: "이전 더미 데이터는 보안상 조회가 불가합니다." };
+    return { 
+      success: true, 
+      data: { 
+        content: "이 글은 홈페이지 시연 및 레이아웃 확인 용도로 작성된 임시 데이터입니다.\n(실제 문의 내용이 존재하지 않습니다.)",
+        email: "test@heyflow.co.kr",
+        budget: "해당 없음"
+      } 
+    };
   }
 
   try {
