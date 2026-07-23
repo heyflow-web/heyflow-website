@@ -1,5 +1,6 @@
 import BoardDetailClient from './BoardDetailClient';
 
-export default function BoardDetailPage({ params }: { params: { id: string } }) {
-  return <BoardDetailClient id={params.id} />;
+export default async function BoardDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  return <BoardDetailClient id={id} />;
 }
