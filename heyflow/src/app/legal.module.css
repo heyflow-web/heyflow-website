@@ -3,7 +3,7 @@
   padding: 120px 5% 80px;
   max-width: 800px;
   margin: 0 auto;
-  color: var(--text);
+  color: var(--text-primary);
   font-family: inherit;
   line-height: 1.8;
 }
@@ -13,14 +13,14 @@
   align-items: center;
   gap: 0.5rem;
   margin-bottom: 3rem;
-  color: var(--gray);
+  color: var(--text-muted);
   text-decoration: none;
   font-size: 0.9rem;
   transition: color 0.3s ease;
 }
 
 .backButton:hover {
-  color: var(--text);
+  color: var(--text-primary);
 }
 
 .title {
@@ -31,7 +31,7 @@
 }
 
 .updatedDate {
-  color: var(--gray);
+  color: var(--text-muted);
   font-size: 0.9rem;
   margin-bottom: 4rem;
   display: block;
@@ -45,7 +45,7 @@
   font-size: 1.2rem;
   font-weight: 600;
   margin-bottom: 1rem;
-  color: var(--text);
+  color: var(--text-primary);
 }
 
 .content p, .content ul {

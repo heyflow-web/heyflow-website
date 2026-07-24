@@ -14,11 +14,11 @@
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  border-bottom: 1px solid var(--text);
+  border-bottom: 1px solid var(--text-primary);
   padding-bottom: 0.2rem;
   transition: opacity 0.2s;
   align-self: flex-start;
-  color: var(--text);
+  color: var(--text-primary);
   text-decoration: none;
 }
 
@@ -28,7 +28,7 @@
 
 .header {
   margin-bottom: 3rem;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--border-default);
   padding-bottom: 1.5rem;
 }
 
@@ -42,7 +42,7 @@
 
 .content {
   margin-top: 1rem;
-  color: var(--text);
+  color: var(--text-primary);
 }
 
 .desc {

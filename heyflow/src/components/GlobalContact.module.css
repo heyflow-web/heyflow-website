@@ -3,8 +3,8 @@
   bottom: 2.5rem;
   right: 2.5rem;
   z-index: 9000;
-  background-color: var(--text);
-  color: var(--bg);
+  background-color: var(--text-primary);
+  color: var(--bg-main);
   border: none;
   padding: 1.2rem 2.5rem;
   border-radius: 50px;
@@ -27,8 +27,8 @@
   --logo-color: #171719;
   position: fixed;
   inset: 0;
-  background-color: var(--bg);
-  color: var(--text);
+  background-color: var(--bg-main);
+  color: var(--text-primary);
   z-index: 100000;
   display: flex;
   flex-direction: column;
@@ -52,7 +52,7 @@
   background: none;
   border: none;
   font-size: var(--font-h2);
-  color: var(--text);
+  color: var(--text-primary);
   cursor: none;
   display: flex;
   align-items: center;
@@ -92,7 +92,7 @@
 
 .introDesc {
   font-size: clamp(1.2rem, 2vw, 1.5rem);
-  color: var(--gray);
+  color: var(--text-muted);
   line-height: 1.6;
   margin-bottom: 4rem;
 }
@@ -103,8 +103,8 @@
   border: none;
   font-size: var(--font-h3);
   font-weight: 700;
-  color: var(--text);
-  border-bottom: 3px solid var(--text);
+  color: var(--text-primary);
+  border-bottom: 3px solid var(--text-primary);
   padding-bottom: 0.5rem;
   cursor: none;
   transition: opacity 0.3s;
@@ -117,14 +117,14 @@
 .kakaoLinkWrapper {
   margin-top: 6rem;
   font-size: 1rem;
-  color: var(--gray);
+  color: var(--text-muted);
 }
 
 .kakaoLink {
-  color: var(--text);
+  color: var(--text-primary);
   font-weight: 700;
   margin-left: 0.5rem;
-  border-bottom: 1px solid var(--text);
+  border-bottom: 1px solid var(--text-primary);
   transition: opacity 0.3s;
 }
 
@@ -144,7 +144,7 @@
 }
 
 .questionHighlight {
-  color: var(--gray);
+  color: var(--text-muted);
   font-size: var(--font-h3);
   display: block;
   margin-bottom: 1rem;
@@ -156,26 +156,26 @@
   font-size: clamp(1.5rem, 3vw, 2.5rem);
   background: transparent;
   border: none;
-  border-bottom: 2px solid var(--border);
+  border-bottom: 2px solid var(--border-default);
   padding-bottom: 1rem;
-  color: var(--text);
+  color: var(--text-primary);
   outline: none;
   transition: border-color 0.4s ease;
   border-radius: 0;
 }
 
 .textInput::placeholder {
-  color: var(--border);
+  color: var(--border-default);
 }
 
 .textInput:focus {
-  border-bottom-color: var(--text);
+  border-bottom-color: var(--text-primary);
 }
 
 .guideText {
   margin-top: 2rem;
   font-size: 1rem;
-  color: var(--gray);
+  color: var(--text-muted);
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -192,8 +192,8 @@
   position: relative;
   font-family: inherit;
   background: transparent;
-  border: 1px solid var(--border);
-  color: var(--text);
+  border: 1px solid var(--border-default);
+  color: var(--text-primary);
   padding: 1rem;
   border-radius: var(--radius-sm);
   font-size: 0.95rem;
@@ -203,8 +203,8 @@
 }
 
 .budgetButton:hover {
-  background: var(--text);
-  color: var(--bg);
+  background: var(--text-primary);
+  color: var(--bg-main);
   /* 가로 스크롤을 유발하던 translateX 제거 */
 }
 
@@ -214,8 +214,8 @@
   bottom: 100%;
   left: 50%;
   transform: translate(-50%, -10px);
-  background-color: var(--text);
-  color: var(--bg);
+  background-color: var(--text-primary);
+  color: var(--bg-main);
   padding: 0.6rem 1rem;
   border-radius: 6px;
   font-size: 1rem;
@@ -248,7 +248,7 @@
 
 .outroDesc {
   font-size: 1.2rem;
-  color: var(--gray);
+  color: var(--text-muted);
   margin-top: 2rem;
 }
 
@@ -267,7 +267,7 @@
   gap: 0.6rem;
   cursor: pointer;
   font-size: 1.1rem;
-  color: var(--text);
+  color: var(--text-primary);
   margin-bottom: 0.8rem;
 }
 
@@ -275,7 +275,7 @@
   width: 1.2rem;
   height: 1.2rem;
   cursor: pointer;
-  accent-color: var(--text);
+  accent-color: var(--text-primary);
 }
 
 .consentText {
@@ -284,7 +284,7 @@
 }
 
 .privacyLink {
-  color: var(--gray);
+  color: var(--text-muted);
   text-decoration: underline;
   font-size: 1rem;
   margin-left: auto;
@@ -293,7 +293,7 @@
 .consentDetail {
   font-size: 0.85rem;
   line-height: 1.5;
-  color: var(--gray);
+  color: var(--text-muted);
   letter-spacing: -0.02em;
 }
 
@@ -304,7 +304,7 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: var(--bg);
+  background: var(--bg-main);
   z-index: 100;
   display: flex;
   flex-direction: column;
@@ -324,7 +324,7 @@
 .privacyModalHeader h3 {
   font-size: var(--font-h3);
   font-weight: 600;
-  color: var(--text);
+  color: var(--text-primary);
   margin: 0;
 }
 
@@ -332,7 +332,7 @@
   background: none;
   border: none;
   font-size: var(--font-h3);
-  color: var(--text);
+  color: var(--text-primary);
   padding: 0;
 }
 
@@ -348,12 +348,12 @@
   font-weight: 600;
   margin-top: 1.5rem;
   margin-bottom: 0.5rem;
-  color: var(--text);
+  color: var(--text-primary);
 }
 
 .privacyModalContent p {
   font-size: 0.95rem;
-  color: var(--gray);
+  color: var(--text-muted);
   line-height: 1.6;
   margin: 0;
 }

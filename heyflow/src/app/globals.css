@@ -184,7 +184,7 @@ a {
 .hero-subtitle {
   font-size: clamp(1.1rem, 2vw, 1.5rem);
   font-weight: 400;
-  color: var(--gray);
+  color: var(--text-muted);
   max-width: 650px;
   line-height: 1.6;
 }
@@ -211,7 +211,7 @@ a {
 .project-image-wrapper {
   width: 100%;
   aspect-ratio: 4/3;
-  background: var(--border);
+  background: var(--border-default);
   margin-bottom: 1.5rem;
   overflow: hidden;
   position: relative;
@@ -281,7 +281,7 @@ a {
 
 .project-desc {
   font-size: 1rem;
-  color: var(--gray);
+  color: var(--text-muted);
   margin-top: 0.5rem;
 }
 

@@ -310,8 +310,8 @@ export default function GlobalContact() {
                             key={type}
                             className={`${styles.budgetButton} cursor-hover`} 
                             style={{
-                              background: isSelected ? "var(--text)" : "transparent",
-                              color: isSelected ? "var(--bg)" : "var(--text)",
+                              background: isSelected ? "var(--text-primary)" : "transparent",
+                              color: isSelected ? "var(--bg-main)" : "var(--text-primary)",
                               textAlign: "left",
                               padding: "1.2rem 1.5rem"
                             }}
