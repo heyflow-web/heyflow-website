@@ -72,7 +72,7 @@ export default function BoardClient({ initialData }: { initialData: BoardPost[] 
 
   return (
     <main className="container">
-      <h1 className="page-title">CUSTOMER CENTER</h1>
+      <h1 className="page-title">고객센터</h1>
       
       <div className={styles.tableWrapper}>
         <table className={styles.boardTable}>
