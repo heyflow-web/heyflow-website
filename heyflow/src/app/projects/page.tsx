@@ -7,7 +7,7 @@ export default async function Projects() {
   const data = await getProjects();
   return (
     <main className="container">
-      <h1 className="page-title">PROJECT</h1>
+      <h1 className="page-title">프로젝트</h1>
       
       <div className="gallery">
         {data.map((item) => (
