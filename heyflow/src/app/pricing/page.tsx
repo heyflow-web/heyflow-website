@@ -7,25 +7,17 @@ import styles from "./pricing.module.css";
 export default function PricingPage() {
   return (
     <main className={styles.pricingSection}>
-      <div className={styles.pricingContainer}>
-        <div className={styles.pricingHeader}>
-          <motion.h2 
-            className={styles.sectionHeadlineCenter}
-            initial={{ y: 40, opacity: 0 }} 
-            animate={{ y: 0, opacity: 1 }} 
-            transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
-          >
-            Pricing Plan
-          </motion.h2>
-          <motion.p 
-            className={styles.pricingSubtitle}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-          >
-            복잡한 견적 조율 없이, 모든 비용은 정찰제로 투명하게 통제됩니다.
-          </motion.p>
-        </div>
+      <div className="container">
+        <h1 className="page-title">가격안내</h1>
+        
+        <motion.p 
+          className={styles.pricingSubtitle}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+        >
+          복잡한 견적 조율 없이, 모든 비용은 정찰제로 투명하게 통제됩니다.
+        </motion.p>
         
         <div className={styles.pricingGrid}>
           {[

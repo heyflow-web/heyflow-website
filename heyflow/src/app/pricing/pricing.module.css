@@ -1,5 +1,4 @@
 .pricingSection {
-  padding: 8vw 4vw;
   background-color: #ffffff;
   color: #171719;
   min-height: 100vh;
@@ -7,30 +6,12 @@
   overflow: hidden;
 }
 
-.pricingContainer {
-  max-width: 1400px;
-  margin: 0 auto;
-  position: relative;
-  z-index: 2;
-}
-
-.pricingHeader {
-  text-align: center;
-  margin-bottom: 5vw;
-}
-
-.sectionHeadlineCenter {
-  font-size: clamp(3rem, 5vw, 5rem);
-  font-weight: 800;
-  letter-spacing: -0.03em;
-  margin-bottom: 1.5rem;
-  color: #171719;
-}
-
 .pricingSubtitle {
   font-size: clamp(1.1rem, 2vw, 1.4rem);
   color: #555555;
   line-height: 1.6;
+  margin-top: -2vw;
+  margin-bottom: 4vw;
 }
 
 .pricingGrid {
@@ -165,16 +146,14 @@
   .pricingGrid {
     grid-template-columns: 1fr;
   }
-  .pricingSection {
-    padding: 15vh 5vw 10vh;
-  }
   .pricingCard {
     padding: 2.5rem 2rem;
   }
-  .sectionHeadlineCenter {
-    font-size: 2.5rem;
-  }
   .planPrice {
     font-size: 2rem;
+  }
+  .pricingSubtitle {
+    margin-top: -6vw;
+    margin-bottom: 8vw;
   }
 }
