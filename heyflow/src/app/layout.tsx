@@ -68,6 +68,7 @@ export default function RootLayout({
           </a>
           <div className="nav-links">
             <Link href="/projects" className="nav-link">프로젝트</Link>
+            <Link href="/pricing" className="nav-link">가격안내</Link>
             <Link href="/board" className="nav-link">고객센터</Link>
           </div>
         </nav>
