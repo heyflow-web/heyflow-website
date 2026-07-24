@@ -165,6 +165,9 @@ export async function getInquiries(): Promise<BoardPost[]> {
         'Notion-Version': '2022-06-28',
         'Content-Type': 'application/json',
       },
+      body: JSON.stringify({
+        sorts: [{ timestamp: 'created_time', direction: 'descending' }],
+      }),
       next: { revalidate: 0 }, // 항상 최신 데이터 가져오기
     });
 
