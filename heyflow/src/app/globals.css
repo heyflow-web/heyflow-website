@@ -1,21 +1,70 @@
 @import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css");
 
 :root {
-  --bg: #ffffff;
-  --text: #000000;
+  /* Brand Colors */
+  --primary: #171719;
+  --primary-hover: #2d2d30;
+  
+  /* Background & Surface */
+  --bg-main: #ffffff;
+  --bg-surface: #f8f9fa;
+  --bg-surface-elevated: #ffffff;
   --nav-bg: rgba(255, 255, 255, 0.85);
-  --border: #e6e6e6;
-  --gray: #777777;
-  --logo-color: #171719;
+  
+  /* Text */
+  --text-primary: #111111;
+  --text-secondary: #555555;
+  --text-muted: #888888;
+  
+  /* Border */
+  --border-light: #eeeeee;
+  --border-default: #dddddd;
+
+  /* Typography */
+  --font-hero: 4rem;
+  --font-h1: 2.5rem;
+  --font-h2: 2rem;
+  --font-h3: 1.5rem;
+  --font-body: 1rem;
+  --font-small: 0.875rem;
+
+  /* Spacing */
+  --space-xs: 0.5rem;
+  --space-sm: 1rem;
+  --space-md: 2rem;
+  --space-lg: 4rem;
+  --space-xl: 8rem;
+
+  /* Radius */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  
+  /* Legacy Mappings (for existing components) */
+  --logo-color: var(--primary);
+  --bg: var(--bg-main);
+  --text: var(--text-primary);
+  --border: var(--border-default);
+  --gray: var(--text-muted);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #0a0a0a;
-    --text: #ffffff;
+    --primary: #ffffff;
+    --primary-hover: #e0e0e0;
+    
+    --bg-main: #0a0a0a;
+    --bg-surface: #141414;
+    --bg-surface-elevated: #1a1a1a;
     --nav-bg: rgba(10, 10, 10, 0.85);
-    --border: #222222;
-    --gray: #888888;
+    
+    --text-primary: #ffffff;
+    --text-secondary: #a0a0a0;
+    --text-muted: #707070;
+    
+    --border-light: #333333;
+    --border-default: #222222;
+
     --logo-color: #ffffff;
   }
 }
@@ -27,8 +76,8 @@
 }
 
 body {
-  background-color: var(--bg);
-  color: var(--text);
+  background-color: var(--bg-main);
+  color: var(--text-primary);
   font-family: var(--font-inter), 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -38,10 +87,17 @@ body {
 }
 
 body.dark-theme {
-  --bg: #111111;
-  --text: #ffffff;
+  --primary: #ffffff;
+  --primary-hover: #e0e0e0;
+  --bg-main: #111111;
+  --bg-surface: #1a1a1a;
+  --bg-surface-elevated: #222222;
   --nav-bg: rgba(17, 17, 17, 0.85);
-  --border: #333333;
+  --text-primary: #ffffff;
+  --text-secondary: #aaaaaa;
+  --text-muted: #777777;
+  --border-light: #444444;
+  --border-default: #333333;
   --logo-color: #ffffff;
 }
 

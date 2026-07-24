@@ -167,7 +167,7 @@
 }
 
 .problemHugeNum {
-  font-size: 2rem;
+  font-size: var(--font-h2);
   font-weight: 800;
   color: var(--gray);
   letter-spacing: 0.05em;
@@ -559,7 +559,7 @@
 }
 
 .planPrice {
-  font-size: 2.5rem;
+  font-size: var(--font-h1);
   font-weight: 800;
   text-align: center;
   margin: 1rem 0;
@@ -819,7 +819,7 @@
   background: var(--nav-bg);
   backdrop-filter: blur(8px);
   padding: 1.5rem 1.2rem;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   border: 1px solid var(--border);
   box-shadow: 0 4px 20px rgba(0,0,0,0.05);
 }

@@ -51,7 +51,7 @@
 .closeButton {
   background: none;
   border: none;
-  font-size: 2rem;
+  font-size: var(--font-h2);
   color: var(--text);
   cursor: none;
   display: flex;
@@ -101,7 +101,7 @@
   font-family: inherit;
   background: none;
   border: none;
-  font-size: 1.5rem;
+  font-size: var(--font-h3);
   font-weight: 700;
   color: var(--text);
   border-bottom: 3px solid var(--text);
@@ -145,7 +145,7 @@
 
 .questionHighlight {
   color: var(--gray);
-  font-size: 1.5rem;
+  font-size: var(--font-h3);
   display: block;
   margin-bottom: 1rem;
 }
@@ -195,7 +195,7 @@
   border: 1px solid var(--border);
   color: var(--text);
   padding: 1rem;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   font-size: 0.95rem;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -257,7 +257,7 @@
   margin-top: 1.5rem;
   padding: 1.2rem;
   background: rgba(120, 120, 120, 0.05);
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   text-align: left;
 }
 
@@ -322,7 +322,7 @@
 }
 
 .privacyModalHeader h3 {
-  font-size: 1.5rem;
+  font-size: var(--font-h3);
   font-weight: 600;
   color: var(--text);
   margin: 0;
@@ -331,7 +331,7 @@
 .privacyModalHeader button {
   background: none;
   border: none;
-  font-size: 1.5rem;
+  font-size: var(--font-h3);
   color: var(--text);
   padding: 0;
 }
