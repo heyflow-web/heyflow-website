@@ -215,3 +215,63 @@
   max-height: 50vh;
   overflow-y: auto;
 }
+
+@media (max-width: 768px) {
+  .boardContainer {
+    padding: 12vh 5vw 4rem;
+  }
+  .tableWrapper {
+    overflow-x: hidden;
+  }
+  .boardTable {
+    min-width: 100%;
+    border-top: 2px solid #111;
+  }
+  .boardTable thead {
+    display: none;
+  }
+  .boardTable, .boardTable tbody, .boardTable tr {
+    display: block;
+    width: 100%;
+  }
+  .boardTable tr {
+    padding: 1.2rem 0;
+    border-bottom: 1px solid #e5e7eb;
+    text-align: left;
+  }
+  .boardTable td {
+    display: block;
+    padding: 0;
+    border: none;
+    text-align: left !important;
+  }
+  /* 번호/구분 */
+  .boardTable td:nth-child(1) {
+    font-size: 0.8rem;
+    color: #888;
+    margin-bottom: 0.4rem;
+  }
+  /* 제목 */
+  .boardTable td:nth-child(2) {
+    font-size: 1.05rem;
+    font-weight: 600;
+    margin-bottom: 0.6rem;
+  }
+  /* 작성자, 날짜, 조회수 */
+  .boardTable td:nth-child(3),
+  .boardTable td:nth-child(4),
+  .boardTable td:nth-child(5) {
+    display: inline-block;
+    font-size: 0.85rem;
+    color: #777;
+  }
+  .boardTable td:nth-child(3)::after,
+  .boardTable td:nth-child(4)::after {
+    content: '|';
+    margin: 0 0.5rem;
+    color: #ddd;
+  }
+  .boardTable td:nth-child(5)::before {
+    content: '조회수 ';
+  }
+}
