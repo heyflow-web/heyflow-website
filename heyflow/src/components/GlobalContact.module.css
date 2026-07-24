@@ -37,7 +37,7 @@
   color: var(--text-primary);
   width: 100%;
   max-width: 1800px;
-  max-height: calc(100vh - 4vw);
+  height: 100%;
   border-radius: var(--radius-lg);
   display: flex;
   flex-direction: column;
@@ -81,7 +81,7 @@
   flex-direction: column;
   justify-content: center;
   position: relative;
-  max-height: 80vh; /* 화면을 넘어가면 스크롤되도록 */
+  flex: 1;
   overflow-y: auto;
   scrollbar-gutter: stable;
   padding: 20px 0;
@@ -371,9 +371,6 @@
 @media (max-width: 768px) {
   .modalOverlay {
     padding: 2vw;
-  }
-  .modalWrapper {
-    max-height: calc(100vh - 10vw);
   }
   .floatingButton {
     bottom: 1.5rem;
