@@ -177,7 +177,7 @@ export async function getInquiries(): Promise<BoardPost[]> {
     
     return data.results.map((page: any, index: number) => {
       const name = getPropertyValue(page.properties['작성자명'], 'title');
-      const company = getPropertyValue(page.properties['브랜드명'], 'rich_text');
+      const company = getPropertyValue(page.properties['회사명'] || page.properties['브랜드명'], 'rich_text');
       const isNotice = page.properties['공지사항']?.checkbox || false;
       
       const viewsStr = getPropertyValue(page.properties['조회수'], 'rich_text');
