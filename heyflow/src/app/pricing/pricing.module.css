@@ -10,7 +10,7 @@
   font-size: clamp(1.1rem, 2vw, 1.4rem);
   color: #555555;
   line-height: 1.6;
-  margin-top: -2vw;
+  margin-top: -1vw; /* 기존 -2vw에서 간격 넓힘 */
   margin-bottom: 4vw;
 }
 
@@ -153,7 +153,7 @@
     font-size: 2rem;
   }
   .pricingSubtitle {
-    margin-top: -6vw;
+    margin-top: -2vw; /* 기존 -6vw에서 간격 대폭 넓힘 */
     margin-bottom: 8vw;
   }
 }
