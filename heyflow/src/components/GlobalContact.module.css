@@ -79,12 +79,12 @@
   max-width: 600px;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
   position: relative;
   flex: 1;
   overflow-y: auto;
   scrollbar-gutter: stable;
-  padding: 20px 0;
+  padding: 3vw 0 6vw;
   margin: 0 auto;
 }
 
@@ -381,7 +381,7 @@
     padding: 1.25rem 10vw !important;
   }
   .modalBody {
-    padding: 20px 10vw !important;
+    padding: 5vh 10vw 10vh !important;
   }
 }
 
