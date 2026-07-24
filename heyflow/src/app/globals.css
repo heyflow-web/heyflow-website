@@ -212,7 +212,7 @@ a {
   width: 100%;
   aspect-ratio: 4/3;
   background: var(--border-default);
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem; /* 기존 1.5rem에서 약 30% 축소 */
   overflow: hidden;
   position: relative;
   border-radius: 4px;
@@ -296,10 +296,22 @@ a {
 
 @media (max-width: 768px) {
   .navbar {
-    padding: 0 8vw !important;
+    padding: 0 5vw !important;
+  }
+  .nav-brand {
+    font-size: 1.1rem;
+  }
+  .nav-links {
+    gap: 1rem;
+  }
+  .nav-link {
+    font-size: 0.85rem;
   }
   .container {
     padding: 5vh 10vw !important;
+  }
+  .gallery {
+    gap: 12vw 0; /* 프로젝트 간 여백 2배 이상 확대 */
   }
 }
 
