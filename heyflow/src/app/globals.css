@@ -158,7 +158,7 @@ a {
 }
 
 .container {
-  padding: 6vw 2vw;
+  padding: 3vw 2vw;
   max-width: 1800px;
   margin: 0 auto;
 }
@@ -299,7 +299,7 @@ a {
     padding: 0 8vw !important;
   }
   .container {
-    padding: 10vh 10vw !important;
+    padding: 5vh 10vw !important;
   }
 }
 

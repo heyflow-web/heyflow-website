@@ -39,7 +39,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 2.5rem 4vw;
+  padding: 1.25rem 4vw;
 }
 
 .modalBrand {
@@ -365,7 +365,7 @@
     padding: 1rem 2rem;
   }
   .modalHeader {
-    padding: 2.5rem 10vw !important;
+    padding: 1.25rem 10vw !important;
   }
   .modalBody {
     padding: 20px 10vw !important;
