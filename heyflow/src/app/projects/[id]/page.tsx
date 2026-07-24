@@ -42,35 +42,39 @@ export default async function PortfolioDetail({ params }: { params: Promise<{ id
   return (
     <main className="container">
       <article className={styles.article}>
-        <BackButton className={styles.backBtn} />
-        
-        <header className={styles.header}>
-          <h1 className={styles.title}>{item.title}</h1>
-          {item.link && item.link !== "#" && (
-            <a href={item.link} target="_blank" rel="noreferrer" className={styles.externalLink}>
-              Visit Site &rarr;
-            </a>
-          )}
-        </header>
+        <div className={styles.textContainer}>
+          <BackButton className={styles.backBtn} />
+          
+          <header className={styles.header}>
+            <h1 className={styles.title}>{item.title}</h1>
+            {item.link && item.link !== "#" && (
+              <a href={item.link} target="_blank" rel="noreferrer" className={styles.externalLink}>
+                Visit Site &rarr;
+              </a>
+            )}
+          </header>
 
-        <div className={styles.content}>
-          {item.description && <p className={styles.desc}>{item.description}</p>}
-        </div>
-
-        <div className={styles.imageGallery}>
-          <div className={styles.imageWrapperPc}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={item.pcImage} alt={`${item.title} PC`} className={styles.image} />
+          <div className={styles.content}>
+            {item.description && <p className={styles.desc}>{item.description}</p>}
           </div>
-          {item.mobileImage && (
-            <div className={styles.imageWrapperMobile}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={item.mobileImage} alt={`${item.title} Mobile`} className={styles.image} />
-            </div>
-          )}
         </div>
 
-        <div className={styles.content}>
+        <div className={styles.imageGalleryWrapper}>
+          <div className={styles.imageGallery}>
+            <div className={styles.imageWrapperPc}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={item.pcImage} alt={`${item.title} PC`} className={styles.image} />
+            </div>
+            {item.mobileImage && (
+              <div className={styles.imageWrapperMobile}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={item.mobileImage} alt={`${item.title} Mobile`} className={styles.image} />
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className={styles.textContainerCenter}>
           <div className={styles.longText}>
             <ReactMarkdown remarkPlugins={[remarkBreaks]}>{item.content || ''}</ReactMarkdown>
           </div>
