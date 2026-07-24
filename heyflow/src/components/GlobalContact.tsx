@@ -186,9 +186,7 @@ export default function GlobalContact() {
           >
             <div className={styles.modalWrapper}>
             <header className={styles.modalHeader}>
-              <Link href="/" className={styles.modalBrand} onClick={() => setIsOpen(false)}>
-                <Logo />
-              </Link>
+              
               <button 
                 className={`${styles.closeButton} cursor-hover`} 
                 onClick={() => setIsOpen(false)}
