@@ -387,13 +387,7 @@
     padding: 20px 10vw !important;
   }
 }
-  .modalHeader {
-    padding: 1.25rem 10vw !important;
-  }
-  .modalBody {
-    padding: 20px 10vw !important;
-  }
-}
+
 
 .boxButton {
   display: inline-flex;
