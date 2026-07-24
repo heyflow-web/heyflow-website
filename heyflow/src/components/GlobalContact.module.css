@@ -20,19 +20,29 @@
 }
 
 .modalOverlay {
-  --bg: #ffffff;
-  --text: #000000;
-  --border: #e6e6e6;
-  --gray: #777777;
-  --logo-color: #171719;
   position: fixed;
   inset: 0;
-  background-color: var(--bg-main);
-  color: var(--text-primary);
+  background-color: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
   z-index: 100000;
   display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10vw;
+}
+
+.modalWrapper {
+  background-color: var(--bg-main);
+  color: var(--text-primary);
+  width: 100%;
+  max-width: 1800px;
+  max-height: calc(100vh - 10vw);
+  border-radius: var(--radius-lg);
+  display: flex;
   flex-direction: column;
-  overflow-x: hidden; /* 가로 스크롤 완벽 차단 */
+  overflow: hidden;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
 }
 
 .modalHeader {
@@ -359,6 +369,12 @@
 }
 
 @media (max-width: 768px) {
+  .modalOverlay {
+    padding: 5vw;
+  }
+  .modalWrapper {
+    max-height: calc(100vh - 10vw);
+  }
   .floatingButton {
     bottom: 1.5rem;
     right: 1.5rem;
@@ -370,4 +386,48 @@
   .modalBody {
     padding: 20px 10vw !important;
   }
+}
+  .modalHeader {
+    padding: 1.25rem 10vw !important;
+  }
+  .modalBody {
+    padding: 20px 10vw !important;
+  }
+}
+
+.boxButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem 2rem;
+  background-color: var(--text-primary);
+  color: var(--bg-main);
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  font-size: 1.1rem;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+}
+.boxButton:hover {
+  background-color: var(--text-secondary);
+  color: var(--bg-main);
+}
+.boxButtonOutline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem 2rem;
+  background-color: transparent;
+  color: var(--text-primary);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+.boxButtonOutline:hover {
+  border-color: var(--text-primary);
 }

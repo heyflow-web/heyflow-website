@@ -138,22 +138,25 @@ export default function GlobalContact() {
 
   // 완료 후 닫기 처리
   useEffect(() => {
-    let timer: NodeJS.Timeout;
+    // 자동 닫기 제거: 유저가 직접 닫거나 '문의 확인하기' 버튼을 클릭하도록 유도
     if (step === 6) {
-      // Outro 화면 4.5초 유지 후 모달 닫힘
-      timer = setTimeout(() => {
-        setIsOpen(false);
-        // 모달 애니메이션 끝난 후 상태 초기화
-        setTimeout(() => {
-          setStep(0);
-          setFormData({ name: "", brand: "", problem: "", budget: "", projectTypes: [], email: "", phone: "" });
-          setIsConsentChecked(false);
-          setShowPrivacy(false);
-        }, 600);
-      }, 4500);
+      // 폼 초기화 로직은 모달 닫힐 때(isOPen === false) 수행되도록 별도 useEffect에서 처리하거나,
+      // 문의 확인하기 링크 클릭 시 처리되도록 유도
     }
-    return () => clearTimeout(timer);
   }, [step]);
+  
+  // 모달이 완전히 닫힐 때 폼 상태 초기화
+  useEffect(() => {
+    if (!isOpen) {
+      const timer = setTimeout(() => {
+        setStep(0);
+        setFormData({ name: "", brand: "", problem: "", budget: "", projectTypes: [], email: "", phone: "" });
+        setIsConsentChecked(false);
+        setShowPrivacy(false);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen]);
 
   const variants: any = {
     initial: { opacity: 0, y: 50 },
@@ -181,6 +184,7 @@ export default function GlobalContact() {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.6, ease: "easeInOut" }}
           >
+            <div className={styles.modalWrapper}>
             <header className={styles.modalHeader}>
               <Link href="/" className={styles.modalBrand} onClick={() => setIsOpen(false)}>
                 <Logo />
@@ -212,7 +216,7 @@ export default function GlobalContact() {
                       웹사이트를 만들기위한 준비가 되셨나요?<br />
                       아래의 몇 가지 질문에 답해주시면 24시간 이내에 디렉터가 직접 연락을 드립니다.
                     </p>
-                    <button className={`${styles.startButton} cursor-hover`} onClick={() => setStep(1)}>
+                    <button className={`${styles.boxButton} cursor-hover`} onClick={() => setStep(1)}>
                       프로젝트 문의 시작하기 <ArrowRight size={20} style={{ display: 'inline', verticalAlign: 'middle', marginLeft: '8px' }} />
                     </button>
 
@@ -267,7 +271,7 @@ export default function GlobalContact() {
                           initial={{ opacity: 0, y: 10 }}
                           animate={{ opacity: 1, y: 0 }}
                           exit={{ opacity: 0, y: 10 }}
-                          className={`${styles.startButton} cursor-hover`} 
+                          className={`${styles.boxButton} cursor-hover`} 
                           style={{ marginTop: '2rem' }}
                           onClick={handleNext}
                         >
@@ -330,7 +334,7 @@ export default function GlobalContact() {
                            initial={{ opacity: 0, y: 10 }}
                            animate={{ opacity: 1, y: 0 }}
                            exit={{ opacity: 0, y: 10 }}
-                           className={`${styles.startButton} cursor-hover`} 
+                           className={`${styles.boxButton} cursor-hover`} 
                            style={{ marginTop: '2rem' }}
                            onClick={handleNext}
                         >
@@ -373,7 +377,7 @@ export default function GlobalContact() {
                           initial={{ opacity: 0, y: 10 }}
                           animate={{ opacity: 1, y: 0 }}
                           exit={{ opacity: 0, y: 10 }}
-                          className={`${styles.startButton} cursor-hover`} 
+                          className={`${styles.boxButton} cursor-hover`} 
                           style={{ marginTop: '2rem' }}
                           onClick={handleNext}
                         >
@@ -478,7 +482,7 @@ export default function GlobalContact() {
                           initial={{ opacity: 0, y: 10 }}
                           animate={{ opacity: 1, y: 0 }}
                           exit={{ opacity: 0, y: 10 }}
-                          className={`${styles.startButton} cursor-hover`} 
+                          className={`${styles.boxButton} cursor-hover`} 
                           style={{ marginTop: '2rem', opacity: (!isConsentChecked || isSubmitting) ? 0.5 : 1 }}
                           onClick={handleNext}
                           disabled={isSubmitting}
@@ -522,23 +526,38 @@ export default function GlobalContact() {
                 {step === 6 && (
                   <motion.div 
                     key="step6"
-                    className={`${styles.stepContainer} ${styles.outroContainer}`}
+                    className={styles.stepContainer}
                     variants={variants}
                     initial="initial"
                     animate="animate"
                     exit="exit"
                   >
-                    <h2 className={styles.outroTitle}>
-                      불필요한 소음을 걷어내고,<br />브랜드의 본질을 마주할 준비를 시작합니다.
-                    </h2>
-                    <p className={styles.outroDesc}>
-                      남겨주신 내용을 면밀히 검토 후, 곧 연결되겠습니다. 감사합니다.
+                    <h2 className={styles.introTitle}>Thank you!</h2>
+                    <p className={styles.introDesc}>
+                      소중한 문의가 성공적으로 접수되었습니다.<br />
+                      검토 후 입력해주신 연락처로 24시간 내에 회신드리겠습니다.
                     </p>
+                    <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
+                      <Link 
+                        href="/board" 
+                        className={`${styles.boxButton} cursor-hover`}
+                        onClick={() => setIsOpen(false)}
+                      >
+                        문의 확인하기
+                      </Link>
+                      <button 
+                        onClick={() => setIsOpen(false)} 
+                        className={`${styles.boxButtonOutline} cursor-hover`}
+                      >
+                        닫기
+                      </button>
+                    </div>
                   </motion.div>
                 )}
 
               </AnimatePresence>
             </main>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>

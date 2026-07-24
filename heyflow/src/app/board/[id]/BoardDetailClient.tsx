@@ -50,7 +50,7 @@ export default function BoardDetailClient({ id }: { id: string }) {
       <article className={styles.article}>
         <div className={styles.textContainer}>
           <Link href="/board" className={styles.backBtn}>
-            &larr; Back to List
+            &larr; Back
           </Link>
           
           {isLoading ? (

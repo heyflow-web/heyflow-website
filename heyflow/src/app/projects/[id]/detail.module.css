@@ -23,9 +23,7 @@
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  border-bottom: 1px solid var(--text-primary);
-  padding-bottom: 0.2rem;
-  transition: opacity 0.2s;
+      transition: opacity 0.2s;
 }
 
 .backBtn:hover {
