@@ -21,6 +21,23 @@ export default function ApplyModal({ campaign, isOpen, onClose }) {
 
   if (!isOpen) return null;
 
+  const isAllAgreed =
+    formData.agreePrivacy &&
+    formData.agreeRetention &&
+    formData.agreeMission &&
+    formData.agreeMarketing;
+
+  const handleSelectAll = (e) => {
+    const checked = e.target.checked;
+    setFormData((prev) => ({
+      ...prev,
+      agreePrivacy: checked,
+      agreeRetention: checked,
+      agreeMission: checked,
+      agreeMarketing: checked,
+    }));
+  };
+
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
@@ -222,7 +239,20 @@ export default function ApplyModal({ campaign, isOpen, onClose }) {
 
               {/* Agreements (Q1, Q6, Q7, Q8) */}
               <div className="space-y-3 pt-3 border-t border-slate-100">
-                <div className="text-xs font-bold text-slate-700">필수 약관 동의</div>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-slate-700">필수 약관 동의</span>
+                </div>
+
+                {/* 전체 동의 버튼 */}
+                <label className="flex items-center gap-3 cursor-pointer bg-slate-900 text-white p-3.5 rounded-xl font-bold text-xs shadow-sm hover:bg-slate-800 transition-colors">
+                  <input
+                    type="checkbox"
+                    checked={isAllAgreed}
+                    onChange={handleSelectAll}
+                    className="w-4 h-4 rounded text-indigo-600 focus:ring-0 cursor-pointer accent-indigo-500"
+                  />
+                  <span>[전체 동의] 모든 필수 약관에 한번에 동의합니다</span>
+                </label>
 
                 {/* Q1 */}
                 <label className="flex items-start gap-2.5 cursor-pointer bg-slate-50 p-3 rounded-xl border border-slate-200/80">
