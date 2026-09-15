@@ -36,13 +36,25 @@ export async function POST(request) {
     if (GOOGLE_SHEET_WEBHOOK_URL) {
       const sheetResponse = await fetch(GOOGLE_SHEET_WEBHOOK_URL, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
         body: JSON.stringify(body),
         redirect: "follow",
       });
 
       const responseText = await sheetResponse.text();
       console.log("✅ 구글 시트 전송 결과 status:", sheetResponse.status, "body:", responseText);
+
+      try {
+        const parsed = JSON.parse(responseText);
+        if (parsed.result === "error") {
+          return NextResponse.json(
+            { success: false, error: parsed.message || "구글 시트 저장 실패" },
+            { status: 500 }
+          );
+        }
+      } catch (e) {
+        // Text output might not be JSON, but 200 OK
+      }
     }
 
     return NextResponse.json({
