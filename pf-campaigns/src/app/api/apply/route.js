@@ -41,7 +41,8 @@ export async function POST(request) {
         redirect: "follow",
       });
 
-      console.log("✅ 구글 시트 전송 결과 status:", sheetResponse.status);
+      const responseText = await sheetResponse.text();
+      console.log("✅ 구글 시트 전송 결과 status:", sheetResponse.status, "body:", responseText);
     }
 
     return NextResponse.json({
