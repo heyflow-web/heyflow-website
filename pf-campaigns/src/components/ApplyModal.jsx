@@ -44,6 +44,11 @@ export default function ApplyModal({ campaign, isOpen, onClose }) {
 
     setIsSubmitting(true);
 
+    const formattedBlogUrl =
+      formData.blogUrl && !formData.blogUrl.startsWith("http")
+        ? `https://${formData.blogUrl}`
+        : formData.blogUrl;
+
     try {
       const response = await fetch("/api/apply", {
         method: "POST",
@@ -52,6 +57,7 @@ export default function ApplyModal({ campaign, isOpen, onClose }) {
           campaignId: campaign.id,
           campaignTitle: campaign.title,
           ...formData,
+          blogUrl: formattedBlogUrl,
         }),
       });
 
@@ -156,10 +162,10 @@ export default function ApplyModal({ campaign, isOpen, onClose }) {
                   3. 지원자 블로그 주소 <span className="text-rose-500">*</span>
                 </label>
                 <input
-                  type="url"
+                  type="text"
                   name="blogUrl"
                   required
-                  placeholder="https://blog.naver.com/아이디"
+                  placeholder="blog.naver.com/아이디 또는 https://..."
                   value={formData.blogUrl}
                   onChange={handleChange}
                   className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-slate-900 text-sm"
