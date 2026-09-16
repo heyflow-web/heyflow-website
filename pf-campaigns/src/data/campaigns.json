@@ -8,8 +8,8 @@
     "channel": "블로그",
     "offer": "5cm 내외의 파인 흉터 치료 2회 전액 지원",
     "copay": "없음 (전액 무상 지원)",
-    "visits": "2회 (3주 간격)",
-    "description": "5cm 내외의 파인 흉터 치료 무상 제공 프로그램입니다. 3주 간격 2회 치료가 진행됩니다.",
+    "visits": "1회 방문",
+    "description": "5cm 내외의 파인 흉터 치료 2회 전액 지원",
     "benefits": [
       "5cm 내외의 파인 흉터 치료 2회 전액 지원",
       "상세 병원 정보는 선정자분들께 톡으로 개별 안내해 드립니다!"
@@ -33,8 +33,7 @@
     "schedule": {
       "announcement": "신청서 검토 후 조건 맞으시면 순차적으로 개별 연락 드려요!",
       "activity": "선정 직후 예약 일정 조율해서 내원 및 시술 진행합니다."
-    },
-    "formUrl": "https://docs.google.com/forms/d/e/1FAIpQLSc_EXAMPLE_FORM_ID_1/viewform"
+    }
   },
   {
     "id": "C017",
@@ -45,8 +44,8 @@
     "channel": "블로그",
     "offer": "500원 동전 크기 켈로이드 흉터 치료 2회 전액 지원",
     "copay": "없음 (전액 무상 지원)",
-    "visits": "2회 (3주 간격)",
-    "description": "500원 동전 크기 이내 켈로이드 흉터 무상 치료 프로그램입니다.",
+    "visits": "1회 방문",
+    "description": "500원 동전 크기 켈로이드 흉터 치료 2회 전액 지원",
     "benefits": [
       "500원 동전 사이즈 이내의 켈로이드 흉터 치료 2회 전액 지원",
       "상세 병원 정보는 선정자분들께 톡으로 개별 안내해 드립니다!"
@@ -70,8 +69,7 @@
     "schedule": {
       "announcement": "신청서 검토 후 조건 맞으시면 순차적으로 개별 연락 드려요!",
       "activity": "선정 직후 예약 일정 조율해서 내원 및 시술 진행합니다."
-    },
-    "formUrl": "https://docs.google.com/forms/d/e/1FAIpQLSc_EXAMPLE_FORM_ID_2/viewform"
+    }
   },
   {
     "id": "C006-A",
@@ -81,9 +79,9 @@
     "location": "서울 강남",
     "channel": "릴스 / 블로그",
     "offer": "온볼라썸 1회 시술 지원 (전액 지원)",
-    "copay": "전액 무상 지원 (부분 모델 시 50% 할인)",
+    "copay": "없음 (전액 무상 지원)",
     "visits": "1회 방문",
-    "description": "팔자 전용 칼슘 콜라겐부스터 온볼라썸 시술로 즉각적인 볼륨과 장기적 콜라겐 형성을 체험해보세요.",
+    "description": "온볼라썸 1회 시술 지원 (전액 지원)",
     "benefits": [
       "팔자전용 칼슘 콜라겐부스터 온볼라썸 1회 시술 전액 지원",
       "상세 병원 정보는 선정자분들께 톡으로 개별 안내해 드립니다!"
@@ -104,8 +102,7 @@
     "schedule": {
       "announcement": "신청서 검토 후 조건 맞으시면 순차적으로 개별 연락 드려요!",
       "activity": "선정 직후 예약 일정 조율해서 내원 및 시술 진행합니다."
-    },
-    "formUrl": "https://docs.google.com/forms/d/e/1FAIpQLSc_EXAMPLE_FORM_ID_3/viewform"
+    }
   },
   {
     "id": "C004",
@@ -115,9 +112,9 @@
     "location": "서울 강남",
     "channel": "블로그 / 인스타그램 릴스",
     "offer": "켈로이드 흉터제거 1회 시술 전액 지원",
-    "copay": "없음",
+    "copay": "없음 (전액 무상 지원)",
     "visits": "1회 방문",
-    "description": "앤펄스, 라비앙 기기를 활용해 진피층에 약물을 전달하고 과증식 섬유모세포 활동을 억제합니다.",
+    "description": "켈로이드 흉터제거 1회 시술 전액 지원",
     "benefits": [
       "켈로이드 흉터제거 앤펄스, 라비앙 약물 주사 1회 시술 전액 지원",
       "상세 병원 정보는 선정자분들께 톡으로 개별 안내해 드립니다!"
@@ -139,8 +136,7 @@
     "schedule": {
       "announcement": "신청서 검토 후 조건 맞으시면 순차적으로 개별 연락 드려요!",
       "activity": "선정 직후 예약 일정 조율해서 내원 및 시술 진행합니다."
-    },
-    "formUrl": "https://docs.google.com/forms/d/e/1FAIpQLSc_EXAMPLE_FORM_ID_4/viewform"
+    }
   },
   {
     "id": "C005",
@@ -150,9 +146,9 @@
     "location": "서울 강남",
     "channel": "블로그 / 인스타그램 릴스",
     "offer": "흑자제거 레블라이트 1회 시술 전액 지원",
-    "copay": "없음",
+    "copay": "없음 (전액 무상 지원)",
     "visits": "1회 방문",
-    "description": "큐스위치 레블라이트 레이저로 멜라닌 색소를 선택적으로 파괴하여 흑자·검은 반점을 제거합니다.",
+    "description": "흑자제거 레블라이트 1회 시술 전액 지원",
     "benefits": [
       "흑자제거 레블라이트 1회 정밀 레이저 시술 전액 지원",
       "상세 병원 정보는 선정자분들께 톡으로 개별 안내해 드립니다!"
@@ -172,8 +168,7 @@
     "schedule": {
       "announcement": "신청서 검토 후 조건 맞으시면 순차적으로 개별 연락 드려요!",
       "activity": "선정 직후 예약 일정 조율해서 내원 및 시술 진행합니다."
-    },
-    "formUrl": "https://docs.google.com/forms/d/e/1FAIpQLSc_EXAMPLE_FORM_ID_5/viewform"
+    }
   },
   {
     "id": "C006-B",
@@ -183,9 +178,9 @@
     "location": "서울 강남",
     "channel": "블로그 / 인스타그램 릴스",
     "offer": "발톱무좀 프락셀 케어 1회 시술 지원",
-    "copay": "없음",
+    "copay": "없음 (전액 무상 지원)",
     "visits": "1회 방문",
-    "description": "뿌리 깊은 발톱무좀 균 파괴 프락셀 전용 레이저 치료 프로그램입니다.",
+    "description": "발톱무좀 프락셀 케어 1회 시술 지원",
     "benefits": [
       "발톱무좀 프락셀 케어 1회 시술 전액 지원",
       "상세 병원 정보는 선정자분들께 톡으로 개별 안내해 드립니다!"
@@ -204,8 +199,7 @@
     "schedule": {
       "announcement": "신청서 검토 후 조건 맞으시면 순차적으로 개별 연락 드려요!",
       "activity": "선정 직후 예약 일정 조율해서 내원 및 시술 진행합니다."
-    },
-    "formUrl": "https://docs.google.com/forms/d/e/1FAIpQLSc_EXAMPLE_FORM_ID_6/viewform"
+    }
   },
   {
     "id": "C008",
@@ -215,9 +209,9 @@
     "location": "서울 강남",
     "channel": "블로그 / 인스타그램 릴스",
     "offer": "1:1 재활 다이어트 프로그램 1회 전액 지원",
-    "copay": "없음",
+    "copay": "없음 (전액 무상 지원)",
     "visits": "1회 방문",
-    "description": "전문 치료사가 직접 설계하는 1:1 재활 분석 및 체형 맞춤 다이어트 코칭입니다.",
+    "description": "1:1 재활 다이어트 프로그램 1회 전액 지원",
     "benefits": [
       "전문 치료사의 체형분석 및 1:1 다이어트 프로그램 1회 전액 지원",
       "상세 병원 정보는 선정자분들께 톡으로 개별 안내해 드립니다!"
@@ -236,8 +230,7 @@
     "schedule": {
       "announcement": "신청서 검토 후 조건 맞으시면 순차적으로 개별 연락 드려요!",
       "activity": "선정 직후 예약 일정 조율해서 내원 및 시술 진행합니다."
-    },
-    "formUrl": "https://docs.google.com/forms/d/e/1FAIpQLSc_EXAMPLE_FORM_ID_7/viewform"
+    }
   },
   {
     "id": "C009",
@@ -247,9 +240,9 @@
     "location": "서울 강남",
     "channel": "블로그 / 인스타그램 릴스",
     "offer": "플라즈마 우먼케어 1회 시술 지원",
-    "copay": "없음",
+    "copay": "없음 (전액 무상 지원)",
     "visits": "1회 방문",
-    "description": "여성 전문 의료진을 통한 플라즈마 기술 기반 여성 전용 케어 프로그램입니다.",
+    "description": "플라즈마 우먼케어 1회 시술 지원",
     "benefits": [
       "플라즈마 우먼케어 1회 시술 전액 지원",
       "상세 병원 정보는 선정자분들께 톡으로 개별 안내해 드립니다!"
@@ -268,8 +261,7 @@
     "schedule": {
       "announcement": "신청서 검토 후 조건 맞으시면 순차적으로 개별 연락 드려요!",
       "activity": "선정 직후 예약 일정 조율해서 내원 및 시술 진행합니다."
-    },
-    "formUrl": "https://docs.google.com/forms/d/e/1FAIpQLSc_EXAMPLE_FORM_ID_8/viewform"
+    }
   },
   {
     "id": "C014",
@@ -279,9 +271,9 @@
     "location": "서울 강남",
     "channel": "블로그 / 인스타그램 릴스",
     "offer": "명함 크기 이하 타투 제거 1회 시술 전액 지원",
-    "copay": "없음",
+    "copay": "없음 (전액 무상 지원)",
     "visits": "1회 방문",
-    "description": "명함 크기 이하 소형 타투/문신 전문 제거 시술입니다.",
+    "description": "명함 크기 이하 타투 제거 1회 시술 전액 지원",
     "benefits": [
       "명함 크기 이하 문신제거 1회 시술 전액 지원",
       "상세 병원 정보는 선정자분들께 톡으로 개별 안내해 드립니다!"
@@ -300,8 +292,7 @@
     "schedule": {
       "announcement": "신청서 검토 후 조건 맞으시면 순차적으로 개별 연락 드려요!",
       "activity": "선정 직후 예약 일정 조율해서 내원 및 시술 진행합니다."
-    },
-    "formUrl": "https://docs.google.com/forms/d/e/1FAIpQLSc_EXAMPLE_FORM_ID_9/viewform"
+    }
   },
   {
     "id": "C015",
@@ -311,9 +302,9 @@
     "location": "서울 강남",
     "channel": "블로그 / 인스타그램 릴스",
     "offer": "두피 전체 스켈링 & 탈모 스파 1회 시술 지원",
-    "copay": "없음",
+    "copay": "없음 (전액 무상 지원)",
     "visits": "1회 방문",
-    "description": "두피 전체 스켈링 + 승모근&뒷목 릴랙스 스파 프로그램입니다.",
+    "description": "두피 전체 스켈링 & 탈모 스파 1회 시술 지원",
     "benefits": [
       "두피 스켈링 및 승모근 릴랙스 탈모 스파 1회 전액 지원",
       "상세 병원 정보는 선정자분들께 톡으로 개별 안내해 드립니다!"
@@ -333,8 +324,7 @@
     "schedule": {
       "announcement": "신청서 검토 후 조건 맞으시면 순차적으로 개별 연락 드려요!",
       "activity": "선정 직후 예약 일정 조율해서 내원 및 시술 진행합니다."
-    },
-    "formUrl": "https://docs.google.com/forms/d/e/1FAIpQLSc_EXAMPLE_FORM_ID_10/viewform"
+    }
   },
   {
     "id": "C019",
@@ -344,9 +334,9 @@
     "location": "서울 강남",
     "channel": "블로그 / 인스타그램 릴스",
     "offer": "롱래스팅 반영구 1부위 무상 시술 전액 지원",
-    "copay": "없음",
+    "copay": "없음 (전액 무상 지원)",
     "visits": "1회 방문",
-    "description": "무통증·무붓기 4D 콤보 반영구 시술. 다운타임 없이 일상 복귀 가능합니다.",
+    "description": "롱래스팅 반영구 1부위 무상 시술 전액 지원",
     "benefits": [
       "롱래스팅 눈썹/아이라인 1부위 시술 전액 지원",
       "상세 병원 정보는 선정자분들께 톡으로 개별 안내해 드립니다!"
@@ -365,8 +355,7 @@
     "schedule": {
       "announcement": "신청서 검토 후 조건 맞으시면 순차적으로 개별 연락 드려요!",
       "activity": "선정 직후 예약 일정 조율해서 내원 및 시술 진행합니다."
-    },
-    "formUrl": "https://docs.google.com/forms/d/e/1FAIpQLSc_EXAMPLE_FORM_ID_11/viewform"
+    }
   },
   {
     "id": "C020",
@@ -376,9 +365,9 @@
     "location": "서울 종로",
     "channel": "블로그",
     "offer": "[A타입] 발톱 무좀 균 제거 맞춤 관리 1회 전액 지원",
-    "copay": "없음 (기본 관리 외 추가 케어 시 별도 비용 발생 가능)",
-    "visits": "모집 인원: 10명 (선착순/적합도 평가)",
-    "description": "전문 장비를 활용한 비가열성 발톱 무좀 균 제거 맞춤 관리입니다.",
+    "copay": "없음 (전액 무상 지원)",
+    "visits": "1회 방문",
+    "description": "[A타입] 발톱 무좀 균 제거 맞춤 관리 1회 전액 지원",
     "benefits": [
       "[A타입] 전문 장비 발톱 무좀 균 제거 케어 1회 전액 지원",
       "상세 정보는 선정자분들께 톡으로 개별 안내해 드립니다!"
@@ -399,8 +388,7 @@
     "schedule": {
       "announcement": "신청서 검토 후 조건 맞으시면 순차적으로 개별 연락 드려요!",
       "activity": "선정 직후 예약 일정 조율해서 내원 및 시술 진행합니다."
-    },
-    "formUrl": "https://docs.google.com/forms/d/e/1FAIpQLSc_EXAMPLE_FORM_ID_12/viewform"
+    }
   },
   {
     "id": "C021",
@@ -410,9 +398,9 @@
     "location": "서울 종로",
     "channel": "블로그",
     "offer": "[B타입] 내성 발톱 맞춤 교정 관리 1회 전액 지원",
-    "copay": "없음 (기본 관리 외 추가 케어 시 별도 비용 발생 가능)",
-    "visits": "모집 인원: 10명 (선착순/적합도 평가)",
-    "description": "파고드는 내성 발톱 통증 해소를 위한 맞춤형 전문 교정 관리입니다.",
+    "copay": "없음 (전액 무상 지원)",
+    "visits": "1회 방문",
+    "description": "[B타입] 내성 발톱 맞춤 교정 관리 1회 전액 지원",
     "benefits": [
       "[B타입] 내성 발톱 전문 맞춤 교정 케어 1회 전액 지원",
       "상세 정보는 선정자분들께 톡으로 개별 안내해 드립니다!"
@@ -433,7 +421,6 @@
     "schedule": {
       "announcement": "신청서 검토 후 조건 맞으시면 순차적으로 개별 연락 드려요!",
       "activity": "선정 직후 예약 일정 조율해서 내원 및 시술 진행합니다."
-    },
-    "formUrl": "https://docs.google.com/forms/d/e/1FAIpQLSc_EXAMPLE_FORM_ID_13/viewform"
+    }
   }
 ]
