@@ -106,7 +106,7 @@ export default function ApplyModal({ campaign, isOpen, onClose }) {
     : "14일 이내 업로드 / 1,500자+ / 사진 15장+ / 동영상 포함 가이드 준수";
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-x-hidden max-w-full">
       <div className="bg-white w-full max-w-md max-h-[90vh] rounded-t-[32px] sm:rounded-[32px] shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-bottom duration-300">
         
         {/* Header */}
