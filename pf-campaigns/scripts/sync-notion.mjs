@@ -11,12 +11,6 @@ const rootDir = path.resolve(__dirname, "..");
 dotenv.config({ path: path.resolve(rootDir, ".env.local") });
 dotenv.config({ path: path.resolve(rootDir, ".env") });
 
-const NOTION_API_KEY = process.env.NOTION_API_KEY;
-const NOTION_DATABASE_ID =
-  process.env.NOTION_CAMPAIGN_DB_ID ||
-  process.env.NOTION_DATABASE_ID ||
-  "3ddb1670-3d4f-81dd-9379-e97d779fc2cd";
-
 const getPlainText = (prop) => {
   if (!prop) return "";
   if (prop.type === "title") {
@@ -44,15 +38,27 @@ const splitLines = (text) => {
 
 async function syncNotionCampaigns() {
   console.log("🚀 노션 캠페인 데이터 동기화를 시작합니다...");
-  console.log(`📌 Notion DB ID: ${NOTION_DATABASE_ID}`);
+
+  const apiKey = process.env.NOTION_API_KEY;
+  const dbId =
+    process.env.NOTION_CAMPAIGN_DB_ID ||
+    process.env.NOTION_DATABASE_ID ||
+    "3ddb1670-3d4f-81dd-9379-e97d779fc2cd";
+
+  if (!apiKey) {
+    console.warn("⚠️ NOTION_API_KEY 환경 변수가 없습니다. 기존 campaigns.json 데이터를 사용합니다.");
+    return;
+  }
+
+  console.log(`📌 Notion DB ID: ${dbId}`);
 
   try {
     const res = await fetch(
-      `https://api.notion.com/v1/databases/${NOTION_DATABASE_ID}/query`,
+      `https://api.notion.com/v1/databases/${dbId}/query`,
       {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${NOTION_API_KEY}`,
+          Authorization: `Bearer ${apiKey}`,
           "Notion-Version": "2022-06-28",
           "Content-Type": "application/json",
         },
@@ -64,7 +70,10 @@ async function syncNotionCampaigns() {
 
     if (!res.ok) {
       const errText = await res.text();
-      throw new Error(`Notion API Error (${res.status}): ${errText}`);
+      console.warn(
+        `⚠️ Notion API 가져오기 예외 (${res.status}): 기존 campaigns.json 데이터를 유지합니다.`
+      );
+      return;
     }
 
     const data = await res.json();
@@ -117,9 +126,11 @@ async function syncNotionCampaigns() {
     const targetPath = path.resolve(rootDir, "src", "data", "campaigns.json");
     fs.writeFileSync(targetPath, JSON.stringify(campaigns, null, 2), "utf8");
 
-    console.log(`✅ 동기화 완료! 총 ${campaigns.length}개 캠페인이 src/data/campaigns.json에 저장되었습니다.`);
+    console.log(
+      `✅ 동기화 완료! 총 ${campaigns.length}개 캠페인이 src/data/campaigns.json에 저장되었습니다.`
+    );
   } catch (error) {
-    console.error("❌ 노션 동기화 실패:", error.message);
+    console.warn("⚠️ 노션 동기화 실패 (기존 데이터 유지):", error.message);
   }
 }
 
