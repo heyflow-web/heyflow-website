@@ -43,7 +43,7 @@ async function syncNotionCampaigns() {
   const dbId =
     process.env.NOTION_CAMPAIGN_DB_ID ||
     process.env.NOTION_DATABASE_ID ||
-    "3ddb1670-3d4f-8105-8a0f-f6b3b79cf8b1";
+    "3ddb1670-3d4f-81f9-8caf-e2e22501dbdf";
 
   if (!apiKey) {
     console.warn("⚠️ NOTION_API_KEY 환경 변수가 없습니다. 기존 campaigns.json 데이터를 사용합니다.");
