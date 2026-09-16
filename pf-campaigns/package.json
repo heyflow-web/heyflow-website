@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --webpack",
-    "build": "node scripts/sync-notion.mjs && next build --webpack",
+    "build": "next build --webpack",
     "start": "next start",
     "sync": "node scripts/sync-notion.mjs"
   },
