@@ -26,6 +26,7 @@ export default function ApplyModal({ campaign, isOpen, onClose }) {
     name: "",
     phone: "",
     blogUrl: "",
+    userNote: "",
     agreePrivacy: false,
     agreeRetention: false,
     agreeMission: false,
@@ -437,6 +438,21 @@ export default function ApplyModal({ campaign, isOpen, onClose }) {
                   value={imageNote}
                   onChange={(e) => setImageNote(e.target.value)}
                   className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-slate-900"
+                />
+              </div>
+
+              {/* 6. Applicant Remarks / Special Note (Optional) */}
+              <div className="space-y-1.5 pt-2 border-t border-slate-100">
+                <label className="block text-xs font-bold text-slate-700">
+                  6. 전달사항 및 특이사항 <span className="text-slate-400 font-normal">(선택)</span>
+                </label>
+                <textarea
+                  name="userNote"
+                  rows={2}
+                  placeholder="병원이나 진행팀에 전달하고 싶으신 메모나 특이사항이 있다면 자유롭게 남겨주세요."
+                  value={formData.userNote}
+                  onChange={handleChange}
+                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-slate-900 resize-none"
                 />
               </div>
 
