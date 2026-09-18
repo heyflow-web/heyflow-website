@@ -1,5 +1,4 @@
 import "./globals.css";
-import PasswordGate from "@/components/PasswordGate";
 
 export const metadata = {
   title: "체험단 캠페인 라운지",
@@ -10,8 +9,9 @@ export default function RootLayout({ children }) {
   return (
     <html lang="ko">
       <body className="antialiased font-sans">
-        <PasswordGate>{children}</PasswordGate>
+        {children}
       </body>
     </html>
   );
 }
+
