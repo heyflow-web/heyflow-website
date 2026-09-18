@@ -2,19 +2,41 @@
 
 import { useState } from "react";
 
+const TIME_SLOTS = [
+  "10:00 (오전)",
+  "10:30 (오전)",
+  "11:00 (오전)",
+  "11:30 (오전)",
+  "12:00 (오후)",
+  "14:00 (오후)",
+  "14:30 (오후)",
+  "15:00 (오후)",
+  "15:30 (오후)",
+  "16:00 (오후)",
+  "16:30 (오후)",
+  "17:00 (오후)",
+  "17:30 (오후)",
+  "18:00 (오후)",
+  "18:30 (오후)",
+  "19:00 (오후)",
+];
+
 export default function ApplyModal({ campaign, isOpen, onClose }) {
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
     blogUrl: "",
-    schedule1: "",
-    schedule2: "",
-    schedule3: "",
     agreePrivacy: false,
     agreeRetention: false,
     agreeMission: false,
     agreeMarketing: false,
   });
+
+  const [schedules, setSchedules] = useState([
+    { date: "", time: "14:00 (오후)" },
+    { date: "", time: "15:00 (오후)" },
+    { date: "", time: "16:00 (오후)" },
+  ]);
 
   const [imageList, setImageList] = useState([]);
   const [imageNote, setImageNote] = useState("");
@@ -22,6 +44,22 @@ export default function ApplyModal({ campaign, isOpen, onClose }) {
   const [isSuccess, setIsSuccess] = useState(false);
 
   if (!isOpen) return null;
+
+  const getTodayString = () => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, "0");
+    const day = String(today.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
+  const handleScheduleChange = (index, field, value) => {
+    setSchedules((prev) => {
+      const updated = [...prev];
+      updated[index] = { ...updated[index], [field]: value };
+      return updated;
+    });
+  };
 
   const isPhotoRequired = Boolean(
     campaign?.title?.match(/흉터|문신|타투|켈로이드|제거|파인|함몰/) ||
@@ -101,6 +139,11 @@ export default function ApplyModal({ campaign, isOpen, onClose }) {
       return;
     }
 
+    if (!schedules[0].date || !schedules[1].date || !schedules[2].date) {
+      alert("1순위, 2순위, 3순위 방문 날짜를 달력에서 모두 선택해 주세요.");
+      return;
+    }
+
     if (isPhotoRequired && imageList.length === 0) {
       alert("흉터/문신 치료 캠페인은 상태 확인을 위해 1장 이상의 사진 첨부가 필요합니다.");
       return;
@@ -129,6 +172,9 @@ export default function ApplyModal({ campaign, isOpen, onClose }) {
           campaignId: campaign.id,
           campaignTitle: campaign.title,
           ...formData,
+          schedule1: `${schedules[0].date} ${schedules[0].time}`,
+          schedule2: `${schedules[1].date} ${schedules[1].time}`,
+          schedule3: `${schedules[2].date} ${schedules[2].time}`,
           phone: formattedPhone,
           blogUrl: formattedBlogUrl,
           images: imageList.map((img) => img.dataUrl),
@@ -247,42 +293,68 @@ export default function ApplyModal({ campaign, isOpen, onClose }) {
                 />
               </div>
 
-              {/* Q5. Schedules */}
-              <div className="space-y-2">
-                <label className="block text-xs font-bold text-slate-700">
-                  4. 방문 가능한 일정 3가지 (1~3순위) <span className="text-rose-500">*</span>
-                </label>
-                <p className="text-[11px] text-slate-500 leading-tight">
-                  원활한 예약 조율을 위해 방문 가능한 날짜와 시간대를 3순위까지 작성해 주세요!
-                </p>
-                <div className="space-y-2 pt-1">
-                  <input
-                    type="text"
-                    name="schedule1"
-                    required
-                    placeholder="1순위: 8월 1일 15~18시"
-                    value={formData.schedule1}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-slate-900"
-                  />
-                  <input
-                    type="text"
-                    name="schedule2"
-                    required
-                    placeholder="2순위: 8월 2일 18시"
-                    value={formData.schedule2}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-slate-900"
-                  />
-                  <input
-                    type="text"
-                    name="schedule3"
-                    required
-                    placeholder="3순위: 8월 7일 오전 10시"
-                    value={formData.schedule3}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-slate-900"
-                  />
+              {/* Q5. Schedules (Calendar Date & Time Picker) */}
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700">
+                    4. 방문 가능한 희망 일정 3가지 (달력에서 선택) <span className="text-rose-500">*</span>
+                  </label>
+                  <p className="text-[11px] text-slate-500 leading-tight mt-0.5">
+                    원활한 병원 예약을 위해 방문이 가능한 날짜와 희망 시간대를 3순위까지 달력에서 꼭 선택해 주세요!
+                  </p>
+                </div>
+
+                <div className="space-y-2.5 pt-0.5">
+                  {[0, 1, 2].map((idx) => (
+                    <div
+                      key={idx}
+                      className="bg-slate-50 p-3 rounded-2xl border border-slate-200/80 space-y-1.5"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] font-extrabold text-slate-800 flex items-center gap-1">
+                          <span className="w-4 h-4 rounded-full bg-slate-900 text-white text-[10px] flex items-center justify-center font-bold">
+                            {idx + 1}
+                          </span>
+                          {idx + 1}순위 희망 일정
+                        </span>
+                        <span className="text-[10px] text-slate-400 font-medium">
+                          날짜 + 시간 선택
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        {/* Date Picker */}
+                        <div className="relative">
+                          <input
+                            type="date"
+                            min={getTodayString()}
+                            required
+                            value={schedules[idx].date}
+                            onChange={(e) =>
+                              handleScheduleChange(idx, "date", e.target.value)
+                            }
+                            className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-900 focus:outline-none focus:border-slate-900 shadow-2xs"
+                          />
+                        </div>
+
+                        {/* Time Select */}
+                        <select
+                          required
+                          value={schedules[idx].time}
+                          onChange={(e) =>
+                            handleScheduleChange(idx, "time", e.target.value)
+                          }
+                          className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-900 focus:outline-none focus:border-slate-900 shadow-2xs cursor-pointer"
+                        >
+                          {TIME_SLOTS.map((time) => (
+                            <option key={time} value={time}>
+                              {time}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
 
