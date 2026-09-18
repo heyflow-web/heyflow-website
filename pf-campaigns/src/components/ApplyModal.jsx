@@ -16,10 +16,18 @@ export default function ApplyModal({ campaign, isOpen, onClose }) {
     agreeMarketing: false,
   });
 
+  const [imageList, setImageList] = useState([]);
+  const [imageNote, setImageNote] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
 
   if (!isOpen) return null;
+
+  const isPhotoRequired = Boolean(
+    campaign?.title?.match(/흉터|문신|타투|켈로이드|제거|파인|함몰/) ||
+    campaign?.description?.match(/흉터|문신|타투|켈로이드|제거|파인|함몰/) ||
+    campaign?.category?.match(/흉터|문신|피부/)
+  );
 
   const isAllAgreed =
     formData.agreePrivacy &&
@@ -46,6 +54,40 @@ export default function ApplyModal({ campaign, isOpen, onClose }) {
     }));
   };
 
+  const handleImageChange = (e) => {
+    const files = Array.from(e.target.files);
+    if (!files.length) return;
+
+    if (imageList.length + files.length > 3) {
+      alert("이미지는 최대 3장까지 첨부할 수 있습니다.");
+      return;
+    }
+
+    files.forEach((file) => {
+      if (file.size > 5 * 1024 * 1024) {
+        alert("5MB 이하의 이미지 파일만 첨부 가능합니다.");
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImageList((prev) => [
+          ...prev,
+          {
+            id: Date.now() + Math.random(),
+            name: file.name,
+            dataUrl: reader.result,
+          },
+        ]);
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handleRemoveImage = (idToRemove) => {
+    setImageList((prev) => prev.filter((img) => img.id !== idToRemove));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -56,6 +98,11 @@ export default function ApplyModal({ campaign, isOpen, onClose }) {
       !formData.agreeMarketing
     ) {
       alert("모든 필수 동의 항목에 체크해 주세요.");
+      return;
+    }
+
+    if (isPhotoRequired && imageList.length === 0) {
+      alert("흉터/문신 치료 캠페인은 상태 확인을 위해 1장 이상의 사진 첨부가 필요합니다.");
       return;
     }
 
@@ -84,6 +131,8 @@ export default function ApplyModal({ campaign, isOpen, onClose }) {
           ...formData,
           phone: formattedPhone,
           blogUrl: formattedBlogUrl,
+          images: imageList.map((img) => img.dataUrl),
+          imageNote: imageNote,
         }),
       });
 
@@ -235,6 +284,88 @@ export default function ApplyModal({ campaign, isOpen, onClose }) {
                     className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-slate-900"
                   />
                 </div>
+              </div>
+
+              {/* 5. Photo Upload for Scar / Tattoo / Medical treatment condition */}
+              <div className="space-y-2.5 pt-2 border-t border-slate-100">
+                <div className="flex items-center justify-between">
+                  <label className="block text-xs font-bold text-slate-700">
+                    5. 시술 부위(흉터/문신 등) 상태 사진 첨부{" "}
+                    {isPhotoRequired ? (
+                      <span className="text-rose-500">* (필수)</span>
+                    ) : (
+                      <span className="text-slate-400 font-normal">(선택)</span>
+                    )}
+                  </label>
+                  <span className="text-[11px] font-medium text-slate-400">
+                    {imageList.length}/3장
+                  </span>
+                </div>
+
+                <p className="text-[11px] text-slate-500 leading-relaxed">
+                  정확한 상담 및 시술 가능 여부 확인을 위해 시술을 원하시는 부위(흉터, 문신, 켈로이드 등)의 사진을 첨부해 주세요.
+                </p>
+
+                {/* Upload Button Box */}
+                {imageList.length < 3 && (
+                  <label className="flex flex-col items-center justify-center w-full p-4 border-2 border-dashed border-slate-200 hover:border-slate-400 bg-slate-50/70 hover:bg-slate-100/70 rounded-2xl cursor-pointer transition-all text-center">
+                    <div className="w-10 h-10 rounded-full bg-slate-200/80 text-slate-700 flex items-center justify-center text-lg mb-1">
+                      📸
+                    </div>
+                    <span className="text-xs font-bold text-slate-800">
+                      사진 추가하기 (클릭 또는 파일 선택)
+                    </span>
+                    <span className="text-[10px] text-slate-400 mt-0.5">
+                      JPG, PNG, WEBP (장당 최대 5MB)
+                    </span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      onChange={handleImageChange}
+                      className="hidden"
+                    />
+                  </label>
+                )}
+
+                {/* Image Previews Grid */}
+                {imageList.length > 0 && (
+                  <div className="grid grid-cols-3 gap-2.5 pt-1">
+                    {imageList.map((img, idx) => (
+                      <div
+                        key={img.id}
+                        className="relative group aspect-square rounded-xl overflow-hidden border border-slate-200 shadow-xs bg-slate-100"
+                      >
+                        <img
+                          src={img.dataUrl}
+                          alt={`첨부 이미지 ${idx + 1}`}
+                          className="w-full h-full object-cover"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveImage(img.id)}
+                          className="absolute top-1 right-1 w-6 h-6 rounded-full bg-black/70 hover:bg-rose-600 text-white flex items-center justify-center text-xs font-bold transition-colors cursor-pointer shadow-md"
+                          title="삭제"
+                        >
+                          ✕
+                        </button>
+                        <span className="absolute bottom-1 left-1 px-1.5 py-0.5 bg-black/60 text-white rounded text-[9px] font-bold">
+                          #{idx + 1}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Optional Note for photo */}
+                <input
+                  type="text"
+                  name="imageNote"
+                  placeholder="부위/상태 설명 (예: 오른쪽 팔 흉터, 5cm 크기)"
+                  value={imageNote}
+                  onChange={(e) => setImageNote(e.target.value)}
+                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-slate-900"
+                />
               </div>
 
               {/* Agreements (Q1, Q6, Q7, Q8) */}

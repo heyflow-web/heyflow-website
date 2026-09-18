@@ -12,6 +12,8 @@ export async function POST(request) {
       schedule1,
       schedule2,
       schedule3,
+      images,
+      imageNote,
       agreePrivacy,
       agreeRetention,
       agreeMission,
@@ -27,6 +29,8 @@ export async function POST(request) {
       schedule1,
       schedule2,
       schedule3,
+      imageCount: images?.length || 0,
+      imageNote,
     });
 
     const GOOGLE_SHEET_WEBHOOK_URL =
