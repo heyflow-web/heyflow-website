@@ -68,6 +68,31 @@ export default function ApplyModal({ campaign, isOpen, onClose }) {
     (campaign?.category?.match(/흉터|문신|타투/) && !campaign?.category?.includes("피부"))
   );
 
+  const isAllAgreed =
+    formData.agreePrivacy &&
+    formData.agreeRetention &&
+    formData.agreeMission &&
+    formData.agreeMarketing;
+
+  const handleSelectAll = (e) => {
+    const checked = e.target.checked;
+    setFormData((prev) => ({
+      ...prev,
+      agreePrivacy: checked,
+      agreeRetention: checked,
+      agreeMission: checked,
+      agreeMarketing: checked,
+    }));
+  };
+
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
+  };
+
   const compressImage = (file) => {
     return new Promise((resolve) => {
       const reader = new FileReader();
