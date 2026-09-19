@@ -62,10 +62,10 @@ export default function ApplyModal({ campaign, isOpen, onClose }) {
     });
   };
 
-  const isPhotoRequired = Boolean(
-    campaign?.title?.match(/흉터|문신|타투|켈로이드|타투제거|문신제거|흉터치료|파인|함몰/) ||
-    campaign?.offer?.match(/흉터|문신|타투|켈로이드/) ||
-    (campaign?.category?.match(/흉터|문신|타투/) && !campaign?.category?.includes("피부"))
+  const titleAndCategory = `${campaign?.title || ""} ${campaign?.category || ""} ${campaign?.offer || ""}`;
+  const isExcludedFromRequired = titleAndCategory.match(/반영구|소형문신|명함크기|명함 크기/);
+  const isPhotoRequired = !isExcludedFromRequired && Boolean(
+    titleAndCategory.match(/흉터|켈로이드|무좀|발톱|함몰|파인/)
   );
 
   const isAllAgreed =
