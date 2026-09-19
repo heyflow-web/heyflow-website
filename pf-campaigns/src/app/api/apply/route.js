@@ -100,8 +100,7 @@ export async function POST(request) {
     const validCdnUrls = uploadedImageUrls.filter((url) => Boolean(url));
     const payload = {
       ...body,
-      rawImages: Array.isArray(images) ? images : [],
-      images: validCdnUrls.length > 0 ? validCdnUrls : (Array.isArray(images) ? images : []),
+      images: validCdnUrls,
       cdnImages: validCdnUrls,
     };
 
