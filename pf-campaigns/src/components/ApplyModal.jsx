@@ -63,37 +63,48 @@ export default function ApplyModal({ campaign, isOpen, onClose }) {
   };
 
   const isPhotoRequired = Boolean(
-    campaign?.title?.match(/흉터|문신|타투|켈로이드|제거|파인|함몰/) ||
-    campaign?.description?.match(/흉터|문신|타투|켈로이드|제거|파인|함몰/) ||
-    campaign?.category?.match(/흉터|문신|피부/)
+    campaign?.title?.match(/흉터|문신|타투|켈로이드|타투제거|문신제거|흉터치료|파인|함몰/) ||
+    campaign?.offer?.match(/흉터|문신|타투|켈로이드/) ||
+    (campaign?.category?.match(/흉터|문신|타투/) && !campaign?.category?.includes("피부"))
   );
 
-  const isAllAgreed =
-    formData.agreePrivacy &&
-    formData.agreeRetention &&
-    formData.agreeMission &&
-    formData.agreeMarketing;
+  const compressImage = (file) => {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const maxWidth = 1000;
+          const maxHeight = 1000;
+          let width = img.width;
+          let height = img.height;
 
-  const handleSelectAll = (e) => {
-    const checked = e.target.checked;
-    setFormData((prev) => ({
-      ...prev,
-      agreePrivacy: checked,
-      agreeRetention: checked,
-      agreeMission: checked,
-      agreeMarketing: checked,
-    }));
+          if (width > maxWidth || height > maxHeight) {
+            if (width > height) {
+              height = Math.round((height * maxWidth) / width);
+              width = maxWidth;
+            } else {
+              width = Math.round((width * maxHeight) / height);
+              height = maxHeight;
+            }
+          }
+
+          const canvas = document.createElement("canvas");
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0, width, height);
+
+          const compressedDataUrl = canvas.toDataURL("image/jpeg", 0.7);
+          resolve(compressedDataUrl);
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
   };
 
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value,
-    }));
-  };
-
-  const handleImageChange = (e) => {
+  const handleImageChange = async (e) => {
     const files = Array.from(e.target.files);
     if (!files.length) return;
 
@@ -102,25 +113,26 @@ export default function ApplyModal({ campaign, isOpen, onClose }) {
       return;
     }
 
-    files.forEach((file) => {
-      if (file.size > 5 * 1024 * 1024) {
-        alert("5MB 이하의 이미지 파일만 첨부 가능합니다.");
+    for (const file of files) {
+      if (file.size > 10 * 1024 * 1024) {
+        alert("10MB 이하의 이미지 파일만 첨부 가능합니다.");
         return;
       }
 
-      const reader = new FileReader();
-      reader.onloadend = () => {
+      try {
+        const compressedDataUrl = await compressImage(file);
         setImageList((prev) => [
           ...prev,
           {
             id: Date.now() + Math.random(),
             name: file.name,
-            dataUrl: reader.result,
+            dataUrl: compressedDataUrl,
           },
         ]);
-      };
-      reader.readAsDataURL(file);
-    });
+      } catch (err) {
+        console.error("이미지 압축 중 오류 발생:", err);
+      }
+    }
   };
 
   const handleRemoveImage = (idToRemove) => {
