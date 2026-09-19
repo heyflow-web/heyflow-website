@@ -1,50 +1,40 @@
 import { NextResponse } from "next/server";
 
-async function uploadBase64ToImageHost(base64Data, index) {
+const IMGUR_CLIENT_IDS = [
+  "54646564070b699",
+  "862d057a6e133c9",
+  "c9a2862d057a6e1",
+  "9f3442c3e5d3fc3",
+  "c9a35e808fa7a76",
+];
+
+async function uploadBase64ToImgur(base64Data) {
   if (!base64Data || typeof base64Data !== "string") return "";
   if (base64Data.startsWith("http")) return base64Data;
 
   const parts = base64Data.split(",");
   const rawBase64 = parts[1] || parts[0];
-  const mimeMatch = parts[0].match(/:(.*?);/);
-  const mimeType = mimeMatch ? mimeMatch[1] : "image/jpeg";
-  const ext = mimeType.split("/")[1] || "jpg";
-  const buffer = Buffer.from(rawBase64, "base64");
 
-  // Attempt 1: tmpfiles.org
-  try {
-    const formData = new FormData();
-    formData.append("file", new Blob([buffer], { type: mimeType }), `photo_${index + 1}.${ext}`);
-    const res = await fetch("https://tmpfiles.org/api/v1/upload", {
-      method: "POST",
-      body: formData,
-    });
-    const json = await res.json();
-    if (json.status === "success" && json.data?.url) {
-      return json.data.url.replace("tmpfiles.org/", "tmpfiles.org/dl/");
+  for (const cid of IMGUR_CLIENT_IDS) {
+    try {
+      const params = new URLSearchParams();
+      params.append("image", rawBase64);
+      params.append("type", "base64");
+
+      const res = await fetch("https://api.imgur.com/3/upload", {
+        method: "POST",
+        headers: { Authorization: `Client-ID ${cid}` },
+        body: params,
+      });
+
+      const json = await res.json();
+      if (json.status === 200 && json.data?.link) {
+        return json.data.link;
+      }
+    } catch (err) {
+      console.error("Imgur upload failed:", err);
     }
-  } catch (err) {
-    console.error("tmpfiles failed:", err.message);
   }
-
-  // Attempt 2: Litterbox (72 hours direct image link)
-  try {
-    const formData = new FormData();
-    formData.append("reqtype", "fileupload");
-    formData.append("time", "72h");
-    formData.append("fileToUpload", new Blob([buffer], { type: mimeType }), `photo_${index + 1}.${ext}`);
-    const res = await fetch("https://litterbox.catbox.moe/resources/internals/api.php", {
-      method: "POST",
-      body: formData,
-    });
-    const text = await res.text();
-    if (text && text.trim().startsWith("http")) {
-      return text.trim();
-    }
-  } catch (err) {
-    console.error("litterbox failed:", err.message);
-  }
-
   return "";
 }
 
@@ -69,20 +59,20 @@ export async function POST(request) {
       agreeMarketing,
     } = body;
 
-    // Convert base64 images to high-speed public CDN URLs
+    // Convert base64 images to permanent Imgur CDN URLs
     let uploadedImageUrls = [];
     if (Array.isArray(images) && images.length > 0) {
       uploadedImageUrls = await Promise.all(
-        images.map((img, idx) => uploadBase64ToImageHost(img, idx))
+        images.map((img) => uploadBase64ToImgur(img))
       );
     }
 
     const payload = {
       ...body,
-      images: uploadedImageUrls,
+      images: uploadedImageUrls.filter((url) => Boolean(url)),
     };
 
-    console.log("📝 지원서 제출 데이터 받아옴 (CDN URL 변환 완료):", {
+    console.log("📝 지원서 제출 데이터 받아옴 (Imgur URL 변환 완료):", {
       campaignId,
       campaignTitle,
       name,
@@ -91,7 +81,7 @@ export async function POST(request) {
       schedule1,
       schedule2,
       schedule3,
-      imageUrls: uploadedImageUrls,
+      imageUrls: payload.images,
       imageNote,
       userNote,
     });
