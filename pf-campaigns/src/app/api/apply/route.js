@@ -99,8 +99,7 @@ export async function POST(request) {
 
     const payload = {
       ...body,
-      images: Array.isArray(images) && images.length > 0 ? images : uploadedImageUrls.filter((url) => Boolean(url)),
-      cdnImages: uploadedImageUrls.filter((url) => Boolean(url)),
+      images: uploadedImageUrls.filter((url) => Boolean(url)),
     };
 
     console.log("📝 지원서 제출 데이터 받아옴 (3단계 이미지 URL 변환 완료):", {
