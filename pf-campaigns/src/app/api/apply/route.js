@@ -1,24 +1,39 @@
 import { NextResponse } from "next/server";
 
-async function uploadBase64ToCatbox(base64Data, index) {
+async function uploadBase64ToImageHost(base64Data, index) {
+  if (!base64Data || typeof base64Data !== "string") return "";
+  if (base64Data.startsWith("http")) return base64Data;
+
+  const parts = base64Data.split(",");
+  const rawBase64 = parts[1] || parts[0];
+  const mimeMatch = parts[0].match(/:(.*?);/);
+  const mimeType = mimeMatch ? mimeMatch[1] : "image/jpeg";
+  const ext = mimeType.split("/")[1] || "jpg";
+  const buffer = Buffer.from(rawBase64, "base64");
+
+  // Attempt 1: tmpfiles.org
   try {
-    if (!base64Data || typeof base64Data !== "string") return "";
-    if (base64Data.startsWith("http")) return base64Data;
+    const formData = new FormData();
+    formData.append("file", new Blob([buffer], { type: mimeType }), `photo_${index + 1}.${ext}`);
+    const res = await fetch("https://tmpfiles.org/api/v1/upload", {
+      method: "POST",
+      body: formData,
+    });
+    const json = await res.json();
+    if (json.status === "success" && json.data?.url) {
+      return json.data.url.replace("tmpfiles.org/", "tmpfiles.org/dl/");
+    }
+  } catch (err) {
+    console.error("tmpfiles failed:", err.message);
+  }
 
-    const parts = base64Data.split(",");
-    const meta = parts[0];
-    const rawBase64 = parts[1] || parts[0];
-    const mimeMatch = meta.match(/:(.*?);/);
-    const mimeType = mimeMatch ? mimeMatch[1] : "image/jpeg";
-    const ext = mimeType.split("/")[1] || "jpg";
-
-    const buffer = Buffer.from(rawBase64, "base64");
+  // Attempt 2: Litterbox (72 hours direct image link)
+  try {
     const formData = new FormData();
     formData.append("reqtype", "fileupload");
-    const blob = new Blob([buffer], { type: mimeType });
-    formData.append("fileToUpload", blob, `photo_${index + 1}.${ext}`);
-
-    const res = await fetch("https://catbox.moe/user/api.php", {
+    formData.append("time", "72h");
+    formData.append("fileToUpload", new Blob([buffer], { type: mimeType }), `photo_${index + 1}.${ext}`);
+    const res = await fetch("https://litterbox.catbox.moe/resources/internals/api.php", {
       method: "POST",
       body: formData,
     });
@@ -27,9 +42,10 @@ async function uploadBase64ToCatbox(base64Data, index) {
       return text.trim();
     }
   } catch (err) {
-    console.error("Catbox upload failed:", err);
+    console.error("litterbox failed:", err.message);
   }
-  return base64Data;
+
+  return "";
 }
 
 export async function POST(request) {
@@ -53,11 +69,11 @@ export async function POST(request) {
       agreeMarketing,
     } = body;
 
-    // Convert base64 images to high-speed Catbox permanent CDN URLs
+    // Convert base64 images to high-speed public CDN URLs
     let uploadedImageUrls = [];
     if (Array.isArray(images) && images.length > 0) {
       uploadedImageUrls = await Promise.all(
-        images.map((img, idx) => uploadBase64ToCatbox(img, idx))
+        images.map((img, idx) => uploadBase64ToImageHost(img, idx))
       );
     }
 
@@ -66,7 +82,7 @@ export async function POST(request) {
       images: uploadedImageUrls,
     };
 
-    console.log("📝 지원서 제출 데이터 받아옴 (Catbox URL 변환 완료):", {
+    console.log("📝 지원서 제출 데이터 받아옴 (CDN URL 변환 완료):", {
       campaignId,
       campaignTitle,
       name,
