@@ -11,13 +11,12 @@ async function uploadBase64ToAnyHost(base64Data, index) {
   const ext = mimeType.split("/")[1] || "jpg";
   const buffer = Buffer.from(rawBase64, "base64");
 
-  // Attempt 1: Litterbox (72 hour direct link)
+  // Attempt 1: Permanent Catbox CDN (files.catbox.moe - 영구 보존)
   try {
     const formData = new FormData();
     formData.append("reqtype", "fileupload");
-    formData.append("time", "72h");
     formData.append("fileToUpload", new Blob([buffer], { type: mimeType }), `photo_${index + 1}.${ext}`);
-    const res = await fetch("https://litterbox.catbox.moe/resources/internals/api.php", {
+    const res = await fetch("https://catbox.moe/user/api.php", {
       method: "POST",
       body: formData,
     });
@@ -26,7 +25,7 @@ async function uploadBase64ToAnyHost(base64Data, index) {
       return text.trim();
     }
   } catch (e) {
-    console.error("Litterbox upload error:", e);
+    console.error("Catbox upload error:", e);
   }
 
   // Attempt 2: tmpfiles.org
@@ -100,8 +99,7 @@ export async function POST(request) {
 
     const payload = {
       ...body,
-      images: Array.isArray(images) && images.length > 0 ? images : uploadedImageUrls.filter((url) => Boolean(url)),
-      cdnImages: uploadedImageUrls.filter((url) => Boolean(url)),
+      images: uploadedImageUrls.filter((url) => Boolean(url)),
     };
 
     console.log("📝 지원서 제출 데이터 받아옴 (3단계 이미지 URL 변환 완료):", {
