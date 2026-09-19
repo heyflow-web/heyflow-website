@@ -141,7 +141,13 @@ export async function POST(request) {
           );
         }
       } catch (e) {
-        // Text output might not be JSON, but 200 OK
+        if (!responseText.includes("success")) {
+          console.error("❌ 구글 스크립트 응답 오류 (HTML 또는 비정상 응답):", responseText);
+          return NextResponse.json(
+            { success: false, error: "구글 앱스 스크립트 권한 승인 또는 배포 설정이 올바르지 않습니다. (구글 스크립트에서 권한 승인을 완료해 주세요)" },
+            { status: 500 }
+          );
+        }
       }
     }
 
