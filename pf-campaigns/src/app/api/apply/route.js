@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-async function uploadBase64ToImageHost(base64Data, index, name) {
+async function uploadBase64ToCatbox(base64Data, index) {
   try {
     if (!base64Data || typeof base64Data !== "string") return "";
     if (base64Data.startsWith("http")) return base64Data;
@@ -14,19 +14,20 @@ async function uploadBase64ToImageHost(base64Data, index, name) {
 
     const buffer = Buffer.from(rawBase64, "base64");
     const formData = new FormData();
+    formData.append("reqtype", "fileupload");
     const blob = new Blob([buffer], { type: mimeType });
-    formData.append("file", blob, `photo_${index + 1}.${ext}`);
+    formData.append("fileToUpload", blob, `photo_${index + 1}.${ext}`);
 
-    const res = await fetch("https://tmpfiles.org/api/v1/upload", {
+    const res = await fetch("https://catbox.moe/user/api.php", {
       method: "POST",
       body: formData,
     });
-    const json = await res.json();
-    if (json.status === "success" && json.data?.url) {
-      return json.data.url.replace("tmpfiles.org/", "tmpfiles.org/dl/");
+    const text = await res.text();
+    if (text && text.trim().startsWith("http")) {
+      return text.trim();
     }
   } catch (err) {
-    console.error("Image upload failed:", err);
+    console.error("Catbox upload failed:", err);
   }
   return base64Data;
 }
@@ -52,11 +53,11 @@ export async function POST(request) {
       agreeMarketing,
     } = body;
 
-    // Process images to public URLs
+    // Convert base64 images to high-speed Catbox permanent CDN URLs
     let uploadedImageUrls = [];
     if (Array.isArray(images) && images.length > 0) {
       uploadedImageUrls = await Promise.all(
-        images.map((img, idx) => uploadBase64ToImageHost(img, idx, name))
+        images.map((img, idx) => uploadBase64ToCatbox(img, idx))
       );
     }
 
@@ -65,7 +66,7 @@ export async function POST(request) {
       images: uploadedImageUrls,
     };
 
-    console.log("📝 지원서 제출 데이터 받아옴 (이미지 URL 변환 완료):", {
+    console.log("📝 지원서 제출 데이터 받아옴 (Catbox URL 변환 완료):", {
       campaignId,
       campaignTitle,
       name,
