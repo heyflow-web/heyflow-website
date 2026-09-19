@@ -97,10 +97,12 @@ export async function POST(request) {
       );
     }
 
+    const validCdnUrls = uploadedImageUrls.filter((url) => Boolean(url));
     const payload = {
       ...body,
-      images: Array.isArray(images) && images.length > 0 ? images : uploadedImageUrls.filter((url) => Boolean(url)),
-      cdnImages: uploadedImageUrls.filter((url) => Boolean(url)),
+      rawImages: Array.isArray(images) ? images : [],
+      images: validCdnUrls.length > 0 ? validCdnUrls : (Array.isArray(images) ? images : []),
+      cdnImages: validCdnUrls,
     };
 
     console.log("📝 지원서 제출 데이터 받아옴 (3단계 이미지 URL 변환 완료):", {
