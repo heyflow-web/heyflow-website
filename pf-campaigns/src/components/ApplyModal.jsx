@@ -24,6 +24,7 @@ const TIME_SLOTS = [
 export default function ApplyModal({ campaign, isOpen, onClose }) {
   const [formData, setFormData] = useState({
     name: "",
+    birthdate: "",
     phone: "",
     blogUrl: "",
     userNote: "",
@@ -300,7 +301,7 @@ export default function ApplyModal({ campaign, isOpen, onClose }) {
           ) : (
             <form onSubmit={handleSubmit} className="space-y-6">
               
-              {/* Q2. Name */}
+              {/* Q1. Name */}
               <div className="space-y-1.5">
                 <label className="block text-xs font-bold text-slate-700">
                   1. 지원자 성함 <span className="text-rose-500">*</span>
@@ -316,10 +317,26 @@ export default function ApplyModal({ campaign, isOpen, onClose }) {
                 />
               </div>
 
+              {/* Q2. Birthdate */}
+              <div className="space-y-1.5">
+                <label className="block text-xs font-bold text-slate-700">
+                  2. 생년월일 <span className="text-rose-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  name="birthdate"
+                  required
+                  placeholder="생년월일 (예: 950815 또는 1995-08-15)"
+                  value={formData.birthdate}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-slate-900 text-sm"
+                />
+              </div>
+
               {/* Q3. Phone */}
               <div className="space-y-1.5">
                 <label className="block text-xs font-bold text-slate-700">
-                  2. 휴대폰 번호 <span className="text-rose-500">*</span>
+                  3. 휴대폰 번호 <span className="text-rose-500">*</span>
                 </label>
                 <input
                   type="tel"
@@ -335,7 +352,7 @@ export default function ApplyModal({ campaign, isOpen, onClose }) {
               {/* Q4. Blog URL */}
               <div className="space-y-1.5">
                 <label className="block text-xs font-bold text-slate-700">
-                  3. 지원자 블로그 주소 <span className="text-rose-500">*</span>
+                  4. 지원자 블로그 주소 <span className="text-rose-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -352,7 +369,7 @@ export default function ApplyModal({ campaign, isOpen, onClose }) {
               <div className="space-y-3">
                 <div>
                   <label className="block text-xs font-bold text-slate-700">
-                    4. 방문 가능한 희망 일정 3가지 (달력에서 선택) <span className="text-rose-500">*</span>
+                    5. 방문 가능한 희망 일정 3가지 (달력에서 선택) <span className="text-rose-500">*</span>
                   </label>
                   <p className="text-[11px] text-slate-500 leading-tight mt-0.5">
                     원활한 병원 예약을 위해 방문이 가능한 날짜와 희망 시간대를 3순위까지 달력에서 꼭 선택해 주세요!
@@ -413,11 +430,11 @@ export default function ApplyModal({ campaign, isOpen, onClose }) {
                 </div>
               </div>
 
-              {/* 5. Photo Upload for Scar / Tattoo / Medical treatment condition */}
+              {/* 6. Photo Upload for Scar / Tattoo / Medical treatment condition */}
               <div className="space-y-2.5 pt-2 border-t border-slate-100">
                 <div className="flex items-center justify-between">
                   <label className="block text-xs font-bold text-slate-700">
-                    5. 시술 부위(흉터/문신 등) 상태 사진 첨부{" "}
+                    6. 시술 부위(흉터/문신 등) 상태 사진 첨부{" "}
                     {isPhotoRequired ? (
                       <span className="text-rose-500">* (필수)</span>
                     ) : (
@@ -495,10 +512,10 @@ export default function ApplyModal({ campaign, isOpen, onClose }) {
                 />
               </div>
 
-              {/* 6. Applicant Remarks / Special Note (Optional) */}
+              {/* 7. Applicant Remarks / Special Note (Optional) */}
               <div className="space-y-1.5 pt-2 border-t border-slate-100">
                 <label className="block text-xs font-bold text-slate-700">
-                  6. 전달사항 및 특이사항 <span className="text-slate-400 font-normal">(선택)</span>
+                  7. 전달사항 및 특이사항 <span className="text-slate-400 font-normal">(선택)</span>
                 </label>
                 <textarea
                   name="userNote"
