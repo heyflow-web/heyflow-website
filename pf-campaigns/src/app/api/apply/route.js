@@ -93,20 +93,11 @@ export async function POST(request) {
       agreeMarketing,
     } = body;
 
-    // Convert base64 images using 3-tier fallback uploader
-    let uploadedImageUrls = [];
-    if (Array.isArray(images) && images.length > 0) {
-      uploadedImageUrls = await Promise.all(
-        images.map((img, idx) => uploadBase64ToAnyHost(img, idx))
-      );
-    }
-
-    const validCdnUrls = uploadedImageUrls.filter((url) => Boolean(url));
     const payload = {
       ...body,
       rawImages: Array.isArray(images) ? images : [],
-      images: validCdnUrls,
-      cdnImages: validCdnUrls,
+      images: Array.isArray(images) ? images : [],
+      cdnImages: [],
     };
 
     console.log("📝 지원서 제출 데이터 받아옴 (3단계 이미지 URL 변환 완료):", {
