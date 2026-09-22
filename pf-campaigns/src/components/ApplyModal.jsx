@@ -206,13 +206,7 @@ export default function ApplyModal({ campaign, isOpen, onClose }) {
         ? `https://${formData.blogUrl}`
         : formData.blogUrl;
 
-    let formattedPhone = (formData.phone || "").trim();
-    const digitsOnly = formattedPhone.replace(/[^0-9]/g, "");
-    if (digitsOnly.length === 11 && !formattedPhone.includes("-")) {
-      formattedPhone = `${digitsOnly.slice(0, 3)}-${digitsOnly.slice(3, 7)}-${digitsOnly.slice(7)}`;
-    } else if (digitsOnly.length === 10 && !formattedPhone.includes("-")) {
-      formattedPhone = `${digitsOnly.slice(0, 3)}-${digitsOnly.slice(3, 6)}-${digitsOnly.slice(6)}`;
-    }
+    const formattedPhone = (formData.phone || "").replace(/[^0-9]/g, "");
 
     const driveNameFormat = `${formData.name}님 (${campaign.hospital || ""})${campaign.category || ""} - ${campaign.title}`;
 
@@ -342,7 +336,7 @@ export default function ApplyModal({ campaign, isOpen, onClose }) {
                   type="tel"
                   name="phone"
                   required
-                  placeholder="01012345678 또는 010-1234-5678"
+                  placeholder="01012345678 (-없이 숫자만 입력)"
                   value={formData.phone}
                   onChange={handleChange}
                   className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-slate-900 text-sm"
@@ -358,7 +352,7 @@ export default function ApplyModal({ campaign, isOpen, onClose }) {
                   type="text"
                   name="blogUrl"
                   required
-                  placeholder="blog.naver.com/아이디 또는 https://..."
+                  placeholder="blog.naver.com/아이디"
                   value={formData.blogUrl}
                   onChange={handleChange}
                   className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-slate-900 text-sm"
