@@ -320,13 +320,13 @@ export default function ApplyModal({ campaign, isOpen, onClose }) {
               {/* Q2. Birthdate */}
               <div className="space-y-1.5">
                 <label className="block text-xs font-bold text-slate-700">
-                  2. 생년월일 <span className="text-rose-500">*</span>
+                  2. 생년월일 (주민번호 앞 6자리) <span className="text-rose-500">*</span>
                 </label>
                 <input
                   type="text"
                   name="birthdate"
                   required
-                  placeholder="생년월일 (예: 950815 또는 1995-08-15)"
+                  placeholder="예: 981225 (주민번호 앞 6자리)"
                   value={formData.birthdate}
                   onChange={handleChange}
                   className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-slate-900 text-sm"
