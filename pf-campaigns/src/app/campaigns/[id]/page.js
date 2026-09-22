@@ -56,7 +56,7 @@ export default function CampaignDetailPage({ params }) {
             <span>목록으로</span>
           </Link>
           <span className="text-[11px] font-bold tracking-widest text-slate-400 uppercase">
-            {campaign.id}
+            {campaign.category}
           </span>
         </nav>
 

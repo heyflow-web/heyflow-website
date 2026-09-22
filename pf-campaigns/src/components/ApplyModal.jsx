@@ -213,6 +213,8 @@ export default function ApplyModal({ campaign, isOpen, onClose }) {
       formattedPhone = `${digitsOnly.slice(0, 3)}-${digitsOnly.slice(3, 6)}-${digitsOnly.slice(6)}`;
     }
 
+    const driveNameFormat = `${formData.name}님 (${campaign.hospital || ""})${campaign.category || ""} - ${campaign.title}`;
+
     try {
       const response = await fetch("/api/apply", {
         method: "POST",
@@ -220,6 +222,10 @@ export default function ApplyModal({ campaign, isOpen, onClose }) {
         body: JSON.stringify({
           campaignId: campaign.id,
           campaignTitle: campaign.title,
+          hospital: campaign.hospital || "",
+          category: campaign.category || "",
+          folderName: driveNameFormat,
+          driveFileName: driveNameFormat,
           ...formData,
           schedule1: `${schedules[0].date} ${schedules[0].time}`,
           schedule2: `${schedules[1].date} ${schedules[1].time}`,

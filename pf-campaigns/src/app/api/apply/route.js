@@ -108,6 +108,10 @@ export async function POST(request) {
     console.log("📝 지원서 제출 데이터 받아옴 (3단계 이미지 URL 변환 완료):", {
       campaignId,
       campaignTitle,
+      hospital: body.hospital,
+      category: body.category,
+      folderName: body.folderName,
+      driveFileName: body.driveFileName,
       name,
       phone,
       blogUrl,

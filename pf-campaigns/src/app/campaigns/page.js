@@ -134,7 +134,7 @@ export default function CampaignListPage() {
                   className="group block rounded-[28px] p-5 sm:p-6 min-h-[280px] shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 relative overflow-hidden flex flex-col justify-between cursor-pointer w-full max-w-full"
                   style={{ backgroundColor: theme.bg }}
                 >
-                  {/* Top Status Tag & ID */}
+                  {/* Top Status & Category Badge */}
                   <div className="flex items-center justify-between">
                     <span
                       className="inline-block px-3 py-1 rounded-full text-[11px] font-bold shadow-xs shrink-0"
@@ -147,14 +147,14 @@ export default function CampaignListPage() {
                     </span>
 
                     <span
-                      className="text-[10px] font-bold tracking-widest uppercase opacity-40 border border-current px-2 py-0.5 rounded-md shrink-0"
-                      style={{ color: theme.text }}
+                      className="text-[11px] font-extrabold tracking-wider uppercase opacity-80 shrink-0"
+                      style={{ color: theme.subtext }}
                     >
-                      {item.id}
+                      {item.category}
                     </span>
                   </div>
 
-                  {/* Center Hero Title & Sub-info Under Title */}
+                  {/* Center Hero Title & Location */}
                   <div className="my-5 min-w-0">
                     <h2
                       className="text-xl sm:text-2xl font-black leading-snug tracking-tight transition-transform group-hover:scale-[1.01] break-keep"
@@ -166,7 +166,7 @@ export default function CampaignListPage() {
                       className="text-[11px] font-extrabold tracking-wider uppercase block mt-2 opacity-80 break-all"
                       style={{ color: theme.subtext }}
                     >
-                      {item.category} · {item.location}
+                      📍 {item.location}
                     </span>
                   </div>
 
@@ -188,17 +188,10 @@ export default function CampaignListPage() {
                       </div>
                     </div>
 
-                    {/* Bottom Meta & Button */}
-                    <div className="flex items-center justify-between gap-2 pt-1 min-w-0 w-full">
-                      <span
-                        className="text-[11px] sm:text-xs font-medium opacity-85 truncate min-w-0 flex-1"
-                        style={{ color: theme.subtext }}
-                      >
-                        {item.channel} · {item.visits}
-                      </span>
-
+                    {/* Bottom Action Button */}
+                    <div className="flex items-center justify-end gap-2 pt-1 min-w-0 w-full">
                       <button
-                        className="px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-xs font-bold transition-all shadow-md flex items-center gap-1 shrink-0 group-hover:scale-105"
+                        className="px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-md flex items-center gap-1 shrink-0 group-hover:scale-105"
                         style={{
                           backgroundColor: theme.buttonBg,
                           color: theme.buttonText,
