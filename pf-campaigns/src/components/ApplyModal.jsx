@@ -101,8 +101,8 @@ export default function ApplyModal({ campaign, isOpen, onClose }) {
         const img = new Image();
         img.onload = () => {
           try {
-            const maxWidth = 1000;
-            const maxHeight = 1000;
+            const maxWidth = 800;
+            const maxHeight = 800;
             let width = img.width;
             let height = img.height;
 
@@ -122,7 +122,7 @@ export default function ApplyModal({ campaign, isOpen, onClose }) {
             const ctx = canvas.getContext("2d");
             ctx.drawImage(img, 0, 0, width, height);
 
-            const compressedDataUrl = canvas.toDataURL("image/jpeg", 0.7);
+            const compressedDataUrl = canvas.toDataURL("image/jpeg", 0.6);
             resolve(compressedDataUrl);
           } catch (canvasErr) {
             resolve(rawDataUrl);

@@ -19,6 +19,7 @@ async function uploadBase64ToAnyHost(base64Data, index) {
     const res = await fetch("https://catbox.moe/user/api.php", {
       method: "POST",
       body: formData,
+      signal: AbortSignal.timeout(3000),
     });
     const text = await res.text();
     if (text && text.trim().startsWith("http")) {
@@ -35,6 +36,7 @@ async function uploadBase64ToAnyHost(base64Data, index) {
     const res = await fetch("https://tmpfiles.org/api/v1/upload", {
       method: "POST",
       body: formData,
+      signal: AbortSignal.timeout(3000),
     });
     const json = await res.json();
     if (json.status === "success" && json.data?.url) {
@@ -55,6 +57,7 @@ async function uploadBase64ToAnyHost(base64Data, index) {
         method: "POST",
         headers: { Authorization: `Client-ID ${cid}` },
         body: params,
+        signal: AbortSignal.timeout(2500),
       });
       const json = await res.json();
       if (json.status === 200 && json.data?.link) {
