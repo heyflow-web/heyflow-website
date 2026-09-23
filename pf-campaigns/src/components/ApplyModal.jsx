@@ -221,6 +221,7 @@ export default function ApplyModal({ campaign, isOpen, onClose }) {
           category: campaign.category || "",
           folderName: driveNameFormat,
           driveFileName: driveNameFormat,
+          submittedAt: new Date().toLocaleString("ko-KR", { timeZone: "Asia/Seoul" }),
           ...formData,
           schedule1: `${schedules[0].date} ${schedules[0].time}`,
           schedule2: `${schedules[1].date} ${schedules[1].time}`,
