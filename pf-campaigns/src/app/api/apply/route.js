@@ -121,7 +121,7 @@ export async function POST(request) {
 
     const GOOGLE_SHEET_WEBHOOK_URL =
       process.env.GOOGLE_SHEET_WEBHOOK_URL ||
-      "https://script.google.com/macros/s/AKfycbyMJPGcGOlla2qp1V4a2J91kU0fofHsMh2GOUbgzHN0lkhKmYogf5d0JxeYbBbLOKpB/exec";
+      "https://script.google.com/macros/s/AKfycbxupbECZLYLFVwZqGYi2AhTigzjpyKdQAvZYXb0XNjnY7lPGHxhZELz2_-SNpfCqleD/exec";
 
     if (GOOGLE_SHEET_WEBHOOK_URL) {
       const sheetResponse = await fetch(GOOGLE_SHEET_WEBHOOK_URL, {
