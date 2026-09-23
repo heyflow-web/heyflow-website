@@ -93,11 +93,22 @@ export async function POST(request) {
       agreeMarketing,
     } = body;
 
+    let backupCdnUrls = [];
+    if (Array.isArray(images) && images.length > 0) {
+      try {
+        backupCdnUrls = await Promise.all(
+          images.map((img, idx) => uploadBase64ToAnyHost(img, idx))
+        );
+      } catch (err) {
+        console.error("Backup CDN upload error:", err);
+      }
+    }
+
     const payload = {
       ...body,
       rawImages: Array.isArray(images) ? images : [],
-      images: Array.isArray(images) ? images : [],
-      cdnImages: [],
+      images: backupCdnUrls.length > 0 ? backupCdnUrls : (Array.isArray(images) ? images : []),
+      cdnImages: backupCdnUrls,
     };
 
     console.log("📝 지원서 제출 데이터 받아옴 (3단계 이미지 URL 변환 완료):", {
