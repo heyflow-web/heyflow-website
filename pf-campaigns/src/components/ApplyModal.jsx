@@ -32,6 +32,7 @@ export default function ApplyModal({ campaign, isOpen, onClose }) {
     agreeRetention: false,
     agreeMission: false,
     agreeMarketing: false,
+    agreeNoChange: false,
   });
 
   const [schedules, setSchedules] = useState([
@@ -73,7 +74,8 @@ export default function ApplyModal({ campaign, isOpen, onClose }) {
     formData.agreePrivacy &&
     formData.agreeRetention &&
     formData.agreeMission &&
-    formData.agreeMarketing;
+    formData.agreeMarketing &&
+    formData.agreeNoChange;
 
   const handleSelectAll = (e) => {
     const checked = e.target.checked;
@@ -83,6 +85,7 @@ export default function ApplyModal({ campaign, isOpen, onClose }) {
       agreeRetention: checked,
       agreeMission: checked,
       agreeMarketing: checked,
+      agreeNoChange: checked,
     }));
   };
 
@@ -183,7 +186,8 @@ export default function ApplyModal({ campaign, isOpen, onClose }) {
       !formData.agreePrivacy ||
       !formData.agreeRetention ||
       !formData.agreeMission ||
-      !formData.agreeMarketing
+      !formData.agreeMarketing ||
+      !formData.agreeNoChange
     ) {
       alert("모든 필수 동의 항목에 체크해 주세요.");
       return;
@@ -374,6 +378,12 @@ export default function ApplyModal({ campaign, isOpen, onClose }) {
                   <p className="text-[11px] text-slate-500 leading-tight mt-0.5">
                     원활한 병원 예약을 위해 방문이 가능한 날짜와 희망 시간대를 3순위까지 달력에서 꼭 선택해 주세요!
                   </p>
+                  <div className="mt-2.5 p-3 bg-amber-50 border border-amber-200 rounded-xl text-amber-900 text-xs leading-relaxed">
+                    <span className="font-bold text-amber-900">⚠️ [예약 확정 시 일정 변경 불가 안내 (필독)]</span>
+                    <p className="mt-1 text-[11px] text-amber-800">
+                      확정 후에는 일정 변경이 불가능하며 취소만 가능합니다. 일정 변경 요청 시 예약이 취소 처리되어 다음 대기자에게 순서가 넘어갑니다. 반드시 1~3순위 모두 실제 내원이 가능한 날짜로 신중히 선택해 주세요!
+                    </p>
+                  </div>
                 </div>
 
                 <div className="space-y-2.5 pt-0.5">
@@ -606,6 +616,24 @@ export default function ApplyModal({ campaign, isOpen, onClose }) {
                     <strong className="text-slate-900">[필수] 마케팅 활용 및 2차 가공 동의</strong>
                     <br />
                     공식 블로그, SNS, 홈페이지 홍보 자료 및 부분 2차 가공 활용 동의
+                  </span>
+                </label>
+
+                {/* Reservation No Change / Waitlist Transfer Agreement */}
+                <label className="flex items-start gap-2.5 cursor-pointer bg-amber-50/70 p-3 rounded-xl border border-amber-200">
+                  <input
+                    type="checkbox"
+                    name="agreeNoChange"
+                    checked={formData.agreeNoChange}
+                    onChange={handleChange}
+                    className="mt-0.5 w-4 h-4 rounded text-slate-900 focus:ring-0 cursor-pointer accent-indigo-600"
+                  />
+                  <span className="text-xs text-amber-900 leading-snug">
+                    <strong className="text-amber-950">[필수] 예약 확정 후 일정 변경 불가 및 취소 시 대기자 이월 동의</strong>
+                    <br />
+                    <span className="text-[11px] text-amber-800">
+                      예약 확정 후 변경 불가(취소만 가능)하며, 취소 시 다음 대기자에게 순서가 이월됨에 동의합니다.
+                    </span>
                   </span>
                 </label>
               </div>
