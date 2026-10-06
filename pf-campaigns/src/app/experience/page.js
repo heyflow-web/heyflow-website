@@ -130,7 +130,7 @@ export default function CampaignListPage() {
               return (
                 <Link
                   key={item.id}
-                  href={`/campaigns/${item.id}`}
+                  href={`/experience/${item.id}`}
                   className="group block rounded-[28px] p-5 sm:p-6 min-h-[280px] shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 relative overflow-hidden flex flex-col justify-between cursor-pointer w-full max-w-full"
                   style={{ backgroundColor: theme.bg }}
                 >

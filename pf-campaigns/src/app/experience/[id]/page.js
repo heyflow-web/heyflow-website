@@ -27,7 +27,7 @@ export default function CampaignDetailPage({ params }) {
       <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col items-center justify-center p-6">
         <h2 className="text-xl font-bold mb-4">존재하지 않는 캠페인입니다.</h2>
         <Link
-          href="/campaigns"
+          href="/experience"
           className="px-5 py-2.5 bg-slate-900 text-white font-bold rounded-full text-sm"
         >
           ← 목록으로 돌아가기
@@ -47,7 +47,7 @@ export default function CampaignDetailPage({ params }) {
         {/* Navigation Header */}
         <nav className="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-slate-100 px-5 py-3.5 flex items-center justify-between">
           <Link
-            href="/campaigns"
+            href="/experience"
             className="flex items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-slate-900 transition-colors"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
