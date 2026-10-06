@@ -199,6 +199,11 @@ export default function ApplyModal({ campaign, isOpen, onClose }) {
       return;
     }
 
+    if (!formData.userNote || !formData.userNote.trim()) {
+      alert("지원동기를 입력해 주세요.");
+      return;
+    }
+
     setIsSubmitting(true);
 
     const formattedBlogUrl =
@@ -507,15 +512,16 @@ export default function ApplyModal({ campaign, isOpen, onClose }) {
                 />
               </div>
 
-              {/* 7. Applicant Remarks / Special Note (Optional) */}
+              {/* 7. Motivation for applying (Required) */}
               <div className="space-y-1.5 pt-2 border-t border-slate-100">
                 <label className="block text-xs font-bold text-slate-700">
-                  7. 전달사항 및 특이사항 <span className="text-slate-400 font-normal">(선택)</span>
+                  7. 지원동기 <span className="text-rose-500">* (필수)</span>
                 </label>
                 <textarea
                   name="userNote"
+                  required
                   rows={2}
-                  placeholder="병원이나 진행팀에 전달하고 싶으신 메모나 특이사항이 있다면 자유롭게 남겨주세요."
+                  placeholder="이번 체험단 캠페인에 지원하시는 계기나 동기를 입력해 주세요."
                   value={formData.userNote}
                   onChange={handleChange}
                   className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-slate-900 resize-none"
