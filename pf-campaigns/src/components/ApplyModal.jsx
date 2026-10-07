@@ -67,7 +67,7 @@ export default function ApplyModal({ campaign, isOpen, onClose }) {
   const titleAndCategory = `${campaign?.title || ""} ${campaign?.category || ""} ${campaign?.offer || ""}`;
   const isExcludedFromRequired = titleAndCategory.match(/반영구|소형문신|명함크기|명함 크기/);
   const isPhotoRequired = !isExcludedFromRequired && Boolean(
-    titleAndCategory.match(/흉터|켈로이드|무좀|발톱|함몰|파인/)
+    titleAndCategory.match(/흉터|켈로이드|무좀|발톱|함몰|파인|사마귀/)
   );
 
   const isAllAgreed =
