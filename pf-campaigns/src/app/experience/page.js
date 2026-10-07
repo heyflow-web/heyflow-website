@@ -68,6 +68,7 @@ export default function CampaignListPage() {
 
   const categories = [
     "전체",
+    "편평사마귀제거",
     "피부클리닉",
     "문제성발톱",
     "재활클리닉",
