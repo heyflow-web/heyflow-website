@@ -4,9 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "next dev --webpack",
-    "build": "next build --webpack",
+    "build": "node scripts/sync-sheet.mjs && next build --webpack",
     "start": "next start",
-    "sync": "node scripts/sync-notion.mjs"
+    "sync": "node scripts/sync-sheet.mjs"
   },
   "dependencies": {
     "@notionhq/client": "^2.2.15",
