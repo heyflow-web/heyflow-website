@@ -2,6 +2,16 @@
 
 import { useState, useEffect, useMemo } from "react";
 import AdminPasswordGate from "@/components/AdminPasswordGate";
+import { formatBlogUrl, getDriveThumbnailUrl, getDrivePreviewUrl, getDriveFileId } from "@/lib/parser";
+
+const getStatusStyle = (status) => {
+  if (!status) return "bg-slate-100 text-slate-700 border-slate-200";
+  if (status.includes("발행") || status.includes("완료")) return "bg-emerald-50 text-emerald-700 border-emerald-200";
+  if (status.includes("확정")) return "bg-blue-50 text-blue-700 border-blue-200";
+  if (status.includes("대기")) return "bg-amber-50 text-amber-800 border-amber-200";
+  if (status.includes("취소") || status.includes("불가")) return "bg-rose-50 text-rose-700 border-rose-200";
+  return "bg-slate-100 text-slate-700 border-slate-200";
+};
 
 const STATUS_OPTIONS = [
   { label: "대기중", color: "bg-amber-50 text-amber-800 border-amber-200" },
@@ -613,7 +623,7 @@ function AdminDashboard({ handleLogout }) {
                           <select
                             value={item.status}
                             onChange={(e) => handleUpdateStatus(item, e.target.value)}
-                            className={`px-2.5 py-1 rounded-full text-[11px] font-bold border outline-none cursor-pointer ${statusObj.color}`}
+                            className={`px-2.5 py-1 rounded-full text-[11px] font-bold border outline-none cursor-pointer ${getStatusStyle(item.status)}`}
                           >
                             {STATUS_OPTIONS.map((opt) => (
                               <option key={opt.label} value={opt.label}>
@@ -675,7 +685,7 @@ function AdminDashboard({ handleLogout }) {
                         >
                           {item.blogUrl ? (
                             <a
-                              href={item.blogUrl}
+                              href={formatBlogUrl(item.blogUrl)}
                               target="_blank"
                               rel="noreferrer"
                               className="text-blue-600 hover:text-blue-800 font-semibold flex items-center gap-1 group/link max-w-[140px] truncate"
@@ -846,7 +856,7 @@ function AdminDashboard({ handleLogout }) {
                   <div className="p-3 bg-white border border-[#E0E3E7] rounded-xl space-y-1 text-xs">
                     <span className="text-[10px] text-[#80868B] block">블로그 주소</span>
                     <a
-                      href={activeItem.blogUrl}
+                      href={formatBlogUrl(activeItem.blogUrl)}
                       target="_blank"
                       rel="noreferrer"
                       className="font-bold text-blue-600 hover:underline break-all block"
@@ -926,12 +936,12 @@ function AdminDashboard({ handleLogout }) {
                       >
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
-                          src={url}
+                          src={getDriveThumbnailUrl(url)}
                           alt={`사진 ${i + 1}`}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
                           onError={(e) => {
                             // 구글 드라이브 뷰 페이지일 경우 대체 이미지 배너
-                            e.target.style.display = "none";
+                            e.target.onerror = null; e.target.src = "https://ssl.gstatic.com/docs/doclist/images/mediatype/icon_1_image_x128.png";
                           }}
                         />
                         <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-bold">
@@ -1040,7 +1050,7 @@ function AdminDashboard({ handleLogout }) {
             <div className="p-4 flex items-center justify-center bg-black/5 overflow-auto max-h-[70vh]">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={lightboxImage}
+                src={getDriveThumbnailUrl(lightboxImage)}
                 alt="확대 사진"
                 className="max-w-full max-h-full object-contain rounded-xl"
               />

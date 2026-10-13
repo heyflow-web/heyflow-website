@@ -1,3 +1,59 @@
+/**
+ * 블로그 주소를 안전한 https 표준 URL로 변환하는 유틸리티
+ */
+export function formatBlogUrl(url) {
+  if (!url || typeof url !== "string") return "";
+  let clean = url.trim();
+  if (!clean) return "";
+
+  // 영문/숫자 아이디만 입력한 경우 (예: beyourkeyring 또는 user123) -> 네이버 블로그로 연결
+  if (!clean.includes(".") && !clean.includes("/")) {
+    return `https://blog.naver.com/${clean}`;
+  }
+
+  // http:// -> https:// 변환
+  if (clean.startsWith("http://")) {
+    clean = "https://" + clean.slice(7);
+  } else if (!clean.startsWith("https://")) {
+    clean = "https://" + clean;
+  }
+  return clean;
+}
+
+/**
+ * 구글 드라이브 링크에서 파일 ID 추출
+ */
+export function getDriveFileId(url) {
+  if (!url || typeof url !== "string") return null;
+  const match = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/) || url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+  return match ? match[1] : null;
+}
+
+/**
+ * 구글 드라이브 HTML 뷰어 링크를 고화질 이미지 썸네일 URL로 변환
+ */
+export function getDriveThumbnailUrl(url) {
+  const fileId = getDriveFileId(url);
+  if (fileId) {
+    return `https://drive.google.com/thumbnail?id=${fileId}&sz=w800`;
+  }
+  return url;
+}
+
+/**
+ * 구글 드라이브 공식 임베드 프리뷰 URL 변환
+ */
+export function getDrivePreviewUrl(url) {
+  const fileId = getDriveFileId(url);
+  if (fileId) {
+    return `https://drive.google.com/file/d/${fileId}/preview`;
+  }
+  return url;
+}
+
+/**
+ * 구글 시트 지원자 데이터를 구조화된 객체로 파싱/정규화
+ */
 export function parseRecruitInfo(text, rawRow = {}) {
   // rawRow에 이미 개별 컬럼 데이터가 깔끔하게 들어있는 경우 (최신 DB 시트)
   const hasDirectData = rawRow.name || rawRow.phone || rawRow.treatment;
@@ -8,6 +64,8 @@ export function parseRecruitInfo(text, rawRow = {}) {
       formattedPhone = `${rawPhone.slice(0, 3)}-${rawPhone.slice(3, 7)}-${rawPhone.slice(7)}`;
     } else if (rawPhone.length === 10) {
       formattedPhone = `${rawPhone.slice(0, 3)}-${rawPhone.slice(3, 6)}-${rawPhone.slice(6)}`;
+    } else if (rawPhone.length === 10 && rawPhone.startsWith("10")) {
+      formattedPhone = `010-${rawPhone.slice(2, 6)}-${rawPhone.slice(6)}`;
     }
 
     let ageInfo = "";
@@ -23,10 +81,7 @@ export function parseRecruitInfo(text, rawRow = {}) {
       }
     }
 
-    let cleanBlogUrl = rawRow.blogUrl || "";
-    if (cleanBlogUrl && !cleanBlogUrl.startsWith("http")) {
-      cleanBlogUrl = `https://${cleanBlogUrl}`;
-    }
+    const cleanBlogUrl = formatBlogUrl(rawRow.blogUrl);
 
     const schedules = [
       rawRow.schedule1,
@@ -61,6 +116,7 @@ export function parseRecruitInfo(text, rawRow = {}) {
     };
   }
 
+  // 이전 형태 (모집정보 B열 텍스트 파싱)
   const lines = text.split("\n").map((l) => l.trim());
 
   let hospital = "";
@@ -186,7 +242,6 @@ export function parseRecruitInfo(text, rawRow = {}) {
       if (line.startsWith("http://") || line.startsWith("https://") || line.includes("drive.google.com")) {
         imageUrls.push(line);
       } else if (!line.startsWith("-")) {
-        // 다른 필드가 시작되었을 수 있음
         isReadingImages = false;
       }
       continue;
@@ -198,7 +253,6 @@ export function parseRecruitInfo(text, rawRow = {}) {
       continue;
     }
 
-    // 기타 텍스트 중 드라이브 링크가 포함되어 있다면 사진으로 수집
     if (line.includes("drive.google.com/file/d/")) {
       imageUrls.push(line);
     }
@@ -206,7 +260,6 @@ export function parseRecruitInfo(text, rawRow = {}) {
 
   userNote = userNoteLines.join("\n").trim();
 
-  // 전화번호 하이픈 포맷팅 (01012345678 -> 010-1234-5678)
   const cleanPhone = (phone || "").replace(/[^0-9]/g, "");
   let formattedPhone = phone;
   if (cleanPhone.length === 11) {
@@ -215,7 +268,6 @@ export function parseRecruitInfo(text, rawRow = {}) {
     formattedPhone = `${cleanPhone.slice(0, 3)}-${cleanPhone.slice(3, 6)}-${cleanPhone.slice(6)}`;
   }
 
-  // 나이 계산 (예: 932004 -> 93년생, 010203 -> 01년생 등)
   let ageInfo = "";
   if (birthdate) {
     const cleanBirth = birthdate.replace(/[^0-9]/g, "");
@@ -224,18 +276,12 @@ export function parseRecruitInfo(text, rawRow = {}) {
       const currentYear = new Date().getFullYear();
       let birthYear = parseInt(yearPrefix, 10);
       birthYear = birthYear > 30 ? 1900 + birthYear : 2000 + birthYear;
-      const age = currentYear - birthYear + 1; // 한국 나이
+      const age = currentYear - birthYear + 1;
       ageInfo = `${birthdate} (${age}세)`;
     }
   }
 
-  // 블로그 URL 정제
-  let cleanBlogUrl = blogUrl;
-  if (cleanBlogUrl && !cleanBlogUrl.startsWith("http")) {
-    cleanBlogUrl = `https://${cleanBlogUrl}`;
-  }
-
-  // schedules 배열
+  const cleanBlogUrl = formatBlogUrl(blogUrl || rawRow.blogUrl);
   const schedules = [schedule1, schedule2, schedule3].filter(Boolean);
 
   return {
@@ -247,7 +293,7 @@ export function parseRecruitInfo(text, rawRow = {}) {
     rawPhone: cleanPhone,
     birthdate: birthdate || rawRow.birthdate || "-",
     ageInfo: ageInfo || birthdate,
-    blogUrl: cleanBlogUrl || rawRow.blogUrl || "",
+    blogUrl: cleanBlogUrl,
     treatment: treatment || rawRow.treatment || "-",
     schedules: schedules.length > 0 ? schedules : ["희망 일정 미기재"],
     schedule1: schedule1 || "",
