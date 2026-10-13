@@ -174,6 +174,11 @@ function doPost(e) {
       return handleUpdateStatus_(data);
     }
 
+    // [신규 기능] 관리자 대시보드에서 보낸 지원서 행 삭제 요청 처리
+    if (data && data.action === "deleteRow") {
+      return handleDeleteRow_(data);
+    }
+
     // --- 이하 기존 신규 지원서 접수 처리 로직 (100% 원본 유지) ---
     // 1. 현재 시트에서 "DB" 탭 가져오기 (예전 이름 "접수DB"도 인식, 없으면 자동 생성)
     var ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -386,6 +391,36 @@ function handleUpdateStatus_(data) {
 
     return ContentService
       .createTextOutput(JSON.stringify({ result: "success", message: "상태 업데이트 완료" }))
+      .setMimeType(ContentService.MimeType.JSON);
+  } catch (err) {
+    return ContentService
+      .createTextOutput(JSON.stringify({ result: "error", message: err.toString() }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+// [신규 기능] 관리자 지원서 행 삭제 처리
+function handleDeleteRow_(data) {
+  try {
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var sh = ss.getSheetByName("DB") || ss.getSheetByName("접수DB");
+    if (!sh) {
+      return ContentService
+        .createTextOutput(JSON.stringify({ result: "error", message: "DB 탭을 찾을 수 없습니다." }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+
+    var targetRow = parseInt(data.rowId, 10);
+    if (!targetRow || targetRow < 2 || targetRow > sh.getLastRow()) {
+      return ContentService
+        .createTextOutput(JSON.stringify({ result: "error", message: "유효하지 않은 행 번호입니다." }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+
+    sh.deleteRow(targetRow);
+
+    return ContentService
+      .createTextOutput(JSON.stringify({ result: "success", message: targetRow + "행 지원서 삭제 완료" }))
       .setMimeType(ContentService.MimeType.JSON);
   } catch (err) {
     return ContentService

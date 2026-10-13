@@ -193,6 +193,29 @@ export async function POST(request) {
     const body = await request.json();
     const { action, rowId, status, confirmedDate, memo } = body;
 
+    if (action === "deleteRow" && GOOGLE_SHEET_WEBHOOK_URL) {
+      try {
+        const delRes = await fetch(GOOGLE_SHEET_WEBHOOK_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({
+            action: "deleteRow",
+            rowId,
+          }),
+        });
+        const resText = await delRes.text();
+        console.log("시트 행 삭제 응답:", resText);
+      } catch (err) {
+        console.warn("시트 행 삭제 에러:", err);
+      }
+
+      return NextResponse.json({
+        success: true,
+        message: "지원서가 성공적으로 삭제되었습니다.",
+        deletedRowId: rowId,
+      });
+    }
+
     if (action === "updateRow" && GOOGLE_SHEET_WEBHOOK_URL) {
       try {
         const updateRes = await fetch(GOOGLE_SHEET_WEBHOOK_URL, {
