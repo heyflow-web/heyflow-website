@@ -160,7 +160,13 @@ export async function GET(request) {
                 status,
                 confirmedDate,
                 memo,
-                shareStatus: row.shareStatus || "",
+                shareStatus: (function (v) {
+                  if (!v) return "";
+                  const s = String(v).trim();
+                  if (s === "TRUE" || s === "true" || s === "공유됨" || s === "공유완료") return "공유됨";
+                  if (s === "제외" || s === "FALSE" || s === "false" || s === "미공유") return "";
+                  return s;
+                })(row.shareStatus),
                 client: row.client || "",
                 syncKey: row.syncKey || "",
                 checkStatus: row.checkStatus || "",

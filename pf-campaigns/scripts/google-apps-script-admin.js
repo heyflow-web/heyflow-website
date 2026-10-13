@@ -119,7 +119,13 @@ function readApplications_() {
         postUrl: col(r, "발행원고 URL"),
         memo: col(r, "이슈") || col(r, "관리자메모") || "",
         client: col(r, "고객사"),
-        shareStatus: col(r, "공유상태"),
+        shareStatus: (function(v) {
+          if (!v) return "";
+          var s = String(v).trim();
+          if (s === "TRUE" || s === "true" || s === "공유됨" || s === "공유완료") return "공유됨";
+          if (s === "제외" || s === "FALSE" || s === "false" || s === "미공유") return "";
+          return s;
+        })(col(r, "공유상태")),
         checkStatus: col(r, "점검"),
         syncKey: col(r, "키"),
         roomSyncVal: col(r, "룸동기값")
@@ -389,7 +395,15 @@ function handleUpdateStatus_(data) {
 
     if (data.status !== undefined) setVal("진행상태", data.status);
     if (data.confirmedDate !== undefined) setVal("예약일", data.confirmedDate);
-    if (data.shareStatus !== undefined) setVal("공유상태", data.shareStatus);
+    if (data.shareStatus !== undefined) {
+      var sVal = data.shareStatus;
+      if (sVal === true || sVal === "true" || sVal === "TRUE" || sVal === "공유됨") {
+        sVal = "공유됨";
+      } else if (sVal === false || sVal === "false" || sVal === "FALSE" || sVal === "제외" || !sVal) {
+        sVal = "";
+      }
+      setVal("공유상태", sVal);
+    }
     if (data.memo !== undefined) {
       if (headers.indexOf("이슈") >= 0) setVal("이슈", data.memo);
       else if (headers.indexOf("관리자메모") >= 0) setVal("관리자메모", data.memo);
