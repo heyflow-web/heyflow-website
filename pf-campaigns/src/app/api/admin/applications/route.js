@@ -3,7 +3,7 @@ import { parseRecruitInfo } from "@/lib/parser";
 
 const GOOGLE_SHEET_WEBHOOK_URL =
   process.env.GOOGLE_SHEET_WEBHOOK_URL ||
-  "https://script.google.com/macros/s/AKfycbx84aIFhj0fR1V-SFU1jRv64shO6RjuWKi_TWyb_vd88-9bG_bb0CQ1DmdiDPU9AhPg/exec";
+  "https://script.google.com/macros/s/AKfycby2z4HPw0hxVRq2eVa5mbEtviF8bxcWvkaJgl2q8MDWzmgl49Nix5U9gti_XECcDm6guQ/exec";
 
 // 구글 앱스 스크립트 새 배포 전에도 대시보드를 즉시 검토할 수 있는 표준 샘플 데이터
 const MOCK_APPLICATIONS = [

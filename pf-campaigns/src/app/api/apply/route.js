@@ -118,10 +118,11 @@ export async function POST(request) {
       userNote,
     });
 
-    // 웹훅 주소는 환경변수로만 받는다 (코드에 주소를 두지 않음). 없으면 지원서가 유실되지 않도록 실패 처리한다.
-    const GOOGLE_SHEET_WEBHOOK_URL = process.env.GOOGLE_SHEET_WEBHOOK_URL;
+    const GOOGLE_SHEET_WEBHOOK_URL =
+      process.env.GOOGLE_SHEET_WEBHOOK_URL ||
+      "https://script.google.com/macros/s/AKfycby2z4HPw0hxVRq2eVa5mbEtviF8bxcWvkaJgl2q8MDWzmgl49Nix5U9gti_XECcDm6guQ/exec";
     if (!GOOGLE_SHEET_WEBHOOK_URL) {
-      console.error("❌ GOOGLE_SHEET_WEBHOOK_URL 환경변수가 없습니다.");
+      console.error("❌ GOOGLE_SHEET_WEBHOOK_URL 설정이 없습니다.");
       return NextResponse.json(
         { success: false, error: "지원서 저장 설정이 되어 있지 않습니다. 잠시 후 다시 시도해 주세요." },
         { status: 500 }
