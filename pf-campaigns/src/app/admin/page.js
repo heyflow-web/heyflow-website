@@ -45,6 +45,10 @@ function AdminDashboard({ handleLogout }) {
   const [copiedScript, setCopiedScript] = useState(false);
   const [itemToDelete, setItemToDelete] = useState(null); // 삭제 확인 모달 대상 지원서
   const [isDeleting, setIsDeleting] = useState(false); // 삭제 진행 중 상태
+  const [messageApplicant, setMessageApplicant] = useState(null); // 메시지 전송 대상 지원서
+  const [selectedTemplateKey, setSelectedTemplateKey] = useState("schedule"); // 'schedule' | 'confirm' | 'review' | 'custom'
+  const [customMessageText, setCustomMessageText] = useState("");
+  const [copiedMessage, setCopiedMessage] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
 
   const showToast = (msg) => {
@@ -189,6 +193,72 @@ function AdminDashboard({ handleLogout }) {
     } finally {
       setIsDeleting(false);
       setItemToDelete(null);
+    }
+  };
+
+  // 4. 메시지 작성 및 발송 템플릿 로직
+  const getTemplateMessage = (applicant, templateKey) => {
+    if (!applicant) return "";
+    const name = applicant.name || "지원자";
+    const hospital = applicant.hospital || "체험단 라운지";
+    const treatment = applicant.treatment || "시술";
+    const schedule1 = applicant.schedule1 || (applicant.schedules && applicant.schedules[0]) || "일정 협의";
+    const confirmedDate = applicant.confirmedDate || schedule1;
+
+    switch (templateKey) {
+      case "schedule":
+        return `[체험단 라운지 - ${hospital}]
+안녕하세요, ${name}님!
+신청해주신 '${treatment}' 체험단에 선정되셨음을 안내드립니다. 🎉
+
+■ 1지망 희망일정: ${schedule1}
+■ 내원 및 시술 진행 일정을 조율하고자 하오니, 본 번호로 편하신 시간대 회신 부탁드립니다.
+
+감사합니다.`;
+
+      case "confirm":
+        return `[체험단 라운지 - ${hospital}]
+안녕하세요, ${name}님!
+신청하신 체험단 예약 일정이 최종 확정되어 안내드립니다.
+
+■ 예약 일시: ${confirmedDate}
+■ 병원명: ${hospital}
+■ 시술 항목: ${treatment}
+
+※ 예약 시간 10분 전까지 내원 부탁드리며, 일정 변경이 필요하신 경우 최소 3일 전 미리 연락 바랍니다.
+감사합니다.`;
+
+      case "review":
+        return `[체험단 라운지 - ${hospital}]
+안녕하세요, ${name}님!
+${hospital} 체험은 편안히 잘 받으셨나요?
+
+■ 포스팅 마감: 내원일로부터 7일 이내
+■ 안내사항: 전달드린 리뷰 가이드라인에 맞추어 솔직하고 정성스러운 후기 부탁드립니다.
+■ 발행 완료 후 포스팅 URL 링크를 본 번호로 회신 부탁드립니다.
+
+감사합니다.`;
+
+      case "custom":
+      default:
+        return "";
+    }
+  };
+
+  const handleOpenMessageModal = (applicant) => {
+    setMessageApplicant(applicant);
+    const defaultKey = applicant.confirmedDate ? "confirm" : "schedule";
+    setSelectedTemplateKey(defaultKey);
+    setCustomMessageText(getTemplateMessage(applicant, defaultKey));
+    setCopiedMessage(false);
+  };
+
+  const handleSelectTemplate = (key) => {
+    setSelectedTemplateKey(key);
+    if (key === "custom") {
+      setCustomMessageText("");
+    } else {
+      setCustomMessageText(getTemplateMessage(messageApplicant, key));
     }
   };
 
@@ -632,7 +702,7 @@ function AdminDashboard({ handleLogout }) {
                     <th className="py-3 px-4 min-w-[140px]">블로그</th>
                     <th className="py-3 px-4 min-w-[180px]">희망 일정 (1~3지망)</th>
                     <th className="py-3 px-4 w-20 text-center">첨부사진</th>
-                    <th className="py-3 px-4 w-28 text-center">관리</th>
+                    <th className="py-3 px-4 w-36 text-center">관리</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#F1F3F4]">
@@ -788,6 +858,13 @@ function AdminDashboard({ handleLogout }) {
                               보기
                             </button>
                             <button
+                              onClick={() => handleOpenMessageModal(item)}
+                              className="px-2 py-1 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-600 font-bold text-xs transition-colors cursor-pointer"
+                              title="메시지/문자 작성"
+                            >
+                              문자
+                            </button>
+                            <button
                               onClick={() => setItemToDelete(item)}
                               className="px-2 py-1 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold text-xs transition-colors cursor-pointer"
                               title="지원서 삭제"
@@ -885,12 +962,21 @@ function AdminDashboard({ handleLogout }) {
                     <span className="text-[10px] text-[#80868B] block">연락처</span>
                     <div className="font-bold text-[#202124] flex items-center justify-between">
                       <span>{activeItem.phone}</span>
-                      <button
-                        onClick={() => copyToClipboard(activeItem.phone, "전화번호")}
-                        className="text-[11px] text-blue-600 hover:underline cursor-pointer"
-                      >
-                        복사
-                      </button>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => copyToClipboard(activeItem.phone, "전화번호")}
+                          className="text-[11px] text-blue-600 hover:underline cursor-pointer"
+                        >
+                          복사
+                        </button>
+                        <a
+                          href={`tel:${activeItem.rawPhone || activeItem.phone}`}
+                          className="text-[11px] text-[#5F6368] hover:text-blue-600 cursor-pointer"
+                          title="전화 걸기"
+                        >
+                          📞
+                        </a>
+                      </div>
                     </div>
                   </div>
 
@@ -1069,12 +1155,13 @@ function AdminDashboard({ handleLogout }) {
                 <span>🗑️</span>
                 <span>삭제</span>
               </button>
-              <a
-                href={`tel:${activeItem.rawPhone || activeItem.phone}`}
-                className="flex-1 py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold text-center transition-colors cursor-pointer"
+              <button
+                onClick={() => handleOpenMessageModal(activeItem)}
+                className="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold text-center transition-colors cursor-pointer flex items-center justify-center gap-1.5 shadow-sm"
               >
-                📞 바로 전화걸기
-              </a>
+                <span>💬</span>
+                <span>메시지 보내기</span>
+              </button>
               <button
                 onClick={() => setActiveItem(null)}
                 className="px-5 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold cursor-pointer transition-colors"
@@ -1201,7 +1288,144 @@ function AdminDashboard({ handleLogout }) {
         </div>
       )}
 
-      {/* 8. Deletion Confirmation Modal Dialog (Google M3 Alert Dialog) */}
+      {/* 8. Message Sending Modal Dialog (Google M3 Style) */}
+      {messageApplicant && (
+        <div
+          className="fixed inset-0 z-70 bg-black/60 backdrop-blur-2xs flex items-center justify-center p-4 animate-in fade-in duration-150"
+          onClick={() => setMessageApplicant(null)}
+        >
+          <div
+            className="w-full max-w-lg bg-white rounded-3xl shadow-2xl overflow-hidden border border-[#E0E3E7] animate-in zoom-in-95 duration-200 flex flex-col max-h-[90vh]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="p-5 border-b border-[#E0E3E7] flex items-center justify-between bg-white">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl shrink-0">
+                  💬
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-[#202124] flex items-center gap-1.5">
+                    <span>메시지 보내기</span>
+                    <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-blue-100 text-blue-800">
+                      {messageApplicant.name} 님
+                    </span>
+                  </h3>
+                  <p className="text-xs text-[#5F6368] mt-0.5">
+                    수신 번호: <strong className="text-[#202124]">{messageApplicant.phone}</strong> · {messageApplicant.hospital}
+                  </p>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setMessageApplicant(null)}
+                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-[#5F6368] flex items-center justify-center font-bold text-sm cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-5 space-y-4 overflow-y-auto">
+              
+              {/* Template Picker */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-[#5F6368] block">
+                  상황별 맞춤 템플릿 선택
+                </label>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
+                  {[
+                    { key: "schedule", label: "📅 일정 조율" },
+                    { key: "confirm", label: "✓ 예약 확정" },
+                    { key: "review", label: "✍️ 리뷰 안내" },
+                    { key: "custom", label: "✏️ 직접 작성" },
+                  ].map((tpl) => (
+                    <button
+                      key={tpl.key}
+                      onClick={() => handleSelectTemplate(tpl.key)}
+                      className={`py-2 px-2 rounded-xl text-xs font-bold transition-all text-center cursor-pointer border ${
+                        selectedTemplateKey === tpl.key
+                          ? "bg-blue-600 text-white border-blue-600 shadow-2xs"
+                          : "bg-[#F8F9FA] hover:bg-slate-100 text-[#3C4043] border-[#E0E3E7]"
+                      }`}
+                    >
+                      {tpl.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Message Editor Textarea */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between text-xs">
+                  <label className="font-bold text-[#202124]">
+                    메시지 내용 (문자 / 알림톡)
+                  </label>
+                  <span className="text-[11px] text-[#80868B]">
+                    {customMessageText.length}자
+                  </span>
+                </div>
+                <textarea
+                  rows={9}
+                  value={customMessageText}
+                  onChange={(e) => setCustomMessageText(e.target.value)}
+                  placeholder="보내실 메시지 내용을 입력하세요..."
+                  className="w-full p-3.5 bg-[#F8F9FA] border border-[#DADCE0] focus:border-blue-600 focus:bg-white rounded-2xl text-xs text-[#202124] leading-relaxed outline-none transition-colors"
+                />
+              </div>
+
+              {/* Tips */}
+              <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-[11px] text-[#5F6368] space-y-1">
+                <p className="font-semibold text-[#202124]">💡 발송 방법 안내</p>
+                <p>• <strong>[메시지 복사]</strong>: 카카오톡 채널 또는 병원 문자 발송 솔루션에 바로 붙여넣기 하실 수 있습니다.</p>
+                <p>• <strong>[문자 앱 열기]</strong>: 모바일 기기 또는 Windows 스마트폰 연결 앱에서 즉시 SMS 발송창이 열립니다.</p>
+              </div>
+
+            </div>
+
+            {/* Modal Actions */}
+            <div className="p-4 px-5 border-t border-[#E0E3E7] bg-white flex items-center justify-between gap-2">
+              <a
+                href={`tel:${messageApplicant.rawPhone || messageApplicant.phone}`}
+                className="px-3.5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-colors cursor-pointer flex items-center gap-1 shrink-0"
+                title="음성 전화 연결"
+              >
+                <span>📞</span>
+                <span className="hidden sm:inline">전화 걸기</span>
+              </a>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(customMessageText);
+                    setCopiedMessage(true);
+                    setTimeout(() => setCopiedMessage(false), 2000);
+                    showToast("메시지가 클립보드에 복사되었습니다!");
+                  }}
+                  className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 border ${
+                    copiedMessage
+                      ? "bg-emerald-50 text-emerald-700 border-emerald-300"
+                      : "bg-white hover:bg-slate-100 text-[#3C4043] border-[#DADCE0]"
+                  }`}
+                >
+                  <span>{copiedMessage ? "✓" : "📋"}</span>
+                  <span>{copiedMessage ? "복사 완료!" : "메시지 복사"}</span>
+                </button>
+
+                <a
+                  href={`sms:${(messageApplicant.rawPhone || messageApplicant.phone).replace(/[^0-9]/g, "")}?body=${encodeURIComponent(customMessageText)}`}
+                  className="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition-colors cursor-pointer flex items-center gap-1.5 shadow-sm"
+                >
+                  <span>💬</span>
+                  <span>문자 앱 열기</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 9. Deletion Confirmation Modal Dialog (Google M3 Alert Dialog) */}
       {itemToDelete && (
         <div
           className="fixed inset-0 z-70 bg-black/60 backdrop-blur-2xs flex items-center justify-center p-4 animate-in fade-in duration-150"
