@@ -112,7 +112,7 @@ function readApplications_() {
         images: images,
         imageNote: col(r, "시술부위 상세설명") || col(r, "부위설명/특이사항") || col(r, "부위설명"),
         userNote: col(r, "지원동기") || col(r, "특이사항") || col(r, "지원동기/체험소감") || col(r, "체험소감"),
-        status: col(r, "진행상태") || "대기중",
+        status: col(r, "진행상태") || "1.신규지원",
         confirmedDate: col(r, "예약일"),
         postDate: col(r, "원고 발행일"),
         keyword: col(r, "키워드"),
@@ -296,7 +296,8 @@ function doPost(e) {
       "지원동기": data.userNote || "",
       "지원동기/체험소감": data.userNote || "",
       "체험소감": data.userNote || "",
-      "진행상태": "대기중"
+      "진행상태": data.status || "1.신규지원",
+      "공유상태": data.shareStatus || "미공유"
     };
 
     var rowData = [];

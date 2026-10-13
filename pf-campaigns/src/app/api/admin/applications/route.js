@@ -14,7 +14,9 @@ const MOCK_APPLICATIONS = [
   {
     rowId: 2,
     submittedAt: "2026-10-07 14:15:30",
-    status: "대기중",
+    status: "1.신규지원",
+    shareStatus: "공유됨",
+    client: "큐어람",
     confirmedDate: "",
     memo: "얼굴 및 목 편평사마귀 50개 내외 희망",
     ...parseRecruitInfo(`[큐어람한의원/편평사마귀제거]
@@ -36,7 +38,9 @@ https://drive.google.com/file/d/1_sample_flatwart_cureram_02/view
   {
     rowId: 3,
     submittedAt: "2026-10-06 17:38:00",
-    status: "예약확정",
+    status: "3.체험대기중",
+    shareStatus: "공유됨",
+    client: "오블리브",
     confirmedDate: "2026-10-12 14:00 (오후)",
     memo: "1지망 일정으로 병원 예약 접수 완료됨",
     ...parseRecruitInfo(`[오블리브송도/문제성발톱]
@@ -57,7 +61,9 @@ https://drive.google.com/file/d/1_sample_obliv_toenail_01/view
   {
     rowId: 4,
     submittedAt: "2026-10-05 11:20:15",
-    status: "방문완료",
+    status: "6.발행완료",
+    shareStatus: "공유됨",
+    client: "온리프",
     confirmedDate: "2026-10-08 11:30 (오전)",
     memo: "시술 완료, 2주 내 블로그 원고 작성 예정",
     ...parseRecruitInfo(`[온리프/피부클리닉]
@@ -78,7 +84,9 @@ https://drive.google.com/file/d/1_sample_onleaf_scar_01/view
   {
     rowId: 5,
     submittedAt: "2026-10-04 16:45:10",
-    status: "대기중",
+    status: "1.신규지원",
+    shareStatus: "미공유",
+    client: "르샤인",
     confirmedDate: "",
     memo: "",
     ...parseRecruitInfo(`[르샤인/피부클리닉]
