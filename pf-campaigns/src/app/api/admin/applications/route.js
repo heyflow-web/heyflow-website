@@ -152,6 +152,11 @@ export async function GET(request) {
                 status,
                 confirmedDate,
                 memo,
+                shareStatus: row.shareStatus || "",
+                client: row.client || "",
+                syncKey: row.syncKey || "",
+                checkStatus: row.checkStatus || "",
+                roomSyncVal: row.roomSyncVal || "",
                 ...parsed,
               };
             });
@@ -191,7 +196,7 @@ export async function GET(request) {
 export async function POST(request) {
   try {
     const body = await request.json();
-    const { action, rowId, status, confirmedDate, memo } = body;
+    const { action, rowId, status, confirmedDate, memo, shareStatus } = body;
 
     if (action === "deleteRow" && GOOGLE_SHEET_WEBHOOK_URL) {
       try {
@@ -227,6 +232,7 @@ export async function POST(request) {
             status,
             confirmedDate,
             memo,
+            shareStatus,
           }),
         });
         const resText = await updateRes.text();
@@ -239,7 +245,7 @@ export async function POST(request) {
     return NextResponse.json({
       success: true,
       message: "상태가 성공적으로 업데이트되었습니다.",
-      updated: { rowId, status, confirmedDate, memo },
+      updated: { rowId, status, confirmedDate, memo, shareStatus },
     });
   } catch (error) {
     console.error("Admin update error:", error);

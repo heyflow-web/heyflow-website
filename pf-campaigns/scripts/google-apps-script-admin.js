@@ -118,7 +118,11 @@ function readApplications_() {
         keyword: col(r, "키워드"),
         postUrl: col(r, "발행원고 URL"),
         memo: col(r, "이슈") || col(r, "관리자메모") || "",
-        client: col(r, "고객사")
+        client: col(r, "고객사"),
+        shareStatus: col(r, "공유상태"),
+        checkStatus: col(r, "점검"),
+        syncKey: col(r, "키"),
+        roomSyncVal: col(r, "룸동기값")
       });
     }
 
@@ -384,6 +388,7 @@ function handleUpdateStatus_(data) {
 
     if (data.status !== undefined) setVal("진행상태", data.status);
     if (data.confirmedDate !== undefined) setVal("예약일", data.confirmedDate);
+    if (data.shareStatus !== undefined) setVal("공유상태", data.shareStatus);
     if (data.memo !== undefined) {
       if (headers.indexOf("이슈") >= 0) setVal("이슈", data.memo);
       else if (headers.indexOf("관리자메모") >= 0) setVal("관리자메모", data.memo);
