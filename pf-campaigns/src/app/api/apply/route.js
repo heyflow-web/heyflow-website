@@ -118,16 +118,12 @@ export async function POST(request) {
       userNote,
     });
 
-    const GOOGLE_SHEET_WEBHOOK_URL =
-      process.env.GOOGLE_SHEET_WEBHOOK_URL ||
+    const LATEST_WEBHOOK_URL =
       "https://script.google.com/macros/s/AKfycby2z4HPw0hxVRq2eVa5mbEtviF8bxcWvkaJgl2q8MDWzmgl49Nix5U9gti_XECcDm6guQ/exec";
-    if (!GOOGLE_SHEET_WEBHOOK_URL) {
-      console.error("❌ GOOGLE_SHEET_WEBHOOK_URL 설정이 없습니다.");
-      return NextResponse.json(
-        { success: false, error: "지원서 저장 설정이 되어 있지 않습니다. 잠시 후 다시 시도해 주세요." },
-        { status: 500 }
-      );
-    }
+    const GOOGLE_SHEET_WEBHOOK_URL =
+      process.env.GOOGLE_SHEET_WEBHOOK_URL && process.env.GOOGLE_SHEET_WEBHOOK_URL.includes("AKfycby2z4")
+        ? process.env.GOOGLE_SHEET_WEBHOOK_URL
+        : LATEST_WEBHOOK_URL;
 
     {
       const sheetResponse = await fetch(GOOGLE_SHEET_WEBHOOK_URL, {
