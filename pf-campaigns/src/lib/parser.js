@@ -1,25 +1,63 @@
-/**
- * 구글 시트 B열(모집정보) 텍스트를 구조화된 JSON 객체로 파싱하는 유틸리티
- */
 export function parseRecruitInfo(text, rawRow = {}) {
-  if (!text || typeof text !== "string") {
+  // rawRow에 이미 개별 컬럼 데이터가 깔끔하게 들어있는 경우 (최신 DB 시트)
+  const hasDirectData = rawRow.name || rawRow.phone || rawRow.treatment;
+  if (!text || typeof text !== "string" || (hasDirectData && !text.includes("["))) {
+    const rawPhone = (rawRow.phone || "").replace(/[^0-9]/g, "");
+    let formattedPhone = rawRow.phone || "-";
+    if (rawPhone.length === 11) {
+      formattedPhone = `${rawPhone.slice(0, 3)}-${rawPhone.slice(3, 7)}-${rawPhone.slice(7)}`;
+    } else if (rawPhone.length === 10) {
+      formattedPhone = `${rawPhone.slice(0, 3)}-${rawPhone.slice(3, 6)}-${rawPhone.slice(6)}`;
+    }
+
+    let ageInfo = "";
+    if (rawRow.birthdate) {
+      const cleanBirth = String(rawRow.birthdate).replace(/[^0-9]/g, "");
+      if (cleanBirth.length >= 2) {
+        const yearPrefix = cleanBirth.slice(0, 2);
+        const currentYear = new Date().getFullYear();
+        let birthYear = parseInt(yearPrefix, 10);
+        birthYear = birthYear > 30 ? 1900 + birthYear : 2000 + birthYear;
+        const age = currentYear - birthYear + 1;
+        ageInfo = `${rawRow.birthdate} (${age}세)`;
+      }
+    }
+
+    let cleanBlogUrl = rawRow.blogUrl || "";
+    if (cleanBlogUrl && !cleanBlogUrl.startsWith("http")) {
+      cleanBlogUrl = `https://${cleanBlogUrl}`;
+    }
+
+    const schedules = [
+      rawRow.schedule1,
+      rawRow.schedule2,
+      rawRow.schedule3,
+    ].filter(Boolean);
+
+    const imageUrls = Array.isArray(rawRow.images)
+      ? rawRow.images
+      : typeof rawRow.images === "string"
+      ? rawRow.images.split("\n").map((s) => s.trim()).filter(Boolean)
+      : [];
+
     return {
       rawText: text || "",
-      hospital: rawRow.hospital || "",
-      category: rawRow.category || "",
-      name: rawRow.name || "미확인",
-      phone: rawRow.phone || "",
-      birthdate: rawRow.birthdate || "",
-      blogUrl: rawRow.blogUrl || "",
-      treatment: rawRow.treatment || "",
-      schedules: [
-        rawRow.schedule1 || "",
-        rawRow.schedule2 || "",
-        rawRow.schedule3 || "",
-      ].filter(Boolean),
+      hospital: rawRow.hospital || "병원 미지정",
+      category: rawRow.category || "기타",
+      name: rawRow.name || "익명 지원자",
+      phone: formattedPhone,
+      rawPhone: rawPhone,
+      birthdate: rawRow.birthdate || "-",
+      ageInfo: ageInfo || rawRow.birthdate || "-",
+      blogUrl: cleanBlogUrl,
+      treatment: rawRow.treatment || "-",
+      schedules: schedules.length > 0 ? schedules : ["희망 일정 미기재"],
+      schedule1: rawRow.schedule1 || "",
+      schedule2: rawRow.schedule2 || "",
+      schedule3: rawRow.schedule3 || "",
       imageNote: rawRow.imageNote || "",
-      imageUrls: rawRow.images || [],
-      userNote: rawRow.userNote || "",
+      imageUrls: imageUrls,
+      userNote: rawRow.userNote || "-",
     };
   }
 

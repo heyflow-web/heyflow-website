@@ -105,7 +105,7 @@ export async function GET(request) {
 
     if (GOOGLE_SHEET_WEBHOOK_URL) {
       try {
-        const fetchUrl = `${GOOGLE_SHEET_WEBHOOK_URL}?action=getAll&t=${Date.now()}`;
+        const fetchUrl = `${GOOGLE_SHEET_WEBHOOK_URL}?action=applications&t=${Date.now()}`;
         const res = await fetch(fetchUrl, {
           method: "GET",
           headers: { Accept: "application/json" },

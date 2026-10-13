@@ -1,177 +1,346 @@
 // ==========================================
-// 체험단 라운지 통합 웹훅 & 관리자 대시보드 연동 최신 스크립트
+// 체험단 라운지 통합 웹훅 & 관리자 대시보드 연동 스크립트 (통합 버전)
 // ==========================================
-// 적용 방법:
-// 1. 구글 시트 상단 메뉴: [확장 프로그램] -> [Apps Script] 클릭
-// 2. 기존 코드 전체를 지우고 아래 코드 전체 붙여넣기
-// 3. 우측 상단 파란색 [배포] -> [새 배포] 클릭
-//    - 유형: 웹 앱 (Web app)
-//    - 다음 사용자 권한으로 실행: 나 (Me)
-//    - 액세스 권한: 모든 사용자 (Anyone)
-// 4. 배포 완료! (기존 웹앱 URL 그대로 유지됩니다)
+// 기존 기능(캠페인 목록 조회, 고객사별 드라이브 사진 보관, 접수DB 저장, 알림메일 발송) 100% 유지
+// + 신규 기능(관리자 대시보드 실시간 지원자 목록 조회 및 예약확정/상태/메모 동기화)이 안전하게 통합되었습니다.
 
-var TARGET_FOLDER_ID = "1j7Jlt2LWPkFzbg2wyEvfaxFgGf7sYgSo";
+// 1. GET 요청 처리 (사이트 캠페인 동기화 & 관리자 대시보드 데이터 조회)
+function doGet(e) {
+  var action = e && e.parameter && e.parameter.action;
 
-function getTargetFolder() {
-  try {
-    return DriveApp.getFolderById(TARGET_FOLDER_ID);
-  } catch (e) {
-    return DriveApp.getRootFolder();
+  // [기존 기능] 사이트가 ?action=campaigns 로 부르면 '사이트관리' 탭의 모집 목록을 JSON으로 반환
+  if (action === "campaigns") {
+    return ContentService
+      .createTextOutput(JSON.stringify(readCampaigns_()))
+      .setMimeType(ContentService.MimeType.JSON);
   }
+
+  // [신규 기능] 관리자 대시보드가 ?action=applications 로 부르면 'DB' 탭의 지원자 목록을 JSON으로 반환
+  if (action === "applications" || action === "getAll") {
+    return ContentService
+      .createTextOutput(JSON.stringify(readApplications_()))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+
+  // 기본 상태 확인 응답
+  return ContentService
+    .createTextOutput(JSON.stringify({ result: "success", message: "체험단 지원서 Webhook 정상 동작 중" }))
+    .setMimeType(ContentService.MimeType.JSON);
 }
 
-// 1. 관리자 대시보드 실시간 데이터 조회 (GET)
-function doGet(e) {
-  try {
-    var spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
-    var sheet = spreadsheet.getSheetByName("Salman") || spreadsheet.getSheets()[0];
-    var data = sheet.getDataRange().getValues();
+// '사이트관리' 탭에서 캠페인 목록 읽기 (기존 함수 원본 유지)
+function readCampaigns_() {
+  var sh = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("사이트관리");
+  if (!sh || sh.getLastRow() < 2) return [];
+  var vals = sh.getDataRange().getValues();
+  var h = vals[0].map(function (x) { return String(x).trim(); });
+  var col = function (r, n) { var j = h.indexOf(n); return j < 0 ? "" : String(r[j]).trim(); };
+  var lines = function (t) { return t ? t.split("\n").map(function (x) { return x.trim(); }).filter(Boolean) : []; };
+  var out = [];
+  for (var i = 1; i < vals.length; i++) {
+    var r = vals[i];
+    var status = col(r, "상태");
+    if (!col(r, "ID") || status === "숨김") continue; // 상태가 '숨김'이면 사이트에 내보내지 않음
+    out.push({
+      id: col(r, "ID"),
+      status: status || "모집중",
+      hospital: col(r, "병원"),
+      category: col(r, "카테고리"),
+      title: col(r, "캠페인명"),
+      location: col(r, "지역") || "서울 강남",
+      channel: col(r, "채널") || "블로그",
+      offer: col(r, "제공혜택"),
+      copay: col(r, "본인부담"),
+      visits: col(r, "방문횟수") || "1회 방문",
+      description: col(r, "제공혜택"),
+      benefits: lines(col(r, "혜택상세")),
+      missions: lines(col(r, "리뷰미션")),
+      conditions: lines(col(r, "신청조건")),
+      notices: lines(col(r, "필수유의사항")),
+      schedule: {
+        announcement: col(r, "발표일정") || "신청서 검토 후 순차 개별 연락드립니다.",
+        activity: col(r, "활동일정") || "선정 직후 예약 일정 조율 후 내원 진행합니다."
+      }
+    });
+  }
+  return out;
+}
 
-    if (data.length <= 1) {
-      return ContentService
-        .createTextOutput(JSON.stringify({ result: "success", rows: [] }))
-        .setMimeType(ContentService.MimeType.JSON);
+// [신규 기능] 'DB' 탭에서 지원자 전체 목록을 구조화하여 관리자 대시보드로 전달
+function readApplications_() {
+  try {
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var sh = ss.getSheetByName("DB") || ss.getSheetByName("접수DB");
+    if (!sh || sh.getLastRow() < 2) {
+      return { result: "success", rows: [] };
     }
+
+    var vals = sh.getDataRange().getValues();
+    var h = vals[0].map(function (x) { return String(x).trim(); });
+    var col = function (r, n) {
+      var j = h.indexOf(n);
+      return j < 0 ? "" : (r[j] !== undefined && r[j] !== null ? String(r[j]).trim() : "");
+    };
 
     var rows = [];
-    for (var i = 1; i < data.length; i++) {
-      var row = data[i];
-      var submittedAt = row[0] ? String(row[0]) : "";
-      var recruitInfo = row[1] ? String(row[1]) : "";
-      var status = row[2] ? String(row[2]) : "대기중";
-      var confirmedDate = row[3] ? String(row[3]) : "";
-      var memo = row[4] ? String(row[4]) : "";
+    for (var i = 1; i < vals.length; i++) {
+      var r = vals[i];
+      var submittedAt = col(r, "신청일시") || col(r, "일시") || col(r, "접수일시");
+      var name = col(r, "이름") || col(r, "지원자") || col(r, "지원자명");
+      var phone = col(r, "연락처") || col(r, "전화번호") || col(r, "휴대폰");
 
-      if (submittedAt || recruitInfo) {
-        rows.push({
-          rowId: i + 1,
-          submittedAt: submittedAt,
-          recruitInfo: recruitInfo,
-          status: status,
-          confirmedDate: confirmedDate,
-          memo: memo
-        });
-      }
+      // 빈 행 건너뛰기
+      if (!submittedAt && !name && !phone) continue;
+
+      var imgRaw = col(r, "첨부사진링크") || col(r, "첨부사진") || col(r, "사진링크") || col(r, "사진");
+      var images = imgRaw ? imgRaw.split("\n").map(function(s){ return s.trim(); }).filter(Boolean) : [];
+
+      rows.push({
+        rowId: i + 1,
+        submittedAt: submittedAt,
+        campaignId: col(r, "캠페인ID"),
+        hospital: col(r, "클리닉") || col(r, "병원") || col(r, "병원명"),
+        treatment: col(r, "희망시술") || col(r, "캠페인명"),
+        category: col(r, "카테고리"),
+        name: name,
+        birthdate: col(r, "생년월일"),
+        phone: phone,
+        blogUrl: col(r, "블로그주소") || col(r, "블로그"),
+        schedule1: col(r, "1지망") || col(r, "1지망일정"),
+        schedule2: col(r, "2지망") || col(r, "2지망일정"),
+        schedule3: col(r, "3지망") || col(r, "3지망일정"),
+        images: images,
+        imageNote: col(r, "시술부위 상세설명") || col(r, "부위설명/특이사항") || col(r, "부위설명"),
+        userNote: col(r, "지원동기") || col(r, "특이사항") || col(r, "지원동기/체험소감") || col(r, "체험소감"),
+        status: col(r, "진행상태") || "대기중",
+        confirmedDate: col(r, "예약일"),
+        postDate: col(r, "원고 발행일"),
+        keyword: col(r, "키워드"),
+        postUrl: col(r, "발행원고 URL"),
+        memo: col(r, "이슈") || col(r, "관리자메모") || "",
+        client: col(r, "고객사")
+      });
     }
 
-    return ContentService
-      .createTextOutput(JSON.stringify({ result: "success", rows: rows }))
-      .setMimeType(ContentService.MimeType.JSON);
-
+    return { result: "success", rows: rows };
   } catch (err) {
-    return ContentService
-      .createTextOutput(JSON.stringify({ result: "error", message: err.toString() }))
-      .setMimeType(ContentService.MimeType.JSON);
+    return { result: "error", message: err.toString(), rows: [] };
   }
 }
 
-// 2. 지원서 수집 및 관리자 상태 업데이트 (POST)
+// 체험단 지원서 사진은 고객사별 '02_지원서사진' 폴더에 쌓는다. (고객사 이름 = 병원정보 탭의 '고객사')
+var PHOTO_FOLDERS = {
+  "살만": "1j7Jlt2LWPkFzbg2wyEvfaxFgGf7sYgSo",
+  "큐어람": "1VQihiH2xh_UjIcg5kvT0oOxEbM2VQ9VG"
+};
+var PHOTO_FOLDER_DEFAULT = "살만"; // 고객사를 못 찾았을 때 쓰는 폴더
+
+// 병원 이름 → 고객사 이름 ('병원정보' 탭의 '시트의 표기' → '고객사'). 접수 알림 메일 제목에 쓴다.
+function clientOf_(hospital) {
+  var h = String(hospital || "").replace(/\s+/g, "");
+  if (!h) return "고객사 미확인";
+  try {
+    var sh = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("병원정보");
+    if (!sh) return "고객사 미확인";
+    var rows = sh.getDataRange().getValues().slice(1);
+    for (var i = 0; i < rows.length; i++) { // 정확히 같은 표기
+      if (String(rows[i][0]).replace(/\s+/g, "") === h && rows[i][4]) return String(rows[i][4]).trim();
+    }
+    for (var j = 0; j < rows.length; j++) { // 한쪽이 다른 쪽을 포함 (예: '큐어람' / '큐어람한의원')
+      var k = String(rows[j][0]).replace(/\s+/g, "");
+      if (k && rows[j][4] && (h.indexOf(k) >= 0 || k.indexOf(h) >= 0)) return String(rows[j][4]).trim();
+    }
+  } catch (err) {
+    Logger.log("client lookup err: " + err.toString());
+  }
+  return "고객사 미확인";
+}
+
+// 고객사에 맞는 사진 폴더를 돌려준다. 목록에 없으면 기본 폴더(살만).
+function getOrCreateFolder(client) {
+  var id = PHOTO_FOLDERS[client] || PHOTO_FOLDERS[PHOTO_FOLDER_DEFAULT];
+  if (!PHOTO_FOLDERS[client]) Logger.log("사진 폴더: '" + client + "' 미등록 → 기본 폴더 사용");
+  return DriveApp.getFolderById(id);
+}
+
+// 2. POST 요청 처리 (지원서 접수 & 관리자 상태 업데이트)
 function doPost(e) {
   try {
     var contents = e.postData.contents;
     var data = JSON.parse(contents);
-    var spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
-    var sheet = spreadsheet.getSheetByName("Salman") || spreadsheet.getSheets()[0];
 
-    // [관리자 액션] 행 상태/확정일/메모 업데이트
-    if (data.action === "updateStatus") {
-      var targetRow = parseInt(data.rowId, 10);
-      if (targetRow && targetRow > 1) {
-        if (data.status !== undefined) sheet.getRange(targetRow, 3).setValue(data.status);
-        if (data.confirmedDate !== undefined) sheet.getRange(targetRow, 4).setValue(data.confirmedDate);
-        if (data.memo !== undefined) sheet.getRange(targetRow, 5).setValue(data.memo);
-      }
-      return ContentService
-        .createTextOutput(JSON.stringify({ result: "success", message: "상태 업데이트 완료" }))
-        .setMimeType(ContentService.MimeType.JSON);
+    // [신규 기능] 관리자 대시보드에서 보낸 상태/예약일/메모 업데이트 요청 처리
+    if (data && data.action === "updateStatus") {
+      return handleUpdateStatus_(data);
     }
 
-    // [신규 지원서 접수]
-    if (sheet.getLastRow() === 0) {
-      sheet.appendRow(["신청일시", "모집정보", "상태", "확정예약일", "관리자메모"]);
+    // --- 이하 기존 신규 지원서 접수 처리 로직 (100% 원본 유지) ---
+    // 1. 현재 시트에서 "DB" 탭 가져오기 (예전 이름 "접수DB"도 인식, 없으면 자동 생성)
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var sheet = ss.getSheetByName("DB") || ss.getSheetByName("접수DB");
+    if (!sheet) {
+      sheet = ss.insertSheet("DB");
     }
 
     var now = new Date();
-    var dateString = data.submittedAt || Utilities.formatDate(now, "Asia/Seoul", "yyyy-MM-dd HH:mm:ss");
-    var hospitalName = data.hospital || "";
-    var categoryName = data.category || "";
-    var campaignTitle = data.campaignTitle || "";
-    var applicantName = data.name || "지원자";
+    var dateString = Utilities.formatDate(now, "Asia/Seoul", "yyyy-MM-dd HH:mm:ss");
+
+    // 2. 첨부 사진을 구글 드라이브에 저장하고 링크 추출
     var finalImageUrls = [];
     var rawImages = data.rawImages || data.images || [];
+    var folder = null;
+    try {
+      folder = getOrCreateFolder(clientOf_(data.hospital));
+    } catch (fErr) {
+      Logger.log("Folder access err: " + fErr.toString());
+    }
 
-    // 드라이브 사진 업로드
-    if (rawImages && rawImages.length > 0) {
-      var folder = getTargetFolder();
-      for (var i = 0; i < rawImages.length; i++) {
-        var imgItem = rawImages[i];
-        var base64Data = (typeof imgItem === "object" && imgItem.dataUrl) ? imgItem.dataUrl : imgItem;
-        if (typeof base64Data === "string" && base64Data.indexOf("data:") === 0) {
-          try {
-            var parts = base64Data.split(",");
-            var raw = parts[1] ? parts[1].replace(/ /g, "+") : parts[0];
-            var decoded = Utilities.base64Decode(raw);
-            var safeFileName = "[" + applicantName + "] (" + hospitalName + ")" + categoryName + " - " + (i + 1) + ".jpg";
-            var blob = Utilities.newBlob(decoded, "image/jpeg", safeFileName);
-            var file = folder.createFile(blob);
-            file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
-            finalImageUrls.push(file.getUrl());
-          } catch(photoErr) {
-            Logger.log("사진 업로드 에러: " + photoErr.toString());
-          }
-        } else if (typeof base64Data === "string" && base64Data.indexOf("http") === 0) {
-          finalImageUrls.push(base64Data);
+    var driveNameBase = data.driveFileName || (data.name + "_" + (data.campaignId || "캠페인"));
+
+    for (var i = 0; i < rawImages.length; i++) {
+      var driveUrl = "";
+      var fileName = driveNameBase + "_사진" + (i + 1) + ".jpg";
+
+      if (folder && rawImages[i] && typeof rawImages[i] === "string" && rawImages[i].indexOf("data:image") === 0) {
+        try {
+          var parts = rawImages[i].split(",");
+          var contentType = (parts[0].match(/:(.*?);/) || [])[1] || "image/jpeg";
+          var base64 = parts[1];
+          var blob = Utilities.newBlob(Utilities.base64Decode(base64), contentType, fileName);
+          var file = folder.createFile(blob);
+          driveUrl = file.getUrl();
+        } catch (e1) {
+          Logger.log("Drive save err: " + e1.toString());
         }
+      }
+
+      if (driveUrl) {
+        finalImageUrls.push(driveUrl);
       }
     }
 
-    var recruitInfoLines = [
-      "[" + hospitalName + "/" + categoryName + "]",
-      "이름 : " + applicantName,
-      "연락처 : " + (data.phone || "-"),
-      "생년월일 : " + (data.birthdate || "-"),
-      "블로그주소 : " + (data.blogUrl || "-"),
-      "희망시술 : " + (campaignTitle || "-"),
-      "희망예약일자 :",
-      "- 1지망 : " + (data.schedule1 || "-"),
-      "- 2지망 : " + (data.schedule2 || "-"),
-      "- 3지망 : " + (data.schedule3 || "-")
-    ];
+    var imagesString = finalImageUrls.join("\n");
 
-    if (data.imageNote) recruitInfoLines.push("시술부위 상세설명 : " + data.imageNote);
-    if (finalImageUrls.length > 0) {
-      recruitInfoLines.push("첨부사진URL :");
-      for (var k = 0; k < finalImageUrls.length; k++) recruitInfoLines.push(finalImageUrls[k]);
+    // 3. 컬럼 헤더 자동 인식 및 데이터 매핑
+    var headers = [];
+    if (sheet.getLastRow() > 0) {
+      headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
     }
-    if (data.userNote) recruitInfoLines.push("특이사항 : " + data.userNote);
 
-    sheet.appendRow([dateString, recruitInfoLines.join("\n"), "대기중", "", ""]);
-
-    // 이메일 알림 전송 (옵션)
-    try {
-      var emailSubject = "[" + (hospitalName || "체험단") + "] 새로운 지원서가 접수되었습니다 - " + applicantName;
-      var htmlLines = [
-        "<h3>체험단 지원서 접수 알림</h3>",
-        "<p><b>신청일시:</b> " + dateString + "</p>",
-        "<p><b>병원명:</b> " + (hospitalName || "-") + "</p>",
-        "<p><b>캠페인명:</b> " + (campaignTitle || "-") + "</p>",
-        "<hr>",
-        "<p><b>이름:</b> " + applicantName + "</p>",
-        "<p><b>연락처:</b> " + (data.phone || "-") + "</p>",
-        "<p><b>블로그:</b> <a href='" + (data.blogUrl || "") + "'>" + (data.blogUrl || "-") + "</a></p>",
-        "<p><b>1지망:</b> " + (data.schedule1 || "-") + "</p>",
-        "<p><b>2지망:</b> " + (data.schedule2 || "-") + "</p>",
-        "<p><b>3지망:</b> " + (data.schedule3 || "-") + "</p>"
+    // 만약 시트가 완전히 비어있다면 기본 헤더 자동 생성
+    if (headers.length === 0 || !headers[0]) {
+      headers = [
+        "신청일시", "캠페인ID", "클리닉", "희망시술", "카테고리",
+        "이름", "생년월일", "연락처", "블로그주소",
+        "블로그지수", "1지망", "2지망", "3지망",
+        "개인정보동의", "6개월유지동의", "미션수행동의", "마케팅동의", "일정변경불가동의",
+        "첨부사진링크", "시술부위 상세설명", "지원동기",
+        "공유상태", "점검", "고객사", "모집정보(원문)", "키",
+        "진행상태", "예약일", "원고 발행일", "키워드", "발행원고 URL", "성과", "이슈", "룸동기값"
       ];
-      MailApp.sendEmail({
-        to: "gkt0108@gmail.com, team.archivehey@gmail.com",
-        subject: emailSubject,
-        htmlBody: htmlLines.join("")
-      });
-    } catch(mailErr) {}
+      sheet.appendRow(headers);
+    }
+
+    // 각 헤더명에 대응하는 데이터 매핑 사전
+    var fieldMap = {
+      "신청일시": dateString,
+      "일시": dateString,
+      "접수일시": dateString,
+      "캠페인ID": data.campaignId || "",
+      "캠페인명": data.campaignTitle || "",
+      "병원": data.hospital || "",
+      "병원명": data.hospital || "",
+      "클리닉": data.hospital || "",
+      "희망시술": data.campaignTitle || "",
+      "카테고리": data.category || "",
+      "이름": data.name || "",
+      "지원자": data.name || "",
+      "지원자명": data.name || "",
+      "생년월일": data.birthdate || "",
+      "연락처": data.phone || "",
+      "전화번호": data.phone || "",
+      "휴대폰": data.phone || "",
+      "블로그": data.blogUrl || "",
+      "블로그주소": data.blogUrl || "",
+      "1지망일정": data.schedule1 || "",
+      "1지망": data.schedule1 || "",
+      "2지망일정": data.schedule2 || "",
+      "2지망": data.schedule2 || "",
+      "3지망일정": data.schedule3 || "",
+      "3지망": data.schedule3 || "",
+      "개인정보동의": data.agreePrivacy ? "동의" : "미동의",
+      "6개월유지동의": data.agreeRetention ? "동의" : "미동의",
+      "유지동의": data.agreeRetention ? "동의" : "미동의",
+      "미션수행동의": data.agreeMission ? "동의" : "미동의",
+      "미션동의": data.agreeMission ? "동의" : "미동의",
+      "마케팅동의": data.agreeMarketing ? "동의" : "미동의",
+      "일정변경불가동의": data.agreeNoChange ? "동의" : "미동의",
+      "일정변경동의": data.agreeNoChange ? "동의" : "미동의",
+      "첨부사진링크": imagesString,
+      "첨부사진": imagesString,
+      "사진": imagesString,
+      "사진링크": imagesString,
+      "부위설명/특이사항": data.imageNote || "",
+      "부위설명": data.imageNote || "",
+      "시술부위 상세설명": data.imageNote || "",
+      "특이사항": data.userNote || "",
+      "지원동기": data.userNote || "",
+      "지원동기/체험소감": data.userNote || "",
+      "체험소감": data.userNote || "",
+      "진행상태": "대기중"
+    };
+
+    var rowData = [];
+    for (var k = 0; k < headers.length; k++) {
+      var colHeader = String(headers[k]).trim();
+      rowData.push(fieldMap[colHeader] !== undefined ? fieldMap[colHeader] : "");
+    }
+    sheet.appendRow(rowData);
+
+    // 연락처·생년월일은 문자로 다시 써서 앞자리 0이 사라지지 않게 한다
+    var newRow = sheet.getLastRow();
+    for (var c = 0; c < headers.length; c++) {
+      var hn = String(headers[c]).trim();
+      if (hn === "연락처" || hn === "전화번호" || hn === "휴대폰" || hn === "생년월일" || hn === "신청일시") {
+        var cell = sheet.getRange(newRow, c + 1);
+        cell.setNumberFormat("@");
+        cell.setValue(String(rowData[c]));
+      }
+    }
+
+    // 4. 관리자 알림 이메일 발송
+    var emailRecipients = ["gkt0108@gmail.com", "team.archivehey@gmail.com"];
+    var emailSubject = "[🍊체험단 지원자] " + clientOf_(data.hospital) + " / " + (data.hospital || "병원 미확인") + " 지원자 등장 📩";
+
+    var emailBodyHtml = "<h3>체험단 지원서 접수 알림</h3>" +
+      "<p><b>신청일시 :</b> " + dateString + "</p>" +
+      "<p><b>병원명 :</b> " + (data.hospital || "-") + "</p>" +
+      "<p><b>캠페인명 :</b> " + (data.campaignTitle || "-") + "</p>" +
+      "<p><b>이름 :</b> " + (data.name || "") + "</p>" +
+      "<p><b>연락처 :</b> " + (data.phone || "") + "</p>" +
+      "<p><b>생년월일 :</b> " + (data.birthdate || "-") + "</p>" +
+      "<p><b>블로그주소 :</b> <a href='" + (data.blogUrl || "") + "'>" + (data.blogUrl || "") + "</a></p>" +
+      "<p><b>1지망 일정 :</b> " + (data.schedule1 || "") + "</p>" +
+      "<p><b>2지망 일정 :</b> " + (data.schedule2 || "") + "</p>" +
+      "<p><b>3지망 일정 :</b> " + (data.schedule3 || "") + "</p>" +
+      "<p><b>첨부사진 (구글 드라이브 링크) :</b><br>" + (imagesString ? imagesString.split("\n").map(function(url){ return "<a href='" + url + "' target='_blank'>" + url + "</a>"; }).join("<br>") : "없음") + "</p>" +
+      "<p><b>시술부위 상세설명 :</b> " + (data.imageNote || "-") + "</p>" +
+      "<p><b>지원동기 :</b> " + (data.userNote || "-") + "</p>";
+
+    for (var j = 0; j < emailRecipients.length; j++) {
+      try {
+        MailApp.sendEmail({
+          to: emailRecipients[j],
+          subject: emailSubject,
+          htmlBody: emailBodyHtml
+        });
+      } catch (e) {
+        Logger.log("Email send error: " + e.toString());
+      }
+    }
 
     return ContentService
-      .createTextOutput(JSON.stringify({ result: "success", message: "저장 완료" }))
+      .createTextOutput(JSON.stringify({ result: "success", message: "구글 시트 저장 및 드라이브 보관 완료" }))
       .setMimeType(ContentService.MimeType.JSON);
 
   } catch (error) {
@@ -179,4 +348,58 @@ function doPost(e) {
       .createTextOutput(JSON.stringify({ result: "error", message: error.toString() }))
       .setMimeType(ContentService.MimeType.JSON);
   }
+}
+
+// [신규 기능] 관리자 상태/예약일/이슈(메모) 업데이트 처리
+function handleUpdateStatus_(data) {
+  try {
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var sh = ss.getSheetByName("DB") || ss.getSheetByName("접수DB");
+    if (!sh) {
+      return ContentService
+        .createTextOutput(JSON.stringify({ result: "error", message: "DB 탭을 찾을 수 없습니다." }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+
+    var targetRow = parseInt(data.rowId, 10);
+    if (!targetRow || targetRow < 2 || targetRow > sh.getLastRow()) {
+      return ContentService
+        .createTextOutput(JSON.stringify({ result: "error", message: "유효하지 않은 행 번호입니다." }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+
+    var headers = sh.getRange(1, 1, 1, sh.getLastColumn()).getValues()[0].map(function (x) { return String(x).trim(); });
+
+    var setVal = function(colName, value) {
+      var idx = headers.indexOf(colName);
+      if (idx >= 0 && value !== undefined) {
+        sh.getRange(targetRow, idx + 1).setValue(String(value));
+      }
+    };
+
+    if (data.status !== undefined) setVal("진행상태", data.status);
+    if (data.confirmedDate !== undefined) setVal("예약일", data.confirmedDate);
+    if (data.memo !== undefined) {
+      if (headers.indexOf("이슈") >= 0) setVal("이슈", data.memo);
+      else if (headers.indexOf("관리자메모") >= 0) setVal("관리자메모", data.memo);
+    }
+
+    return ContentService
+      .createTextOutput(JSON.stringify({ result: "success", message: "상태 업데이트 완료" }))
+      .setMimeType(ContentService.MimeType.JSON);
+  } catch (err) {
+    return ContentService
+      .createTextOutput(JSON.stringify({ result: "error", message: err.toString() }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+// 📌 권한 승인 및 드라이브 폴더 생성 확인용 함수 (기존 원본 유지)
+function authorizeEverything() {
+  Object.keys(PHOTO_FOLDERS).forEach(function (c) {
+    Logger.log("📁 1. " + c + " 사진 폴더 연결 성공: " + getOrCreateFolder(c).getName());
+  });
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName("DB") || ss.getSheetByName("접수DB") || ss.insertSheet("DB");
+  Logger.log("📊 2. 시트 'DB' 탭 연결 성공: " + sheet.getName());
 }
