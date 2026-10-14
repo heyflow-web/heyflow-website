@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { parseRecruitInfo } from "@/lib/parser";
+import { DEFAULT_MESSAGE_TEMPLATES } from "@/lib/templates";
 
 const LATEST_WEBHOOK_URL =
   "https://script.google.com/macros/s/AKfycby2z4HPw0hxVRq2eVa5mbEtviF8bxcWvkaJgl2q8MDWzmgl49Nix5U9gti_XECcDm6guQ/exec";
@@ -194,6 +195,7 @@ export async function GET(request) {
     const forceRefresh = searchParams.get("refresh") === "true";
 
     let sheetData = null;
+    let messageTemplates = DEFAULT_MESSAGE_TEMPLATES;
     let isLiveSheet = false;
     let isScriptOutdated = false;
 
@@ -210,6 +212,9 @@ export async function GET(request) {
         const text = await res.text();
         try {
           const json = JSON.parse(text);
+          if (Array.isArray(json.templates) && json.templates.length > 0) {
+            messageTemplates = json.templates;
+          }
           if (Array.isArray(json.rows) && json.rows.length > 0) {
             // 구글 시트에서 최신 행 목록을 정상 수신한 경우
             sheetData = json.rows.map((row, idx) => {
@@ -283,6 +288,7 @@ export async function GET(request) {
       isScriptOutdated,
       totalCount: applications.length,
       applications,
+      templates: messageTemplates,
       scriptUrl: GOOGLE_SHEET_WEBHOOK_URL,
       sheetUrl: "https://docs.google.com/spreadsheets/d/1kjwDdMS8AIspbWnDF2ILAlewOA7Dcyp-zk1hE29rbu8/edit?usp=sharing",
     });

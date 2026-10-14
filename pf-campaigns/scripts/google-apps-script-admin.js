@@ -22,6 +22,13 @@ function doGet(e) {
       .setMimeType(ContentService.MimeType.JSON);
   }
 
+  // [신규 기능] 문자 템플릿만 단독 조회 (?action=templates)
+  if (action === "templates") {
+    return ContentService
+      .createTextOutput(JSON.stringify({ result: "success", templates: readMessageTemplates_() }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+
   // 기본 상태 확인 응답
   return ContentService
     .createTextOutput(JSON.stringify({ result: "success", message: "체험단 지원서 Webhook 정상 동작 중" }))
@@ -135,10 +142,142 @@ function readApplications_() {
       });
     }
 
-    return { result: "success", rows: rows };
+    return {
+      result: "success",
+      rows: rows,
+      templates: readMessageTemplates_()
+    };
   } catch (err) {
-    return { result: "error", message: err.toString(), rows: [] };
+    return { result: "error", message: err.toString(), rows: [], templates: getDefaultMessageTemplates_() };
   }
+}
+
+// [신규 기능] '문자템플릿' 탭에서 문자/알림톡 템플릿 목록 읽기
+function readMessageTemplates_() {
+  try {
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var sheetNames = ["문자템플릿", "문자 템플릿", "메시지템플릿", "메시지 템플릿", "템플릿"];
+    var sh = null;
+    for (var s = 0; s < sheetNames.length; s++) {
+      sh = ss.getSheetByName(sheetNames[s]);
+      if (sh) break;
+    }
+    if (!sh || sh.getLastRow() < 1) {
+      return getDefaultMessageTemplates_();
+    }
+
+    var vals = sh.getDataRange().getValues();
+    if (vals.length === 0) return getDefaultMessageTemplates_();
+
+    var h = vals[0].map(function (x) { return String(x).trim(); });
+
+    var colTitleIdx = -1;
+    var colCategoryIdx = -1;
+    var colContentIdx = -1;
+    var colIdIdx = -1;
+
+    for (var c = 0; c < h.length; c++) {
+      var colName = h[c];
+      if (/^(구분|카테고리|분류|상황)$/i.test(colName)) {
+        if (colCategoryIdx < 0) colCategoryIdx = c;
+      }
+      if (/^(제목|타이틀|템플릿명|명칭|템플릿)$/i.test(colName)) {
+        if (colTitleIdx < 0) colTitleIdx = c;
+      }
+      if (/^(내용|문구|메시지|본문|메시지내용|문자내용|템플릿내용)$/i.test(colName)) {
+        if (colContentIdx < 0) colContentIdx = c;
+      }
+      if (/^(id|코드|key)$/i.test(colName)) {
+        if (colIdIdx < 0) colIdIdx = c;
+      }
+    }
+
+    var templates = [];
+
+    // Case 1: 내용(메시지) 헤더가 존재하는 표준 테이블 형태
+    if (colContentIdx >= 0 && vals.length >= 2) {
+      if (colTitleIdx < 0 && colCategoryIdx >= 0) colTitleIdx = colCategoryIdx;
+      if (colTitleIdx < 0) colTitleIdx = (colContentIdx === 0 ? 1 : 0);
+
+      for (var i = 1; i < vals.length; i++) {
+        var row = vals[i];
+        var title = (colTitleIdx >= 0 && row[colTitleIdx]) ? String(row[colTitleIdx]).trim() : "";
+        if (!title && colCategoryIdx >= 0 && row[colCategoryIdx]) {
+          title = String(row[colCategoryIdx]).trim();
+        }
+        var content = (colContentIdx >= 0 && row[colContentIdx]) ? String(row[colContentIdx]).trim() : "";
+        var id = (colIdIdx >= 0 && row[colIdIdx]) ? String(row[colIdIdx]).trim() : ("tpl_" + i);
+
+        if (!title && !content) continue;
+        templates.push({
+          id: id || ("tpl_" + i),
+          title: title || ("템플릿 " + i),
+          content: content
+        });
+      }
+    } else {
+      // Case 2: 헤더가 없거나 1행=제목들, 2행=내용들(가로 배치) 형태
+      var isHorizontal = vals.length === 2 || (vals.length === 3 && vals[0].length >= 3);
+      if (isHorizontal && vals[0].length >= 2) {
+        for (var colI = 0; colI < vals[0].length; colI++) {
+          var topCell = String(vals[0][colI] || "").trim();
+          var bottomCell = String(vals[1][colI] || "").trim();
+          if (topCell && bottomCell) {
+            templates.push({
+              id: "tpl_col_" + (colI + 1),
+              title: topCell,
+              content: bottomCell
+            });
+          }
+        }
+      }
+
+      // Case 3: 2컬럼 키-값 세로 형태 (Col 1 = 제목, Col 2 = 내용)
+      if (templates.length === 0) {
+        var startRow = (h[0] === "구분" || h[0] === "제목" || h[1] === "내용") ? 1 : 0;
+        for (var r2 = startRow; r2 < vals.length; r2++) {
+          var t2 = String(vals[r2][0] || "").trim();
+          var cnt2 = vals[r2].length > 1 ? String(vals[r2][1] || "").trim() : "";
+          if (t2 && cnt2) {
+            templates.push({
+              id: "tpl_" + (r2 + 1),
+              title: t2,
+              content: cnt2
+            });
+          }
+        }
+      }
+    }
+
+    if (templates.length > 0) {
+      return templates;
+    }
+    return getDefaultMessageTemplates_();
+  } catch (err) {
+    Logger.log("readMessageTemplates_ error: " + err.toString());
+    return getDefaultMessageTemplates_();
+  }
+}
+
+// 기본 표준 메시지 템플릿
+function getDefaultMessageTemplates_() {
+  return [
+    {
+      id: "schedule",
+      title: "📅 일정 조율",
+      content: "[체험단 라운지 - {병원}]\n안녕하세요, {이름}님!\n신청해주신 '{희망시술}' 체험단에 선정되셨음을 안내드립니다. 🎉\n\n■ 1지망 희망일정: {1지망}\n■ 내원 및 시술 진행 일정을 조율하고자 하오니, 본 번호로 편하신 시간대 회신 부탁드립니다.\n\n감사합니다."
+    },
+    {
+      id: "confirm",
+      title: "✓ 예약 확정",
+      content: "[체험단 라운지 - {병원}]\n안녕하세요, {이름}님!\n신청하신 체험단 예약 일정이 최종 확정되어 안내드립니다.\n\n■ 예약 일시: {예약일}\n■ 병원명: {병원}\n■ 시술 항목: {희망시술}\n\n※ 예약 시간 10분 전까지 내원 부탁드리며, 일정 변경이 필요하신 경우 최소 3일 전 미리 연락 바랍니다.\n감사합니다."
+    },
+    {
+      id: "review",
+      title: "✍️ 리뷰 안내",
+      content: "[체험단 라운지 - {병원}]\n안녕하세요, {이름}님!\n{병원} 체험은 편안히 잘 받으셨나요?\n\n■ 포스팅 마감: 내원일로부터 7일 이내\n■ 안내사항: 전달드린 리뷰 가이드라인에 맞추어 솔직하고 정성스러운 후기 부탁드립니다.\n■ 발행 완료 후 포스팅 URL 링크를 본 번호로 회신 부탁드립니다.\n\n감사합니다."
+    }
+  ];
 }
 
 // 체험단 지원서 사진은 고객사별 '02_지원서사진' 폴더에 쌓는다. (고객사 이름 = 병원정보 탭의 '고객사')
