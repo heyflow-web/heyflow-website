@@ -1460,9 +1460,12 @@ ${hospital} 체험은 편안히 잘 받으셨나요?
 
       {/* 5. Google Style Detail Side Sheet / Drawer */}
       {activeItem && (
-        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-2xs flex justify-end animate-in fade-in duration-200">
+        <div
+          className="fixed inset-0 z-50 bg-black/40 backdrop-blur-2xs flex justify-end animate-in fade-in duration-200 cursor-pointer"
+          onClick={() => setActiveItem(null)}
+        >
           <div
-            className="w-full max-w-lg bg-white h-full shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-right duration-300"
+            className="w-full max-w-lg bg-white h-full shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-right duration-300 cursor-default"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Drawer Header */}
@@ -2089,12 +2092,6 @@ ${hospital} 체험은 편안히 잘 받으셨나요?
               >
                 <span>💬</span>
                 <span>메시지 보내기</span>
-              </button>
-              <button
-                onClick={() => setActiveItem(null)}
-                className="px-5 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold cursor-pointer transition-colors"
-              >
-                닫기
               </button>
             </div>
           </div>
