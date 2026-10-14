@@ -29,11 +29,30 @@ export function Textarea({ size = "md", className = "", ...rest }) {
   );
 }
 
+// 기본 화살표 대신 그리는 화살표. 오른쪽 여백을 직접 정할 수 있다.
+export function SelectChevron({ className = "" }) {
+  return (
+    <svg
+      className={`pointer-events-none absolute top-1/2 -translate-y-1/2 w-4 h-4 ${className}`}
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+    >
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 9l6 6 6-6" />
+    </svg>
+  );
+}
+
+// className은 바깥 틀(폭 등)에 붙는다
 export function Select({ size = "md", className = "", children, ...rest }) {
   return (
-    <select className={`${CONTROL} ${SIZE[size] || SIZE.md} pr-8 cursor-pointer ${className}`} {...rest}>
-      {children}
-    </select>
+    <span className={`relative inline-block w-full ${className}`}>
+      <select className={`${CONTROL} ${SIZE[size] || SIZE.md} appearance-none pr-10 cursor-pointer`} {...rest}>
+        {children}
+      </select>
+      <SelectChevron className={`text-sub ${size === "sm" ? "right-3" : "right-4"}`} />
+    </span>
   );
 }
 
