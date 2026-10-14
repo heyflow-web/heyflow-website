@@ -1,41 +1,16 @@
-// ==========================================
-// 체험단 라운지 통합 웹훅 & 관리자 대시보드 연동 스크립트 (통합 버전)
-// ==========================================
-// 기존 기능(캠페인 목록 조회, 고객사별 드라이브 사진 보관, 접수DB 저장, 알림메일 발송) 100% 유지
-// + 신규 기능(관리자 대시보드 실시간 지원자 목록 조회 및 예약확정/상태/메모 동기화)이 안전하게 통합되었습니다.
-
-// 1. GET 요청 처리 (사이트 캠페인 동기화 & 관리자 대시보드 데이터 조회)
+// 사이트가 ?action=campaigns 로 부르면 '캠페인' 탭의 모집 목록을 JSON으로 돌려준다.
 function doGet(e) {
   var action = e && e.parameter && e.parameter.action;
-
-  // [기존 기능] 사이트가 ?action=campaigns 로 부르면 '사이트관리' 탭의 모집 목록을 JSON으로 반환
   if (action === "campaigns") {
     return ContentService
       .createTextOutput(JSON.stringify(readCampaigns_()))
       .setMimeType(ContentService.MimeType.JSON);
   }
-
-  // [신규 기능] 관리자 대시보드가 ?action=applications 로 부르면 'DB' 탭의 지원자 목록을 JSON으로 반환
-  if (action === "applications" || action === "getAll") {
-    return ContentService
-      .createTextOutput(JSON.stringify(readApplications_()))
-      .setMimeType(ContentService.MimeType.JSON);
-  }
-
-  // [신규 기능] 문자 템플릿만 단독 조회 (?action=templates)
-  if (action === "templates") {
-    return ContentService
-      .createTextOutput(JSON.stringify({ result: "success", templates: readMessageTemplates_() }))
-      .setMimeType(ContentService.MimeType.JSON);
-  }
-
-  // 기본 상태 확인 응답
   return ContentService
     .createTextOutput(JSON.stringify({ result: "success", message: "체험단 지원서 Webhook 정상 동작 중" }))
     .setMimeType(ContentService.MimeType.JSON);
 }
 
-// '사이트관리' 탭에서 캠페인 목록 읽기 (기존 함수 원본 유지)
 function readCampaigns_() {
   var sh = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("사이트관리");
   if (!sh || sh.getLastRow() < 2) return [];
@@ -73,214 +48,8 @@ function readCampaigns_() {
   return out;
 }
 
-// [신규 기능] 'DB' 탭에서 지원자 전체 목록을 구조화하여 관리자 대시보드로 전달
-function readApplications_() {
-  try {
-    var ss = SpreadsheetApp.getActiveSpreadsheet();
-    var sh = ss.getSheetByName("DB") || ss.getSheetByName("접수DB");
-    if (!sh || sh.getLastRow() < 2) {
-      return { result: "success", rows: [] };
-    }
-
-    var vals = sh.getDataRange().getValues();
-    var h = vals[0].map(function (x) { return String(x).trim(); });
-    var col = function (r, n) {
-      var j = h.indexOf(n);
-      return j < 0 ? "" : (r[j] !== undefined && r[j] !== null ? String(r[j]).trim() : "");
-    };
-
-    var rows = [];
-    for (var i = 1; i < vals.length; i++) {
-      var r = vals[i];
-      var submittedAt = col(r, "신청일시") || col(r, "일시") || col(r, "접수일시");
-      var name = col(r, "이름") || col(r, "지원자") || col(r, "지원자명");
-      var phone = col(r, "연락처") || col(r, "전화번호") || col(r, "휴대폰");
-
-      // 빈 행 건너뛰기
-      if (!submittedAt && !name && !phone) continue;
-
-      var imgRaw = col(r, "첨부사진링크") || col(r, "첨부사진") || col(r, "사진링크") || col(r, "사진");
-      var images = imgRaw ? imgRaw.split("\n").map(function(s){ return s.trim(); }).filter(Boolean) : [];
-
-      rows.push({
-        rowId: i + 1,
-        submittedAt: submittedAt,
-        campaignId: col(r, "캠페인ID"),
-        hospital: col(r, "클리닉") || col(r, "병원") || col(r, "병원명"),
-        treatment: col(r, "희망시술") || col(r, "캠페인명"),
-        category: col(r, "카테고리"),
-        name: name,
-        birthdate: col(r, "생년월일"),
-        phone: phone,
-        blogUrl: col(r, "블로그주소") || col(r, "블로그"),
-        schedule1: col(r, "1지망") || col(r, "1지망일정"),
-        schedule2: col(r, "2지망") || col(r, "2지망일정"),
-        schedule3: col(r, "3지망") || col(r, "3지망일정"),
-        images: images,
-        imageNote: col(r, "시술부위 상세설명") || col(r, "부위설명/특이사항") || col(r, "부위설명"),
-        userNote: col(r, "지원동기") || col(r, "특이사항") || col(r, "지원동기/체험소감") || col(r, "체험소감"),
-        status: col(r, "진행상태") || "1.신규지원",
-        confirmedDate: col(r, "예약일"),
-        guideRoom: col(r, "비포앤애프터 이미지") || col(r, "비포앤애프터") || col(r, "비포애프터") || col(r, "가이드룸") || col(r, "블로거폴더") || col(r, "가이드폴더") || col(r, "가이드"),
-        draftUrl: col(r, "원고 초안 URL") || col(r, "원고초안") || col(r, "초안 URL") || col(r, "초안링크") || col(r, "초안") || col(r, "검수링크") || col(r, "검수 URL"),
-        postDate: col(r, "원고 발행일") || col(r, "발행일") || col(r, "발행일자"),
-        keyword: col(r, "타겟 키워드") || col(r, "타겟키워드") || col(r, "키워드"),
-        postUrl: col(r, "포스팅URL") || col(r, "포스팅 URL") || col(r, "포스팅링크") || col(r, "발행원고 URL") || col(r, "발행글 URL") || col(r, "발행 URL") || col(r, "발행링크"),
-        performance: col(r, "성과") || col(r, "성과지표") || col(r, "성과이미지") || col(r, "포스팅성과"),
-        memo: col(r, "이슈") || col(r, "관리자메모") || "",
-        client: col(r, "고객사"),
-        shareStatus: (function(v) {
-          if (!v) return "";
-          var s = String(v).trim();
-          if (s === "TRUE" || s === "true" || s === "공유됨" || s === "공유완료") return "공유됨";
-          if (s === "제외" || s === "FALSE" || s === "false" || s === "미공유") return "";
-          return s;
-        })(col(r, "공유상태")),
-        checkStatus: col(r, "점검"),
-        syncKey: col(r, "키"),
-        roomSyncVal: col(r, "룸동기값")
-      });
-    }
-
-    return {
-      result: "success",
-      rows: rows,
-      templates: readMessageTemplates_()
-    };
-  } catch (err) {
-    return { result: "error", message: err.toString(), rows: [], templates: getDefaultMessageTemplates_() };
-  }
-}
-
-// [신규 기능] '문자템플릿' 탭에서 문자/알림톡 템플릿 목록 읽기
-function readMessageTemplates_() {
-  try {
-    var ss = SpreadsheetApp.getActiveSpreadsheet();
-    var sheetNames = ["문자템플릿", "문자 템플릿", "메시지템플릿", "메시지 템플릿", "템플릿"];
-    var sh = null;
-    for (var s = 0; s < sheetNames.length; s++) {
-      sh = ss.getSheetByName(sheetNames[s]);
-      if (sh) break;
-    }
-    if (!sh || sh.getLastRow() < 1) {
-      return getDefaultMessageTemplates_();
-    }
-
-    var vals = sh.getDataRange().getValues();
-    if (vals.length === 0) return getDefaultMessageTemplates_();
-
-    var h = vals[0].map(function (x) { return String(x).trim(); });
-
-    var colTitleIdx = -1;
-    var colCategoryIdx = -1;
-    var colContentIdx = -1;
-    var colIdIdx = -1;
-
-    for (var c = 0; c < h.length; c++) {
-      var colName = h[c];
-      if (/^(구분|카테고리|분류|상황)$/i.test(colName)) {
-        if (colCategoryIdx < 0) colCategoryIdx = c;
-      }
-      if (/^(제목|타이틀|템플릿명|명칭|템플릿)$/i.test(colName)) {
-        if (colTitleIdx < 0) colTitleIdx = c;
-      }
-      if (/^(내용|문구|메시지|본문|메시지내용|문자내용|템플릿내용)$/i.test(colName)) {
-        if (colContentIdx < 0) colContentIdx = c;
-      }
-      if (/^(id|코드|key)$/i.test(colName)) {
-        if (colIdIdx < 0) colIdIdx = c;
-      }
-    }
-
-    var templates = [];
-
-    // Case 1: 내용(메시지) 헤더가 존재하는 표준 테이블 형태
-    if (colContentIdx >= 0 && vals.length >= 2) {
-      if (colTitleIdx < 0 && colCategoryIdx >= 0) colTitleIdx = colCategoryIdx;
-      if (colTitleIdx < 0) colTitleIdx = (colContentIdx === 0 ? 1 : 0);
-
-      for (var i = 1; i < vals.length; i++) {
-        var row = vals[i];
-        var title = (colTitleIdx >= 0 && row[colTitleIdx]) ? String(row[colTitleIdx]).trim() : "";
-        if (!title && colCategoryIdx >= 0 && row[colCategoryIdx]) {
-          title = String(row[colCategoryIdx]).trim();
-        }
-        var content = (colContentIdx >= 0 && row[colContentIdx]) ? String(row[colContentIdx]).trim() : "";
-        var id = (colIdIdx >= 0 && row[colIdIdx]) ? String(row[colIdIdx]).trim() : ("tpl_" + i);
-
-        if (!title && !content) continue;
-        templates.push({
-          id: id || ("tpl_" + i),
-          title: title || ("템플릿 " + i),
-          content: content
-        });
-      }
-    } else {
-      // Case 2: 헤더가 없거나 1행=제목들, 2행=내용들(가로 배치) 형태
-      var isHorizontal = vals.length === 2 || (vals.length === 3 && vals[0].length >= 3);
-      if (isHorizontal && vals[0].length >= 2) {
-        for (var colI = 0; colI < vals[0].length; colI++) {
-          var topCell = String(vals[0][colI] || "").trim();
-          var bottomCell = String(vals[1][colI] || "").trim();
-          if (topCell && bottomCell) {
-            templates.push({
-              id: "tpl_col_" + (colI + 1),
-              title: topCell,
-              content: bottomCell
-            });
-          }
-        }
-      }
-
-      // Case 3: 2컬럼 키-값 세로 형태 (Col 1 = 제목, Col 2 = 내용)
-      if (templates.length === 0) {
-        var startRow = (h[0] === "구분" || h[0] === "제목" || h[1] === "내용") ? 1 : 0;
-        for (var r2 = startRow; r2 < vals.length; r2++) {
-          var t2 = String(vals[r2][0] || "").trim();
-          var cnt2 = vals[r2].length > 1 ? String(vals[r2][1] || "").trim() : "";
-          if (t2 && cnt2) {
-            templates.push({
-              id: "tpl_" + (r2 + 1),
-              title: t2,
-              content: cnt2
-            });
-          }
-        }
-      }
-    }
-
-    if (templates.length > 0) {
-      return templates;
-    }
-    return getDefaultMessageTemplates_();
-  } catch (err) {
-    Logger.log("readMessageTemplates_ error: " + err.toString());
-    return getDefaultMessageTemplates_();
-  }
-}
-
-// 기본 표준 메시지 템플릿
-function getDefaultMessageTemplates_() {
-  return [
-    {
-      id: "schedule",
-      title: "📅 일정 조율",
-      content: "[체험단 라운지 - {병원}]\n안녕하세요, {이름}님!\n신청해주신 '{희망시술}' 체험단에 선정되셨음을 안내드립니다. 🎉\n\n■ 1지망 희망일정: {1지망}\n■ 내원 및 시술 진행 일정을 조율하고자 하오니, 본 번호로 편하신 시간대 회신 부탁드립니다.\n\n감사합니다."
-    },
-    {
-      id: "confirm",
-      title: "✓ 예약 확정",
-      content: "[체험단 라운지 - {병원}]\n안녕하세요, {이름}님!\n신청하신 체험단 예약 일정이 최종 확정되어 안내드립니다.\n\n■ 예약 일시: {예약일}\n■ 병원명: {병원}\n■ 시술 항목: {희망시술}\n\n※ 예약 시간 10분 전까지 내원 부탁드리며, 일정 변경이 필요하신 경우 최소 3일 전 미리 연락 바랍니다.\n감사합니다."
-    },
-    {
-      id: "review",
-      title: "✍️ 리뷰 안내",
-      content: "[체험단 라운지 - {병원}]\n안녕하세요, {이름}님!\n{병원} 체험은 편안히 잘 받으셨나요?\n\n■ 포스팅 마감: 내원일로부터 7일 이내\n■ 안내사항: 전달드린 리뷰 가이드라인에 맞추어 솔직하고 정성스러운 후기 부탁드립니다.\n■ 발행 완료 후 포스팅 URL 링크를 본 번호로 회신 부탁드립니다.\n\n감사합니다."
-    }
-  ];
-}
-
 // 체험단 지원서 사진은 고객사별 '02_지원서사진' 폴더에 쌓는다. (고객사 이름 = 병원정보 탭의 '고객사')
+// 새 고객사가 생기면 아래에 "고객사": "폴더ID" 한 줄만 추가하면 된다.
 var PHOTO_FOLDERS = {
   "살만": "1j7Jlt2LWPkFzbg2wyEvfaxFgGf7sYgSo",
   "큐어람": "1VQihiH2xh_UjIcg5kvT0oOxEbM2VQ9VG"
@@ -315,23 +84,14 @@ function getOrCreateFolder(client) {
   return DriveApp.getFolderById(id);
 }
 
-// 2. POST 요청 처리 (지원서 접수 & 관리자 상태 업데이트)
 function doPost(e) {
   try {
     var contents = e.postData.contents;
     var data = JSON.parse(contents);
 
-    // [신규 기능] 관리자 대시보드에서 보낸 상태/예약일/메모 업데이트 요청 처리
-    if (data && data.action === "updateStatus") {
-      return handleUpdateStatus_(data);
-    }
+    // 관리자 화면 요청(action 포함)은 비밀키를 확인한 뒤 따로 처리한다. 지원서 접수에는 action이 없다.
+    if (data && data.action) return admRoute_(data);
 
-    // [신규 기능] 관리자 대시보드에서 보낸 지원서 행 삭제 요청 처리
-    if (data && data.action === "deleteRow") {
-      return handleDeleteRow_(data);
-    }
-
-    // --- 이하 기존 신규 지원서 접수 처리 로직 (100% 원본 유지) ---
     // 1. 현재 시트에서 "DB" 탭 가져오기 (예전 이름 "접수DB"도 인식, 없으면 자동 생성)
     var ss = SpreadsheetApp.getActiveSpreadsheet();
     var sheet = ss.getSheetByName("DB") || ss.getSheetByName("접수DB");
@@ -443,9 +203,7 @@ function doPost(e) {
       "특이사항": data.userNote || "",
       "지원동기": data.userNote || "",
       "지원동기/체험소감": data.userNote || "",
-      "체험소감": data.userNote || "",
-      "진행상태": data.status || "1.신규지원",
-      "공유상태": data.shareStatus || "미공유"
+      "체험소감": data.userNote || ""
     };
 
     var rowData = [];
@@ -508,106 +266,7 @@ function doPost(e) {
   }
 }
 
-// [신규 기능] 관리자 상태/예약일/이슈(메모) 업데이트 처리
-function handleUpdateStatus_(data) {
-  try {
-    var ss = SpreadsheetApp.getActiveSpreadsheet();
-    var sh = ss.getSheetByName("DB") || ss.getSheetByName("접수DB");
-    if (!sh) {
-      return ContentService
-        .createTextOutput(JSON.stringify({ result: "error", message: "DB 탭을 찾을 수 없습니다." }))
-        .setMimeType(ContentService.MimeType.JSON);
-    }
-
-    var targetRow = parseInt(data.rowId, 10);
-    if (!targetRow || targetRow < 2 || targetRow > sh.getLastRow()) {
-      return ContentService
-        .createTextOutput(JSON.stringify({ result: "error", message: "유효하지 않은 행 번호입니다." }))
-        .setMimeType(ContentService.MimeType.JSON);
-    }
-
-    var headers = sh.getRange(1, 1, 1, sh.getLastColumn()).getValues()[0].map(function (x) { return String(x).trim(); });
-
-    var setVal = function(colName, value) {
-      var idx = headers.indexOf(colName);
-      if (idx >= 0 && value !== undefined) {
-        sh.getRange(targetRow, idx + 1).setValue(String(value));
-      }
-    };
-
-    var setAny = function(colCandidates, value) {
-      if (value === undefined) return;
-      for (var ci = 0; ci < colCandidates.length; ci++) {
-        var idx = headers.indexOf(colCandidates[ci]);
-        if (idx >= 0) {
-          sh.getRange(targetRow, idx + 1).setValue(String(value));
-          return;
-        }
-      }
-    };
-
-    if (data.status !== undefined) setVal("진행상태", data.status);
-    if (data.confirmedDate !== undefined) setVal("예약일", data.confirmedDate);
-    if (data.guideRoom !== undefined) setAny(["비포앤애프터 이미지", "비포앤애프터", "비포애프터", "가이드룸", "블로거폴더", "가이드폴더", "가이드"], data.guideRoom);
-    if (data.draftUrl !== undefined) setAny(["원고초안", "원고 초안 URL", "초안", "초안링크", "초안 URL", "검수링크", "검수 URL"], data.draftUrl);
-    if (data.postDate !== undefined) setAny(["원고 발행일", "발행일", "발행일자"], data.postDate);
-    if (data.postUrl !== undefined) setAny(["포스팅URL", "포스팅 URL", "포스팅링크", "발행원고 URL", "발행글 URL", "발행 URL", "발행링크"], data.postUrl);
-    if (data.keyword !== undefined) setAny(["타겟 키워드", "타겟키워드", "키워드"], data.keyword);
-    if (data.performance !== undefined) setAny(["성과", "성과지표", "성과이미지", "포스팅성과"], data.performance);
-    if (data.shareStatus !== undefined) {
-      var sVal = data.shareStatus;
-      if (sVal === true || sVal === "true" || sVal === "TRUE" || sVal === "공유됨") {
-        sVal = "공유됨";
-      } else if (sVal === false || sVal === "false" || sVal === "FALSE" || sVal === "제외" || !sVal) {
-        sVal = "";
-      }
-      setVal("공유상태", sVal);
-    }
-    if (data.memo !== undefined) {
-      setAny(["이슈", "관리자메모"], data.memo);
-    }
-
-    return ContentService
-      .createTextOutput(JSON.stringify({ result: "success", message: "상태 업데이트 완료" }))
-      .setMimeType(ContentService.MimeType.JSON);
-  } catch (err) {
-    return ContentService
-      .createTextOutput(JSON.stringify({ result: "error", message: err.toString() }))
-      .setMimeType(ContentService.MimeType.JSON);
-  }
-}
-
-// [신규 기능] 관리자 지원서 행 삭제 처리
-function handleDeleteRow_(data) {
-  try {
-    var ss = SpreadsheetApp.getActiveSpreadsheet();
-    var sh = ss.getSheetByName("DB") || ss.getSheetByName("접수DB");
-    if (!sh) {
-      return ContentService
-        .createTextOutput(JSON.stringify({ result: "error", message: "DB 탭을 찾을 수 없습니다." }))
-        .setMimeType(ContentService.MimeType.JSON);
-    }
-
-    var targetRow = parseInt(data.rowId, 10);
-    if (!targetRow || targetRow < 2 || targetRow > sh.getLastRow()) {
-      return ContentService
-        .createTextOutput(JSON.stringify({ result: "error", message: "유효하지 않은 행 번호입니다." }))
-        .setMimeType(ContentService.MimeType.JSON);
-    }
-
-    sh.deleteRow(targetRow);
-
-    return ContentService
-      .createTextOutput(JSON.stringify({ result: "success", message: targetRow + "행 지원서 삭제 완료" }))
-      .setMimeType(ContentService.MimeType.JSON);
-  } catch (err) {
-    return ContentService
-      .createTextOutput(JSON.stringify({ result: "error", message: err.toString() }))
-      .setMimeType(ContentService.MimeType.JSON);
-  }
-}
-
-// 📌 권한 승인 및 드라이브 폴더 생성 확인용 함수 (기존 원본 유지)
+// 📌 권한 승인 및 드라이브 폴더 생성 확인용 함수
 function authorizeEverything() {
   Object.keys(PHOTO_FOLDERS).forEach(function (c) {
     Logger.log("📁 1. " + c + " 사진 폴더 연결 성공: " + getOrCreateFolder(c).getName());
@@ -615,4 +274,225 @@ function authorizeEverything() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var sheet = ss.getSheetByName("DB") || ss.getSheetByName("접수DB") || ss.insertSheet("DB");
   Logger.log("📊 2. 시트 'DB' 탭 연결 성공: " + sheet.getName());
+}
+
+/* =====================================================================
+ * 관리자 화면(pf-campaigns /admin) 연동
+ *  - 모든 요청은 POST + 비밀키(스크립트 속성 ADMIN_API_SECRET)로 확인한다. 키가 없으면 아무것도 읽거나 쓰지 않는다.
+ *  - 열은 이름이 아니라 자동화와 같은 열 번호(C_*)로 읽고 쓴다. 열 순서가 다르면(layoutOk_) 멈춘다.
+ *  - 행은 '행 번호 + 키'로 확인한다. 행이 밀렸으면 거절한다.
+ * ===================================================================== */
+
+function admOut_(obj) {
+  return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON);
+}
+function admErr_(msg, issues) {
+  var o = { result: 'error', message: msg };
+  if (issues && issues.length) o.issues = issues;
+  return admOut_(o);
+}
+
+function admRoute_(data) {
+  var secret = PropertiesService.getScriptProperties().getProperty('ADMIN_API_SECRET');
+  if (!secret || String(data.token || '') !== secret) return admErr_('인증에 실패했어요. ADMIN_API_SECRET을 확인해 주세요.');
+  if (!layoutOk_()) return admErr_('DB 탭 열 순서가 자동화와 달라 멈췄어요.');
+  var lock = LockService.getScriptLock();
+  if (!lock.tryLock(25000)) return admErr_('다른 동기화가 진행 중이에요. 잠시 후 다시 시도해 주세요.');
+  try {
+    switch (data.action) {
+      case 'listApplications': return admList_();
+      case 'updateFields': return admUpdateFields_(data);
+      case 'setShare': return admSetShare_(data);
+      case 'deleteRow': return admDelete_(data);
+      case 'markSent': return admMarkSent_(data);
+      case 'saveMessage': return admSaveMessage_(data);
+    }
+    return admErr_('알 수 없는 요청: ' + data.action);
+  } catch (err) {
+    return admErr_(String(err && err.message ? err.message : err));
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+function admRead_(r, c) { return String(r[c - 1] === undefined || r[c - 1] === null ? '' : r[c - 1]).trim(); }
+
+function admList_() {
+  var db = dbSheet_();
+  var last = db.getLastRow();
+  var rows = [];
+  if (last >= 2) {
+    var vals = db.getRange(2, 1, last - 1, C_SNAP).getDisplayValues();
+    for (var i = 0; i < vals.length; i++) {
+      var r = vals[i];
+      if (!admRead_(r, C_NAME) && !admRead_(r, C_TS)) continue;
+      var photos = admRead_(r, C_PHOTO);
+      rows.push({
+        rowId: i + 2,
+        syncKey: admRead_(r, C_KEY),
+        submittedAt: admRead_(r, C_TS),
+        name: admRead_(r, C_NAME),
+        shareStatus: admRead_(r, C_STATE),
+        checkStatus: admRead_(r, C_WARN),
+        status: canonStatus_(admRead_(r, C_PROG)) || '1.신규지원',
+        hospital: admRead_(r, C_CLINIC),
+        treatment: admRead_(r, C_PROC),
+        category: admRead_(r, C_CAT),
+        birthdate: admRead_(r, C_BIRTH),
+        phone: admRead_(r, C_PHONE),
+        blogUrl: admRead_(r, C_BLOG),
+        blogIndex: admRead_(r, C_IDX),
+        schedule1: admRead_(r, C_W1),
+        schedule2: admRead_(r, C_W2),
+        schedule3: admRead_(r, C_W3),
+        images: photos ? photos.split('\n').map(function (x) { return x.trim(); }).filter(Boolean) : [],
+        imageNote: admRead_(r, C_PART),
+        userNote: admRead_(r, C_NOTE),
+        client: admRead_(r, C_CLIENT),
+        recruitInfo: admRead_(r, C_RAW),
+        confirmedDate: admRead_(r, C_RES),
+        postDate: admRead_(r, C_PUB),
+        postUrl: admRead_(r, C_URL),
+        performance: admRead_(r, C_PERF),
+        memo: admRead_(r, C_ISSUE),
+        guideRoom: admRead_(r, C_GUIDE),
+        roomSynced: admRead_(r, C_SNAP) !== ''
+      });
+    }
+  }
+  // 자동으로 만들어진 문자 (문자발송 탭)
+  var messages = [];
+  var out = SpreadsheetApp.getActive().getSheetByName(OUT_SHEET);
+  if (out && out.getLastRow() >= 2) {
+    out.getRange(2, 1, out.getLastRow() - 1, 10).getValues().forEach(function (m, i) {
+      if (!m[0]) return;
+      messages.push({ key: String(m[0]), tpl: String(m[1]), client: String(m[2]), name: String(m[3]),
+        phone: String(m[4]).replace(/\D/g, ''), text: String(m[5]), warn: String(m[6]),
+        madeAt: String(m[7]), sent: m[8] === true });
+    });
+  }
+  return admOut_({ result: 'success', rows: rows, messages: messages });
+}
+
+/** 화면에서 본 지원자가 시트의 그 행과 같은지 확인한다. 같으면 행 번호를 돌려준다. */
+function admRow_(db, id) {
+  var row = parseInt(id && id.rowId, 10);
+  if (!row || row < 2 || row > db.getLastRow()) throw new Error('행 번호가 달라졌어요. 새로고침 후 다시 시도해 주세요.');
+  var r = db.getRange(row, 1, 1, C_SNAP).getDisplayValues()[0];
+  var sheetKey = admRead_(r, C_KEY);
+  var ok = sheetKey ? sheetKey === String(id.key || '').trim()
+                    : (admRead_(r, C_NAME) === String(id.name || '').trim() && admRead_(r, C_TS) === String(id.submittedAt || '').trim());
+  if (!ok) throw new Error('시트에서 행이 바뀌었어요(' + admRead_(r, C_NAME) + '). 새로고침 후 다시 시도해 주세요.');
+  return { row: row, vals: r };
+}
+
+function admDate_(v, withTime) {
+  v = String(v || '').trim();
+  if (!v) return '';
+  var m = v.match(/(\d{4})[-./년\s]+(\d{1,2})[-./월\s]+(\d{1,2})/);
+  if (!m) throw new Error('날짜 형식을 확인해 주세요: ' + v);
+  var d = m[1] + '-' + ('0' + m[2]).slice(-2) + '-' + ('0' + m[3]).slice(-2);
+  if (!withTime) return d;
+  var t = v.match(/(\d{1,2}):(\d{2})/);
+  if (!t) {
+    var pm = v.match(/(오전|오후)\s*(\d{1,2})시(?:\s*(\d{1,2})분)?/);
+    if (pm) {
+      var h = Number(pm[2]) % 12 + (pm[1] === '오후' ? 12 : 0);
+      return d + ' ' + ('0' + h).slice(-2) + ':' + ('0' + (pm[3] || 0)).slice(-2);
+    }
+    return d;
+  }
+  return d + ' ' + ('0' + t[1]).slice(-2) + ':' + t[2];
+}
+
+/** 바뀐 칸만 쓴다. 상태·예약일·원고 발행일·발행원고 URL·성과·이슈·블로그지수만 허용(가이드룸·키·모집정보 원문·룸동기값은 자동 칸이라 쓰지 않는다). */
+function admUpdateFields_(data) {
+  var db = dbSheet_();
+  var hit = admRow_(db, data.id || data);
+  var ch = data.changes || {};
+  var warnings = [];
+  var put = function (col, v) { db.getRange(hit.row, col).setNumberFormat('@').setValue(v); };
+  if (ch.status !== undefined) {
+    var st = canonStatus_(ch.status);
+    if (ROOM_STATUSES.indexOf(st) < 0) throw new Error('진행상태 값이 올바르지 않아요: ' + ch.status);
+    put(C_PROG, st);
+  }
+  if (ch.confirmedDate !== undefined) put(C_RES, admDate_(ch.confirmedDate, true));
+  if (ch.postDate !== undefined) put(C_PUB, admDate_(ch.postDate, false));
+  if (ch.postUrl !== undefined) put(C_URL, String(ch.postUrl).trim());
+  if (ch.performance !== undefined) put(C_PERF, String(ch.performance).trim());
+  if (ch.memo !== undefined) put(C_ISSUE, String(ch.memo));
+  if (ch.blogIndex !== undefined) {
+    put(C_IDX, String(ch.blogIndex).trim());
+    refreshRows_(db, [hit.row]);
+  }
+  var r = db.getRange(hit.row, 1, 1, C_SNAP).getDisplayValues()[0];
+  var status = canonStatus_(admRead_(r, C_PROG));
+  if (status === '3.체험대기중' && !admRead_(r, C_RES)) warnings.push('예약일이 비어 있어요. 예약 전날·체험 후 문자가 만들어지지 않아요.');
+  if (status === '6.발행완료' && !admRead_(r, C_PUB)) warnings.push('원고 발행일이 비어 있어요. 발행완료 문자가 만들어지지 않아요.');
+  if (status === '7.드랍') warnings.push('드랍은 문자를 보내지 않아요.');
+  return admOut_({ result: 'success', message: '저장했어요', data: { warnings: warnings, row: admRowObj_(r) } });
+}
+
+function admRowObj_(r) {
+  return { status: canonStatus_(admRead_(r, C_PROG)), confirmedDate: admRead_(r, C_RES), postDate: admRead_(r, C_PUB),
+    postUrl: admRead_(r, C_URL), performance: admRead_(r, C_PERF), memo: admRead_(r, C_ISSUE),
+    blogIndex: admRead_(r, C_IDX), shareStatus: admRead_(r, C_STATE), checkStatus: admRead_(r, C_WARN) };
+}
+
+/** 병원 프로젝트룸 공유 체크박스. 공유됨으로 바꾸면 10분 안에 자동화(pushShared_)가 룸에 올린다. */
+function admSetShare_(data) {
+  var db = dbSheet_();
+  var hit = admRow_(db, data.id || data);
+  if (data.shared) {
+    refreshRows_(db, [hit.row]); // 점검을 최신으로
+    var r = db.getRange(hit.row, 1, 1, C_SNAP).getDisplayValues()[0];
+    var issues = [];
+    if (!admRead_(r, C_IDX)) issues.push('블로그지수 입력이 누락되었어요!');
+    if (admRead_(r, C_WARN)) issues.push('점검 내용을 먼저 확인해 주세요: ' + admRead_(r, C_WARN));
+    if (!admRead_(r, C_CLIENT)) issues.push('고객사가 비어 있어요. 병원정보 탭에서 클리닉의 고객사를 확인해 주세요.');
+    var fromDay = startDay_(getConfig_());
+    var day = tsDay_(db.getRange(hit.row, C_TS).getValue());
+    if (fromDay && day && day < fromDay) issues.push('공유 시작일(' + fromDay + ') 이전에 신청한 분이라 자동 공유 대상이 아니에요.');
+    if (issues.length) return admErr_('공유 조건이 맞지 않아요.', issues);
+    db.getRange(hit.row, C_STATE).setValue('공유됨');
+    return admOut_({ result: 'success', message: '공유됨으로 바꿨어요. 10분 안에 병원 프로젝트룸에 올라가요.', data: { shareStatus: '공유됨' } });
+  }
+  if (admRead_(hit.vals, C_SNAP)) {
+    return admErr_('이미 병원 프로젝트룸에 올라간 지원자예요.', ['공유 해제는 프로젝트룸에서 직접 정리해 주세요.']);
+  }
+  db.getRange(hit.row, C_STATE).setValue('신규지원');
+  return admOut_({ result: 'success', message: '공유를 해제했어요.', data: { shareStatus: '신규지원' } });
+}
+
+/** 완전삭제. 키로 같은 사람인지 확인한 뒤 지우고, 처리기록 탭에 누가 지워졌는지 남긴다. */
+function admDelete_(data) {
+  var db = dbSheet_();
+  var hit = admRow_(db, data.id || data);
+  var v = hit.vals;
+  db.deleteRow(hit.row);
+  try {
+    logRow_(['관리자 삭제', new Date(), '완료', admRead_(v, C_CLIENT), INTAKE_SHEET, hit.row,
+      admRead_(v, C_CLINIC) + ' ' + admRead_(v, C_NAME) + ' / ' + admRead_(v, C_KEY)]);
+  } catch (e) {}
+  return admOut_({ result: 'success', message: admRead_(v, C_NAME) + ' 지원서를 삭제했어요.' });
+}
+
+function admMsgRow_(key) {
+  var out = SpreadsheetApp.getActive().getSheetByName(OUT_SHEET);
+  if (!out || out.getLastRow() < 2) throw new Error('문자발송 탭이 비어 있어요.');
+  var keys = out.getRange(2, 1, out.getLastRow() - 1, 1).getValues();
+  for (var i = 0; i < keys.length; i++) if (String(keys[i][0]) === String(key)) return { out: out, row: i + 2 };
+  throw new Error('문자 행을 찾지 못했어요. 새로고침해 주세요.');
+}
+function admMarkSent_(data) {
+  var h = admMsgRow_(data.key);
+  h.out.getRange(h.row, 9).setValue(data.sent === false ? false : true);
+  return admOut_({ result: 'success', message: data.sent === false ? '보냄 표시를 풀었어요.' : '보냄으로 표시했어요.' });
+}
+function admSaveMessage_(data) {
+  var h = admMsgRow_(data.key);
+  if (h.out.getRange(h.row, 9).getValue() === true) throw new Error('이미 보낸 문자는 고칠 수 없어요.');
+  h.out.getRange(h.row, 6).setValue(String(data.text || ''));
+  return admOut_({ result: 'success', message: '문구를 저장했어요. 자동 원문이 바뀌기 전까지 유지돼요.' });
 }

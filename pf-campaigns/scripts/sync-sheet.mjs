@@ -5,9 +5,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const url =
-  process.env.GOOGLE_SHEET_WEBHOOK_URL ||
-  "https://script.google.com/macros/s/AKfycby2z4HPw0hxVRq2eVa5mbEtviF8bxcWvkaJgl2q8MDWzmgl49Nix5U9gti_XECcDm6guQ/exec";
+const url = process.env.GOOGLE_SHEET_WEBHOOK_URL;
 
 async function main() {
   if (!url) return console.warn("GOOGLE_SHEET_WEBHOOK_URL 없음 - 기존 campaigns.json 유지");

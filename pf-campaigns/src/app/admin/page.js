@@ -3,15 +3,14 @@
 import { useState, useEffect, useMemo } from "react";
 import AdminPasswordGate from "@/components/AdminPasswordGate";
 import { formatBlogUrl, getDriveThumbnailUrl, getDrivePreviewUrl, getDriveFileId } from "@/lib/parser";
-import { DEFAULT_MESSAGE_TEMPLATES, fillTemplatePlaceholders } from "@/lib/templates";
 
 const getStatusStyle = (status) => {
   if (!status) return "bg-slate-100 text-slate-700 border-slate-200";
   if (status.includes("발행") || status.includes("6.")) return "bg-emerald-50 text-emerald-700 border-emerald-200";
   if (status.includes("검수") || status.includes("5.")) return "bg-purple-50 text-purple-700 border-purple-200";
-  if (status.includes("체험완료") || status.includes("4.")) return "bg-teal-50 text-teal-700 border-teal-200";
+  if (status.includes("포스팅") || status.includes("4.")) return "bg-teal-50 text-teal-700 border-teal-200";
   if (status.includes("대기") || status.includes("3.")) return "bg-amber-50 text-amber-800 border-amber-200";
-  if (status.includes("확정") || status.includes("2.")) return "bg-blue-50 text-blue-700 border-blue-200";
+  if (status.includes("예약") || status.includes("2.")) return "bg-blue-50 text-blue-700 border-blue-200";
   if (status.includes("신규") || status.includes("1.")) return "bg-indigo-50 text-indigo-700 border-indigo-200";
   if (status.includes("드랍") || status.includes("취소") || status.includes("7.")) return "bg-rose-50 text-rose-700 border-rose-200";
   return "bg-slate-100 text-slate-700 border-slate-200";
@@ -20,14 +19,14 @@ const getStatusStyle = (status) => {
 const isShared = (item) => {
   if (!item || !item.shareStatus) return false;
   const s = String(item.shareStatus).trim().toLowerCase();
-  return s === "공유됨" || s === "공유완료" || s === "true" || s === "y" || s === "1";
+  return s === "공유됨";
 };
 
 const STATUS_OPTIONS = [
   { label: "1.신규지원", color: "bg-indigo-50 text-indigo-700 border-indigo-200" },
-  { label: "2.예약확정", color: "bg-blue-50 text-blue-700 border-blue-200" },
+  { label: "2.예약중", color: "bg-blue-50 text-blue-700 border-blue-200" },
   { label: "3.체험대기중", color: "bg-amber-50 text-amber-800 border-amber-200" },
-  { label: "4.체험완료", color: "bg-teal-50 text-teal-700 border-teal-200" },
+  { label: "4.포스팅 작성중", color: "bg-teal-50 text-teal-700 border-teal-200" },
   { label: "5.원고 검수중", color: "bg-purple-50 text-purple-700 border-purple-200" },
   { label: "6.발행완료", color: "bg-emerald-50 text-emerald-700 border-emerald-200" },
   { label: "7.드랍", color: "bg-rose-50 text-rose-700 border-rose-200" },
@@ -45,6 +44,11 @@ const extractYearMonth = (dateStr) => {
     return `2026-${matchMonthOnly[1].padStart(2, "0")}`;
   }
   return null;
+};
+
+const currentYearMonth = () => {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
 };
 
 const getClientName = (app) => {
@@ -71,30 +75,28 @@ function AdminDashboard({ handleLogout }) {
   const [applications, setApplications] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [isLiveSheet, setIsLiveSheet] = useState(false);
-  const [isScriptOutdated, setIsScriptOutdated] = useState(false);
   const [sheetUrl, setSheetUrl] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedStatusTab, setSelectedStatusTab] = useState("전체");
   const [selectedHospital, setSelectedHospital] = useState("전체");
   const [selectedClientFilter, setSelectedClientFilter] = useState("전체");
   const [selectedPostMonthFilter, setSelectedPostMonthFilter] = useState("전체");
-  const [selectedBillingMonth, setSelectedBillingMonth] = useState("2026-11"); // 월별 발행 집계 대시보드 기준월
+  const [selectedBillingMonth, setSelectedBillingMonth] = useState(currentYearMonth()); // 월별 발행 집계 대시보드 기준월 (원고 발행일 기준)
   const [onlySharedFilter, setOnlySharedFilter] = useState(false); // 체크박스 필터: 룸 공유완료만 보기
   const [sortOrder, setSortOrder] = useState("desc"); // 'desc' | 'asc'
   const [activeItem, setActiveItem] = useState(null); // Side Sheet Drawer
   const [drawerTab, setDrawerTab] = useState("recruit"); // 'recruit' | 'campaign'
   const [lightboxImage, setLightboxImage] = useState(null);
-  const [showScriptModal, setShowScriptModal] = useState(false);
-  const [copiedScript, setCopiedScript] = useState(false);
+  const [alertInfo, setAlertInfo] = useState(null); // 점검/경고 알림창 { title, lines[] }
   const [itemToDelete, setItemToDelete] = useState(null); // 삭제 확인 모달 대상 지원서
   const [isDeleting, setIsDeleting] = useState(false); // 삭제 진행 중 상태
   const [messageApplicant, setMessageApplicant] = useState(null); // 메시지 전송 대상 지원서
-  const [messageTemplates, setMessageTemplates] = useState(DEFAULT_MESSAGE_TEMPLATES); // 구글시트 연동 템플릿 목록
-  const [selectedTemplateKey, setSelectedTemplateKey] = useState("schedule");
+  const [sheetMessages, setSheetMessages] = useState([]); // 시트 '문자발송' 탭에 자동으로 만들어진 문자
+  const [selectedTemplateKey, setSelectedTemplateKey] = useState("custom");
   const [customMessageText, setCustomMessageText] = useState("");
   const [copiedMessage, setCopiedMessage] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
+  const [loadError, setLoadError] = useState("");
 
   const showToast = (msg) => {
     setToastMessage(msg);
@@ -107,25 +109,25 @@ function AdminDashboard({ handleLogout }) {
     else setIsLoading(true);
 
     try {
-      const res = await fetch(`/api/admin/applications?refresh=${isManual ? "true" : "false"}`);
+      const res = await fetch("/api/admin/applications", { cache: "no-store" });
+      if (res.status === 401) {
+        window.location.reload(); // 로그인이 풀렸으면 로그인 화면으로
+        return;
+      }
       const data = await res.json();
 
       if (data.success) {
         setApplications(data.applications || []);
-        setIsLiveSheet(Boolean(data.isLiveSheet));
-        setIsScriptOutdated(Boolean(data.isScriptOutdated));
+        setSheetMessages(data.messages || []);
+        setLoadError("");
         if (data.sheetUrl) setSheetUrl(data.sheetUrl);
-        if (data.templates && Array.isArray(data.templates) && data.templates.length > 0) {
-          setMessageTemplates(data.templates);
-        }
-
-        if (isManual) {
-          showToast(data.isLiveSheet ? "구글 시트 최신 데이터를 불러왔습니다." : "데이터를 새로고침했습니다.");
-        }
+        if (isManual) showToast("구글 시트 최신 데이터를 불러왔습니다.");
+      } else {
+        setLoadError(data.error || "구글 시트에서 데이터를 받지 못했어요.");
       }
     } catch (err) {
       console.error(err);
-      showToast("데이터 조회 중 오류가 발생했습니다.");
+      setLoadError("데이터 조회 중 오류가 발생했습니다.");
     } finally {
       setIsLoading(false);
       setIsRefreshing(false);
@@ -136,191 +138,110 @@ function AdminDashboard({ handleLogout }) {
     fetchData();
   }, []);
 
-  // 2. 상태 및 메모 변경 핸들러
-  const handleUpdateStatus = async (item, newStatus, confirmedDate = null) => {
-    const targetDate = confirmedDate !== null ? confirmedDate : (item.confirmedDate || "");
+  // 2. 시트 저장 공통 처리 ---------------------------------------------
+  // 시트 행은 '행 번호 + 키'로 확인한다. 화면에서 바꾼 칸만 보내고, 실패하면 되돌린다.
+  const identityOf = (item) => ({
+    rowId: item.rowId,
+    key: item.syncKey || "",
+    name: item.name || "",
+    submittedAt: item.submittedAt || "",
+  });
 
-    // 낙관적 UI 업데이트
-    setApplications((prev) =>
-      prev.map((app) =>
-        app.rowId === item.rowId
-          ? { ...app, status: newStatus, confirmedDate: targetDate }
-          : app
-      )
-    );
+  const patchApp = (rowId, patch) => {
+    setApplications((prev) => prev.map((app) => (app.rowId === rowId ? { ...app, ...patch } : app)));
+    setActiveItem((prev) => (prev && prev.rowId === rowId ? { ...prev, ...patch } : prev));
+  };
 
-    if (activeItem && activeItem.rowId === item.rowId) {
-      setActiveItem((prev) => ({
-        ...prev,
-        status: newStatus,
-        confirmedDate: targetDate,
-      }));
+  const callAdmin = async (body) => {
+    const res = await fetch("/api/admin/applications", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    if (res.status === 401) {
+      window.location.reload();
+      throw new Error("로그인이 만료되었습니다.");
     }
+    return res.json();
+  };
 
+  const saveChanges = async (item, changes, okMessage) => {
+    const before = {};
+    Object.keys(changes).forEach((k) => {
+      before[k] = item[k];
+    });
+    patchApp(item.rowId, changes);
     try {
-      const res = await fetch("/api/admin/applications", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action: "updateRow",
-          rowId: item.rowId,
-          status: newStatus,
-          confirmedDate: targetDate,
-          memo: item.memo || "",
-        }),
-      });
-      const data = await res.json();
-      if (data.success) {
-        showToast(`[${item.name}님] 상태가 '${newStatus}'(으)로 변경되었습니다.`);
+      const data = await callAdmin({ action: "updateFields", id: identityOf(item), changes });
+      if (!data.success) {
+        patchApp(item.rowId, before);
+        setAlertInfo({ title: "저장하지 못했어요", lines: [data.error || "구글 시트 저장에 실패했습니다."] });
+        return false;
       }
+      if (data.data && data.data.row) patchApp(item.rowId, data.data.row);
+      const warnings = (data.data && data.data.warnings) || [];
+      if (warnings.length) setAlertInfo({ title: "저장했어요. 확인해 주세요", lines: warnings });
+      else showToast(okMessage);
+      return true;
     } catch (err) {
       console.error(err);
-      showToast("상태 저장 중 오류가 발생했습니다.");
+      patchApp(item.rowId, before);
+      showToast("저장 중 오류가 발생했습니다.");
+      return false;
     }
   };
 
-  const handleUpdateMemo = async (item, newMemo) => {
-    setApplications((prev) =>
-      prev.map((app) =>
-        app.rowId === item.rowId ? { ...app, memo: newMemo } : app
-      )
-    );
-
-    if (activeItem && activeItem.rowId === item.rowId) {
-      setActiveItem((prev) => ({ ...prev, memo: newMemo }));
-    }
-
-    try {
-      await fetch("/api/admin/applications", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action: "updateRow",
-          rowId: item.rowId,
-          status: item.status,
-          confirmedDate: item.confirmedDate || "",
-          memo: newMemo,
-        }),
-      });
-      showToast("메모가 저장되었습니다.");
-    } catch (err) {
-      console.error(err);
-    }
+  const handleUpdateStatus = (item, newStatus, confirmedDate = null) => {
+    const changes = { status: newStatus };
+    if (confirmedDate !== null) changes.confirmedDate = confirmedDate;
+    return saveChanges(item, changes, `[${item.name}님] 상태가 '${newStatus}'(으)로 변경되었습니다.`);
   };
 
-  // 병원 룸 공유상태 체크박스 토글 핸들러
+  const handleUpdateMemo = (item, newMemo) => {
+    if ((item.memo || "") === newMemo) return;
+    return saveChanges(item, { memo: newMemo }, "이슈 메모가 저장되었습니다.");
+  };
+
+  // 병원 룸 공유 체크박스: 조건이 부족하면 알림창으로 알려주고 체크하지 않는다
   const handleUpdateShareStatus = async (item, isChecked) => {
-    const newShareStatus = isChecked ? "공유됨" : "";
-
-    // 낙관적 UI 업데이트
-    setApplications((prev) =>
-      prev.map((app) =>
-        app.rowId === item.rowId ? { ...app, shareStatus: newShareStatus } : app
-      )
-    );
-
-    if (activeItem && activeItem.rowId === item.rowId) {
-      setActiveItem((prev) => ({ ...prev, shareStatus: newShareStatus }));
-    }
-
     try {
-      const res = await fetch("/api/admin/applications", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action: "updateRow",
-          rowId: item.rowId,
-          status: item.status,
-          confirmedDate: item.confirmedDate || "",
-          memo: item.memo || "",
-          shareStatus: newShareStatus,
-        }),
-      });
-      const data = await res.json();
-      if (data.success) {
-        showToast(
-          isChecked
-            ? `[${item.name}님] 병원 룸에 공유되었습니다. (체크 완료)`
-            : `[${item.name}님] 병원 룸 공유가 해제되었습니다.`
-        );
-      } else {
-        showToast("공유상태 저장 실패: " + (data.message || "오류"));
+      const data = await callAdmin({ action: "setShare", id: identityOf(item), shared: isChecked });
+      if (!data.success) {
+        setAlertInfo({
+          title: data.error || "공유할 수 없어요",
+          lines: data.issues && data.issues.length ? data.issues : [],
+        });
+        return;
       }
-    } catch (err) {
-      console.error("공유상태 업데이트 실패:", err);
-      showToast("공유상태 동기화 중 오류가 발생했습니다.");
-    }
-  };
-
-  // 캠페인 현황(가이드룸, 초안, 발행URL, 발행일, 성과 등) 필드 업데이트 핸들러
-  const handleUpdateCampaignField = async (item, fieldName, value) => {
-    // 낙관적 UI 업데이트
-    setApplications((prev) =>
-      prev.map((app) =>
-        app.rowId === item.rowId ? { ...app, [fieldName]: value } : app
-      )
-    );
-
-    if (activeItem && activeItem.rowId === item.rowId) {
-      setActiveItem((prev) => ({ ...prev, [fieldName]: value }));
-    }
-
-    try {
-      const res = await fetch("/api/admin/applications", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action: "updateRow",
-          rowId: item.rowId,
-          status: item.status,
-          confirmedDate: item.confirmedDate || "",
-          memo: item.memo || "",
-          shareStatus: item.shareStatus || "",
-          guideRoom: item.guideRoom || "",
-          draftUrl: item.draftUrl || "",
-          postDate: item.postDate || "",
-          postUrl: item.postUrl || "",
-          keyword: item.keyword || "",
-          performance: item.performance || "",
-          [fieldName]: value,
-        }),
-      });
-      const data = await res.json();
-      if (data.success) {
-        showToast("캠페인 정보가 구글 시트에 실시간 저장되었습니다.");
-      }
+      patchApp(item.rowId, { shareStatus: (data.data && data.data.shareStatus) || "" });
+      showToast(`[${item.name}님] ${data.message}`);
     } catch (err) {
       console.error(err);
-      showToast("캠페인 정보 저장 중 오류가 발생했습니다.");
+      showToast("공유상태 저장 중 오류가 발생했습니다.");
     }
   };
 
-  // 3. 지원서 삭제 처리 (확인 모달 후 실행)
+  // 캠페인 현황(블로그지수, 발행일, 발행URL, 성과) — 바뀐 칸만 저장
+  const handleUpdateCampaignField = (item, fieldName, value) => {
+    const next = String(value).trim();
+    if ((item[fieldName] || "") === next) return;
+    return saveChanges(item, { [fieldName]: next }, "구글 시트에 저장되었습니다.");
+  };
+
+  // 3. 지원서 완전 삭제 (키로 같은 사람인지 확인한 뒤 삭제)
   const handleConfirmDelete = async () => {
     if (!itemToDelete) return;
     const target = itemToDelete;
     setIsDeleting(true);
-
     try {
-      const res = await fetch("/api/admin/applications", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action: "deleteRow",
-          rowId: target.rowId,
-        }),
-      });
-      const data = await res.json();
-
+      const data = await callAdmin({ action: "deleteRow", id: identityOf(target) });
       if (data.success) {
-        // 프론트엔드 목록에서 즉시 제거
-        setApplications((prev) => prev.filter((app) => app.rowId !== target.rowId));
-        if (activeItem && activeItem.rowId === target.rowId) {
-          setActiveItem(null);
-        }
-        showToast(`[${target.name || "지원자"}님] 지원서가 성공적으로 삭제되었습니다.`);
+        // 삭제하면 아래 행 번호가 한 칸씩 당겨지므로 목록을 다시 받는다
+        setActiveItem(null);
+        await fetchData(true);
+        showToast(`[${target.name || "지원자"}님] 지원서를 삭제했습니다.`);
       } else {
-        showToast(data.message || "지원서 삭제 중 오류가 발생했습니다.");
+        setAlertInfo({ title: "삭제하지 못했어요", lines: [data.error || "지원서 삭제 중 오류가 발생했습니다."] });
       }
     } catch (err) {
       console.error("삭제 요청 실패:", err);
@@ -331,26 +252,23 @@ function AdminDashboard({ handleLogout }) {
     }
   };
 
-  // 4. 메시지 작성 및 발송 템플릿 로직 (구글 시트 연동)
-  const getTemplateMessage = (applicant, templateKey) => {
-    const target = (messageTemplates || []).find((t) => t.id === templateKey);
-    return target ? fillTemplatePlaceholders(target.content, applicant) : "";
+  // 4. 문자: 시트 '문자발송' 탭에 자동으로 만들어진 문구를 그대로 쓴다
+  const digitsOf = (v) => String(v || "").replace(/\D/g, "").replace(/^0+/, "");
+  const messagesFor = (app) => {
+    if (!app) return [];
+    const ph = digitsOf(app.rawPhone || app.phone);
+    return sheetMessages.filter(
+      (m) => m.name === app.name && ph.length >= 8 && digitsOf(m.phone).slice(-8) === ph.slice(-8)
+    );
   };
+  const pendingMessageCount = (app) => messagesFor(app).filter((m) => !m.sent).length;
+
   const handleOpenMessageModal = (applicant) => {
     setMessageApplicant(applicant);
-    // 예약일이 있으면 예약확정 템플릿 우선 선택, 없으면 첫번째 템플릿
-    let initialTpl = messageTemplates && messageTemplates.length > 0 ? messageTemplates[0] : null;
-    if (applicant.confirmedDate && messageTemplates && messageTemplates.length > 0) {
-      const confirmTpl = messageTemplates.find(
-        (t) =>
-          (t.id && (t.id.includes("confirm") || t.id.includes("확정"))) ||
-          (t.title && (t.title.includes("확정") || t.title.includes("예약")))
-      );
-      if (confirmTpl) initialTpl = confirmTpl;
-    }
-    const initialKey = initialTpl ? initialTpl.id : "custom";
-    setSelectedTemplateKey(initialKey);
-    setCustomMessageText(initialTpl ? fillTemplatePlaceholders(initialTpl.content, applicant) : "");
+    const list = messagesFor(applicant);
+    const first = list.find((m) => !m.sent) || list[0];
+    setSelectedTemplateKey(first ? first.key : "custom");
+    setCustomMessageText(first ? first.text : "");
     setCopiedMessage(false);
   };
 
@@ -359,10 +277,44 @@ function AdminDashboard({ handleLogout }) {
     if (key === "custom") {
       setCustomMessageText("");
     } else {
-      const target = (messageTemplates || []).find((t) => t.id === key);
-      if (target) {
-        setCustomMessageText(fillTemplatePlaceholders(target.content, messageApplicant));
+      const target = sheetMessages.find((m) => m.key === key);
+      if (target) setCustomMessageText(target.text);
+    }
+  };
+
+  const selectedSheetMessage = sheetMessages.find((m) => m.key === selectedTemplateKey) || null;
+
+  const handleMarkSent = async (sent = true) => {
+    if (!selectedSheetMessage) return;
+    try {
+      const data = await callAdmin({ action: "markSent", key: selectedSheetMessage.key, sent });
+      if (data.success) {
+        setSheetMessages((prev) => prev.map((m) => (m.key === selectedSheetMessage.key ? { ...m, sent } : m)));
+        showToast(data.message);
+      } else {
+        setAlertInfo({ title: "보냄 표시를 저장하지 못했어요", lines: [data.error || ""] });
       }
+    } catch (err) {
+      console.error(err);
+      showToast("보냄 표시 저장 중 오류가 발생했습니다.");
+    }
+  };
+
+  const handleSaveMessageText = async () => {
+    if (!selectedSheetMessage) return;
+    try {
+      const data = await callAdmin({ action: "saveMessage", key: selectedSheetMessage.key, text: customMessageText });
+      if (data.success) {
+        setSheetMessages((prev) =>
+          prev.map((m) => (m.key === selectedSheetMessage.key ? { ...m, text: customMessageText } : m))
+        );
+        showToast(data.message);
+      } else {
+        setAlertInfo({ title: "문구를 저장하지 못했어요", lines: [data.error || ""] });
+      }
+    } catch (err) {
+      console.error(err);
+      showToast("문구 저장 중 오류가 발생했습니다.");
     }
   };
 
@@ -392,8 +344,7 @@ function AdminDashboard({ handleLogout }) {
       const ym = extractYearMonth(a.postDate);
       if (ym) set.add(ym);
     });
-    set.add("2026-11");
-    set.add("2026-10");
+    set.add(currentYearMonth());
     return Array.from(set).sort().reverse();
   }, [applications]);
 
@@ -441,7 +392,7 @@ function AdminDashboard({ handleLogout }) {
     applications.forEach((app) => {
       if (app.status && app.status.trim()) set.add(app.status.trim());
     });
-    const baseOrder = ["2.예약확정", "3.체험대기중", "4.체험완료", "5.원고 검수중", "6.발행완료", "7.드랍"];
+    const baseOrder = ["1.신규지원", "2.예약중", "3.체험대기중", "4.포스팅 작성중", "5.원고 검수중", "6.발행완료", "7.드랍"];
     const foundTabs = baseOrder.filter((o) => set.has(o));
     set.forEach((s) => {
       if (!foundTabs.includes(s)) foundTabs.push(s);
@@ -527,10 +478,8 @@ function AdminDashboard({ handleLogout }) {
       "2지망",
       "3지망",
       "확정예약일",
-      "비포앤애프터_이미지",
-      "원고초안URL",
+      "블로거폴더(가이드룸)",
       "원고발행일",
-      "타겟키워드",
       "포스팅URL",
       "성과",
       "시술부위설명",
@@ -555,9 +504,7 @@ function AdminDashboard({ handleLogout }) {
       `"${(a.schedule3 || "").replace(/"/g, '""')}"`,
       `"${a.confirmedDate || ""}"`,
       `"${(a.guideRoom || "").replace(/"/g, '""')}"`,
-      `"${(a.draftUrl || "").replace(/"/g, '""')}"`,
       `"${(a.postDate || "").replace(/"/g, '""')}"`,
-      `"${(a.keyword || "").replace(/"/g, '""')}"`,
       `"${(a.postUrl || "").replace(/"/g, '""')}"`,
       `"${(a.performance || "").replace(/"/g, '""')}"`,
       `"${(a.imageNote || "").replace(/"/g, '""')}"`,
@@ -688,12 +635,16 @@ function AdminDashboard({ handleLogout }) {
             <span>CSV 저장</span>
           </button>
 
-          <button
-            onClick={() => setShowScriptModal(true)}
-            className="flex items-center gap-1 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 rounded-xl text-xs font-semibold transition-colors cursor-pointer"
-          >
-            <span>연동 스크립트</span>
-          </button>
+          {sheetUrl && (
+            <a
+              href={sheetUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="flex items-center gap-1 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 rounded-xl text-xs font-semibold transition-colors cursor-pointer"
+            >
+              <span>구글 시트 열기</span>
+            </a>
+          )}
 
           <button
             onClick={handleLogout}
@@ -710,27 +661,21 @@ function AdminDashboard({ handleLogout }) {
       {/* Main Content Area */}
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-8 space-y-6">
         
-        {/* Notice Banner (If Script Needs Update) */}
-        {isScriptOutdated && (
-          <div className="p-4 bg-amber-50 border border-amber-200 rounded-2xl flex items-start justify-between gap-4">
+        {/* 시트 연결 오류 안내 */}
+        {loadError && (
+          <div className="p-4 bg-rose-50 border border-rose-200 rounded-2xl flex items-start justify-between gap-4">
             <div className="flex items-start gap-3">
               <span className="text-xl">⚠️</span>
               <div>
-                <h4 className="text-xs font-bold text-amber-900">
-                  구글 앱스 스크립트 최신 버전 업데이트 권장
-                </h4>
-                <p className="text-[11px] text-amber-800 mt-0.5 leading-relaxed">
-                  현재 구글 시트에 연결된 스크립트가 지원서 저장 전용 구버전으로 확인됩니다.
-                  우측 상단 <strong>[연동 스크립트]</strong> 버튼을 눌러 최신 코드로 새 배포를 하시면,
-                  구글 시트에 쌓인 지원자가 1초 만에 대시보드로 실시간 동기화됩니다! (현재는 미리보기용 표준 데이터가 활성화되어 있습니다.)
-                </p>
+                <h4 className="text-xs font-bold text-rose-900">구글 시트에서 지원자를 불러오지 못했어요</h4>
+                <p className="text-[11px] text-rose-800 mt-0.5 leading-relaxed">{loadError}</p>
               </div>
             </div>
             <button
-              onClick={() => setShowScriptModal(true)}
-              className="px-3.5 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold shrink-0 transition-colors shadow-2xs cursor-pointer"
+              onClick={() => fetchData(true)}
+              className="px-3.5 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold shrink-0 transition-colors shadow-2xs cursor-pointer"
             >
-              코드 복사하기
+              다시 시도
             </button>
           </div>
         )}
@@ -1317,20 +1262,9 @@ function AdminDashboard({ handleLogout }) {
                                   target="_blank"
                                   rel="noreferrer"
                                   className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100 transition-colors"
-                                  title="비포앤애프터 이미지 폴더 열기"
+                                  title="블로거 폴더(원고 초안 · 비포애프터) 열기"
                                 >
-                                  📁비포애프터
-                                </a>
-                              )}
-                              {item.draftUrl && (
-                                <a
-                                  href={item.draftUrl}
-                                  target="_blank"
-                                  rel="noreferrer"
-                                  className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[9px] font-bold bg-purple-50 text-purple-700 border border-purple-200 hover:bg-purple-100 transition-colors"
-                                  title="원고 초안 검수하기"
-                                >
-                                  📝초안
+                                  📁폴더
                                 </a>
                               )}
                               {item.postUrl && (
@@ -1503,8 +1437,19 @@ function AdminDashboard({ handleLogout }) {
                       )}
                     </div>
                     <p className="text-[10px] text-[#5F6368]">
-                      체크 시 병원 프로젝트 룸(블로거관리)에 실시간 노출
+                      체크하면 10분 안에 병원 프로젝트 룸에 올라가요 (블로그지수 필수)
                     </p>
+                    <div className="flex items-center gap-1.5 mt-1.5">
+                      <span className="text-[10px] font-bold text-[#5F6368]">블로그지수</span>
+                      <input
+                        type="text"
+                        placeholder="예: 준최4"
+                        defaultValue={activeItem.blogIndex || ""}
+                        key={`blogIndex-${activeItem.rowId}-${activeItem.blogIndex || ""}`}
+                        onBlur={(e) => handleUpdateCampaignField(activeItem, "blogIndex", e.target.value)}
+                        className="w-28 px-2 py-1 bg-[#F8F9FA] focus:bg-white border border-[#DADCE0] focus:border-blue-600 rounded-lg text-[11px] font-medium text-[#202124] outline-none transition-all"
+                      />
+                    </div>
                   </div>
                 </div>
                 <label className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border cursor-pointer select-none transition-all ${
@@ -1562,7 +1507,7 @@ function AdminDashboard({ handleLogout }) {
               >
                 <span>🚀</span>
                 <span>캠페인 현황</span>
-                {(activeItem.draftUrl || activeItem.postUrl || activeItem.guideRoom || activeItem.confirmedDate) && (
+                {(activeItem.postUrl || activeItem.guideRoom || activeItem.confirmedDate) && (
                   <span className="w-1.5 h-1.5 rounded-full bg-blue-600 inline-block"></span>
                 )}
               </button>
@@ -1671,7 +1616,7 @@ function AdminDashboard({ handleLogout }) {
                               </div>
 
                               <button
-                                onClick={() => handleUpdateStatus(activeItem, "2.예약확정", item.val)}
+                                onClick={() => handleUpdateStatus(activeItem, !activeItem.status || activeItem.status === "1.신규지원" ? "2.예약중" : activeItem.status, item.val)}
                                 className={`px-3 py-1 rounded-lg text-xs font-bold cursor-pointer transition-colors ${
                                   isConfirmed
                                     ? "bg-blue-600 text-white"
@@ -1790,9 +1735,9 @@ function AdminDashboard({ handleLogout }) {
                     <div className="grid grid-cols-6 gap-1 text-[10px] text-center">
                       {[
                         { step: "1.신규", full: "1.신규지원" },
-                        { step: "2.예약", full: "2.예약확정" },
+                        { step: "2.예약", full: "2.예약중" },
                         { step: "3.대기", full: "3.체험대기중" },
-                        { step: "4.체험", full: "4.체험완료" },
+                        { step: "4.포스팅", full: "4.포스팅 작성중" },
                         { step: "5.검수", full: "5.원고 검수중" },
                         { step: "6.발행", full: "6.발행완료" },
                       ].map((s) => {
@@ -1835,12 +1780,12 @@ function AdminDashboard({ handleLogout }) {
                     )}
                   </div>
 
-                  {/* 2. 비포앤애프터 이미지 (가이드룸 안의 폴더 중 비포앤애프터 링크) */}
+                  {/* 2. 블로거 폴더 (자동 생성 · 읽기 전용) */}
                   <div className="p-4 bg-white border border-[#E0E3E7] rounded-2xl space-y-2.5">
                     <div className="flex items-center justify-between">
                       <label className="text-xs font-bold text-[#202124] flex items-center gap-1.5">
                         <span>📁</span>
-                        <span>비포앤애프터 이미지 (가이드룸 내 링크)</span>
+                        <span>블로거 폴더 (원고 초안 · 비포애프터 이미지)</span>
                       </label>
                       {activeItem.guideRoom && (
                         <a
@@ -1850,53 +1795,14 @@ function AdminDashboard({ handleLogout }) {
                           className="px-2.5 py-1 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 rounded-lg text-[11px] font-bold flex items-center gap-1 cursor-pointer transition-colors shadow-2xs"
                         >
                           <span>📁 폴더 바로열기</span>
-                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
                         </a>
                       )}
                     </div>
                     <p className="text-[11px] text-[#5F6368]">
-                      블로거 가이드룸 내 [비포앤애프터] 이미지 폴더 링크입니다. 구글 시트와 실시간 양방향 연동됩니다.
+                      {activeItem.guideRoom
+                        ? "체험대기중이 되면 자동으로 만들어진 폴더예요. 원고 초안 문서와 비포애프터 이미지 폴더가 들어 있어요. (화면에서는 수정할 수 없어요)"
+                        : "아직 폴더가 없어요. 3.체험대기중이 되면 10분 안에 자동으로 만들어져요."}
                     </p>
-                    <input
-                      type="text"
-                      placeholder="https://drive.google.com/drive/folders/..."
-                      defaultValue={activeItem.guideRoom || ""}
-                      key={`guideRoom-${activeItem.rowId}-${activeItem.guideRoom || ""}`}
-                      onBlur={(e) => handleUpdateCampaignField(activeItem, "guideRoom", e.target.value)}
-                      className="w-full px-3 py-2 bg-[#F8F9FA] focus:bg-white border border-[#DADCE0] focus:border-blue-600 rounded-xl text-xs font-medium text-[#202124] outline-none transition-all"
-                    />
-                  </div>
-
-                  {/* 3. 원고 초안 링크 (가이드룸 내 원고 초안) */}
-                  <div className="p-4 bg-white border border-[#E0E3E7] rounded-2xl space-y-2.5">
-                    <div className="flex items-center justify-between">
-                      <label className="text-xs font-bold text-[#202124] flex items-center gap-1.5">
-                        <span>📝</span>
-                        <span>원고 초안 링크</span>
-                      </label>
-                      {activeItem.draftUrl && (
-                        <a
-                          href={activeItem.draftUrl}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="px-2.5 py-1 bg-purple-50 hover:bg-purple-100 text-purple-800 border border-purple-300 rounded-lg text-[11px] font-bold flex items-center gap-1 cursor-pointer transition-colors shadow-2xs"
-                        >
-                          <span>📝 초안 검수하기</span>
-                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
-                        </a>
-                      )}
-                    </div>
-                    <p className="text-[11px] text-[#5F6368]">
-                      가이드룸 내 작성된 원고 초안 링크입니다. 담당자 검수 후 수정 요청 또는 발행 승인을 진행합니다.
-                    </p>
-                    <input
-                      type="text"
-                      placeholder="https://blog.naver.com/... 또는 네이버 블로그 초안 공유 링크"
-                      defaultValue={activeItem.draftUrl || ""}
-                      key={`draftUrl-${activeItem.rowId}-${activeItem.draftUrl || ""}`}
-                      onBlur={(e) => handleUpdateCampaignField(activeItem, "draftUrl", e.target.value)}
-                      className="w-full px-3 py-2 bg-[#F8F9FA] focus:bg-white border border-[#DADCE0] focus:border-blue-600 rounded-xl text-xs font-medium text-[#202124] outline-none transition-all"
-                    />
                   </div>
 
                   {/* 4. 발행완료 정보 (공식 포스팅) - 포스팅 URL, 원고 발행일, 타겟 키워드 행 분리 */}
@@ -1951,21 +1857,6 @@ function AdminDashboard({ handleLogout }) {
                       </p>
                     </div>
 
-                    {/* 행 분리 2: 타겟 키워드 */}
-                    <div>
-                      <span className="text-[11px] font-bold text-[#5F6368] block mb-1">타겟 키워드</span>
-                      <textarea
-                        rows={2}
-                        placeholder="예: 강남역 피부과, 슈링크 유니버스 리프팅 후기, 볼탄력 개선"
-                        defaultValue={activeItem.keyword || ""}
-                        key={`keyword-${activeItem.rowId}-${activeItem.keyword || ""}`}
-                        onBlur={(e) => handleUpdateCampaignField(activeItem, "keyword", e.target.value)}
-                        className="w-full p-2.5 bg-[#F8F9FA] focus:bg-white border border-[#DADCE0] focus:border-blue-600 rounded-xl text-xs font-medium text-[#202124] outline-none transition-all leading-relaxed"
-                      />
-                      <p className="text-[10px] text-[#80868B] mt-1">
-                        ※ 키워드가 여러 개인 경우 쉼표(,) 또는 줄바꿈으로 구분하여 입력하실 수 있습니다.
-                      </p>
-                    </div>
                   </div>
 
                   {/* 5. 성과 지표 (가이드룸 성과 캡처/이미지 보관 공간) */}
@@ -2119,74 +2010,6 @@ function AdminDashboard({ handleLogout }) {
         </div>
       )}
 
-      {/* 7. Google Apps Script Code Modal */}
-      {showScriptModal && (
-        <div
-          className="fixed inset-0 z-60 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4"
-          onClick={() => setShowScriptModal(false)}
-        >
-          <div
-            className="w-full max-w-2xl bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="p-5 border-b border-[#E0E3E7] flex items-center justify-between bg-white">
-              <div className="flex items-center gap-2">
-                <span className="text-xl">⚙️</span>
-                <h3 className="text-base font-bold text-[#202124]">
-                  구글 앱스 스크립트 실시간 연동 코드
-                </h3>
-              </div>
-              <button
-                onClick={() => setShowScriptModal(false)}
-                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-[#5F6368] flex items-center justify-center font-bold text-sm cursor-pointer"
-              >
-                ✕
-              </button>
-            </div>
-
-            <div className="p-6 space-y-4 overflow-y-auto text-xs leading-relaxed text-[#3C4043]">
-              <div className="p-4 bg-blue-50 border border-blue-200 rounded-2xl text-blue-900 space-y-1.5">
-                <h5 className="font-bold text-blue-950">📌 실시간 연동 적용 방법 (1분 소요)</h5>
-                <ol className="list-decimal list-inside space-y-1 text-[11px] text-blue-800">
-                  <li>구글 시트 상단 메뉴에서 <strong>[확장 프로그램] ➔ [Apps Script]</strong>를 클릭합니다.</li>
-                  <li>기존 코드를 모두 지우고, 아래 복사한 코드를 <strong>전체 붙여넣기</strong>합니다.</li>
-                  <li>우측 상단 <strong>[배포] ➔ [새 배포]</strong> 클릭 후 완료하시면 대시보드와 실시간 연동됩니다!</li>
-                </ol>
-              </div>
-
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between">
-                  <span className="font-bold text-[#202124]">최신 Google Apps Script 코드</span>
-                  <button
-                    onClick={() => {
-                      navigator.clipboard.writeText(SCRIPT_CODE_TEXT);
-                      setCopiedScript(true);
-                      setTimeout(() => setCopiedScript(false), 2500);
-                      showToast("스크립트 코드가 복사되었습니다!");
-                    }}
-                    className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold transition-colors cursor-pointer"
-                  >
-                    {copiedScript ? "✓ 복사 완료!" : "전체 코드 복사"}
-                  </button>
-                </div>
-                <pre className="p-4 bg-[#202124] text-slate-100 rounded-2xl text-[11px] font-mono overflow-x-auto max-h-64 leading-normal select-all">
-                  {SCRIPT_CODE_TEXT}
-                </pre>
-              </div>
-            </div>
-
-            <div className="p-4 border-t border-[#E0E3E7] bg-white flex justify-end">
-              <button
-                onClick={() => setShowScriptModal(false)}
-                className="px-5 py-2.5 bg-slate-900 text-white rounded-xl text-xs font-bold cursor-pointer"
-              >
-                확인 완료
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* 8. Message Sending Modal Dialog (Google M3 Style) */}
       {messageApplicant && (
         <div
@@ -2227,30 +2050,36 @@ function AdminDashboard({ handleLogout }) {
             {/* Modal Body */}
             <div className="p-5 space-y-4 overflow-y-auto">
               
-              {/* Template Picker */}
+              {/* 이 지원자에게 자동으로 만들어진 문자 (시트 '문자발송' 탭) */}
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
                   <label className="text-xs font-bold text-[#5F6368] block">
-                    상황별 맞춤 템플릿 선택
+                    자동 생성된 문자 선택
                   </label>
                   <span className="text-[11px] text-blue-600 font-medium bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100 flex items-center gap-1">
                     <span>📊</span>
-                    <span>시트 연동 {messageTemplates.length}개</span>
+                    <span>문자발송 탭 {messagesFor(messageApplicant).length}건</span>
                   </span>
                 </div>
+                {messagesFor(messageApplicant).length === 0 && (
+                  <p className="text-[11px] text-[#5F6368] p-2.5 bg-slate-50 border border-slate-200 rounded-xl">
+                    아직 만들어진 문자가 없어요. 진행상태가 바뀌면 10분 안에 자동으로 만들어져요. (7.드랍은 문자를 보내지 않아요)
+                  </p>
+                )}
                 <div className="flex flex-wrap gap-1.5">
-                  {messageTemplates.map((tpl) => (
+                  {messagesFor(messageApplicant).map((m) => (
                     <button
-                      key={tpl.id}
+                      key={m.key}
                       type="button"
-                      onClick={() => handleSelectTemplate(tpl.id)}
+                      onClick={() => handleSelectTemplate(m.key)}
                       className={`py-2 px-3 rounded-xl text-xs font-bold transition-all text-center cursor-pointer border ${
-                        selectedTemplateKey === tpl.id
+                        selectedTemplateKey === m.key
                           ? "bg-blue-600 text-white border-blue-600 shadow-2xs"
                           : "bg-[#F8F9FA] hover:bg-slate-100 text-[#3C4043] border-[#E0E3E7]"
                       }`}
                     >
-                      {tpl.title}
+                      {m.tpl}
+                      {m.sent ? " ✓보냄" : ""}
                     </button>
                   ))}
                   <button
@@ -2266,6 +2095,11 @@ function AdminDashboard({ handleLogout }) {
                     ✏️ 직접 작성
                   </button>
                 </div>
+                {selectedSheetMessage && selectedSheetMessage.warn && (
+                  <p className="text-[11px] text-amber-800 p-2 bg-amber-50 border border-amber-200 rounded-xl">
+                    ⚠️ 점검: {selectedSheetMessage.warn}
+                  </p>
+                )}
               </div>
 
               {/* Message Editor Textarea */}
@@ -2290,9 +2124,9 @@ function AdminDashboard({ handleLogout }) {
               {/* Tips */}
               <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-[11px] text-[#5F6368] space-y-1">
                 <p className="font-semibold text-[#202124]">💡 안내</p>
-                <p>• 구글 시트의 <strong>[문자템플릿]</strong> 탭에 작성된 문구를 실시간으로 불러와 지원자의 정보(이름, 병원, 시술, 예약일 등)로 자동 치환합니다.</p>
-                <p>• <strong>[메시지 복사]</strong>: 카카오톡 채널 또는 병원 문자 발송 솔루션에 바로 붙여넣기 하실 수 있습니다.</p>
-                <p>• <strong>[문자 앱 열기]</strong>: 모바일 기기 또는 Windows 스마트폰 연결 앱에서 즉시 SMS 발송창이 열립니다.</p>
+                <p>• 문구는 자동화가 시트의 <strong>[문자발송]</strong> 탭에 만들어 둔 것이에요. 문구를 고쳐 <strong>[문구 저장]</strong>하면 자동 갱신으로 덮어쓰지 않아요.</p>
+                <p>• 문자를 보낸 뒤 <strong>[보냄 표시]</strong>를 눌러야 같은 문자가 다시 만들어지거나 중복 발송되지 않아요.</p>
+                <p>• <strong>[메시지 복사]</strong>로 문자 발송 솔루션에 붙여넣거나, <strong>[문자 앱 열기]</strong>로 바로 보낼 수 있어요.</p>
               </div>
 
             </div>
@@ -2309,6 +2143,27 @@ function AdminDashboard({ handleLogout }) {
               </a>
 
               <div className="flex items-center gap-2">
+                {selectedSheetMessage && !selectedSheetMessage.sent && (
+                  <button
+                    onClick={handleSaveMessageText}
+                    disabled={customMessageText === selectedSheetMessage.text}
+                    className="px-3 py-2.5 rounded-xl text-xs font-bold border bg-white hover:bg-slate-100 text-[#3C4043] border-[#DADCE0] cursor-pointer disabled:opacity-40 disabled:cursor-default"
+                  >
+                    문구 저장
+                  </button>
+                )}
+                {selectedSheetMessage && (
+                  <button
+                    onClick={() => handleMarkSent(!selectedSheetMessage.sent)}
+                    className={`px-3 py-2.5 rounded-xl text-xs font-bold border cursor-pointer ${
+                      selectedSheetMessage.sent
+                        ? "bg-emerald-50 text-emerald-700 border-emerald-300"
+                        : "bg-white hover:bg-emerald-50 text-emerald-700 border-emerald-300"
+                    }`}
+                  >
+                    {selectedSheetMessage.sent ? "✓ 보냄 (되돌리기)" : "보냄 표시"}
+                  </button>
+                )}
                 <button
                   onClick={() => {
                     navigator.clipboard.writeText(customMessageText);
@@ -2334,6 +2189,45 @@ function AdminDashboard({ handleLogout }) {
                   <span>문자 앱 열기</span>
                 </a>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 점검/경고 알림창 */}
+      {alertInfo && (
+        <div
+          className="fixed inset-0 z-80 bg-black/60 backdrop-blur-2xs flex items-center justify-center p-4 animate-in fade-in duration-150"
+          onClick={() => setAlertInfo(null)}
+        >
+          <div
+            className="w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden border border-amber-100 animate-in zoom-in-95 duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-6 pb-3 flex items-start gap-3.5">
+              <div className="w-11 h-11 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center text-xl shrink-0">
+                ⚠️
+              </div>
+              <div className="space-y-2">
+                <h3 className="text-base font-bold text-[#202124]">{alertInfo.title}</h3>
+                {alertInfo.lines.length > 0 && (
+                  <ul className="space-y-1">
+                    {alertInfo.lines.map((line, i) => (
+                      <li key={i} className="text-xs text-[#3C4043] leading-relaxed">
+                        • {line}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </div>
+            <div className="p-4 px-6 mt-3 bg-[#F8F9FA] border-t border-[#E0E3E7] flex items-center justify-end">
+              <button
+                onClick={() => setAlertInfo(null)}
+                className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition-colors cursor-pointer shadow-sm"
+              >
+                확인
+              </button>
             </div>
           </div>
         </div>
@@ -2442,5 +2336,3 @@ function AdminDashboard({ handleLogout }) {
     </div>
   );
 }
-
-const SCRIPT_CODE_TEXT = "// ==========================================\n// 체험단 라운지 통합 웹훅 & 관리자 대시보드 연동 스크립트 (통합 버전)\n// ==========================================\n// 기존 기능(캠페인 목록 조회, 고객사별 드라이브 사진 보관, 접수DB 저장, 알림메일 발송) 100% 유지\n// + 신규 기능(관리자 대시보드 실시간 지원자 목록 조회 및 예약확정/상태/메모 동기화)이 안전하게 통합되었습니다.\n\n// 1. GET 요청 처리 (사이트 캠페인 동기화 & 관리자 대시보드 데이터 조회)\nfunction doGet(e) {\n  var action = e && e.parameter && e.parameter.action;\n\n  // [기존 기능] 사이트가 ?action=campaigns 로 부르면 '사이트관리' 탭의 모집 목록을 JSON으로 반환\n  if (action === \"campaigns\") {\n    return ContentService\n      .createTextOutput(JSON.stringify(readCampaigns_()))\n      .setMimeType(ContentService.MimeType.JSON);\n  }\n\n  // [신규 기능] 관리자 대시보드가 ?action=applications 로 부르면 'DB' 탭의 지원자 목록을 JSON으로 반환\n  if (action === \"applications\" || action === \"getAll\") {\n    return ContentService\n      .createTextOutput(JSON.stringify(readApplications_()))\n      .setMimeType(ContentService.MimeType.JSON);\n  }\n\n  // [신규 기능] 문자 템플릿만 단독 조회 (?action=templates)\n  if (action === \"templates\") {\n    return ContentService\n      .createTextOutput(JSON.stringify({ result: \"success\", templates: readMessageTemplates_() }))\n      .setMimeType(ContentService.MimeType.JSON);\n  }\n\n  // 기본 상태 확인 응답\n  return ContentService\n    .createTextOutput(JSON.stringify({ result: \"success\", message: \"체험단 지원서 Webhook 정상 동작 중\" }))\n    .setMimeType(ContentService.MimeType.JSON);\n}\n\n// '사이트관리' 탭에서 캠페인 목록 읽기 (기존 함수 원본 유지)\nfunction readCampaigns_() {\n  var sh = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(\"사이트관리\");\n  if (!sh || sh.getLastRow() < 2) return [];\n  var vals = sh.getDataRange().getValues();\n  var h = vals[0].map(function (x) { return String(x).trim(); });\n  var col = function (r, n) { var j = h.indexOf(n); return j < 0 ? \"\" : String(r[j]).trim(); };\n  var lines = function (t) { return t ? t.split(\"\\n\").map(function (x) { return x.trim(); }).filter(Boolean) : []; };\n  var out = [];\n  for (var i = 1; i < vals.length; i++) {\n    var r = vals[i];\n    var status = col(r, \"상태\");\n    if (!col(r, \"ID\") || status === \"숨김\") continue; // 상태가 '숨김'이면 사이트에 내보내지 않음\n    out.push({\n      id: col(r, \"ID\"),\n      status: status || \"모집중\",\n      hospital: col(r, \"병원\"),\n      category: col(r, \"카테고리\"),\n      title: col(r, \"캠페인명\"),\n      location: col(r, \"지역\") || \"서울 강남\",\n      channel: col(r, \"채널\") || \"블로그\",\n      offer: col(r, \"제공혜택\"),\n      copay: col(r, \"본인부담\"),\n      visits: col(r, \"방문횟수\") || \"1회 방문\",\n      description: col(r, \"제공혜택\"),\n      benefits: lines(col(r, \"혜택상세\")),\n      missions: lines(col(r, \"리뷰미션\")),\n      conditions: lines(col(r, \"신청조건\")),\n      notices: lines(col(r, \"필수유의사항\")),\n      schedule: {\n        announcement: col(r, \"발표일정\") || \"신청서 검토 후 순차 개별 연락드립니다.\",\n        activity: col(r, \"활동일정\") || \"선정 직후 예약 일정 조율 후 내원 진행합니다.\"\n      }\n    });\n  }\n  return out;\n}\n\n// [신규 기능] 'DB' 탭에서 지원자 전체 목록을 구조화하여 관리자 대시보드로 전달\nfunction readApplications_() {\n  try {\n    var ss = SpreadsheetApp.getActiveSpreadsheet();\n    var sh = ss.getSheetByName(\"DB\") || ss.getSheetByName(\"접수DB\");\n    if (!sh || sh.getLastRow() < 2) {\n      return { result: \"success\", rows: [] };\n    }\n\n    var vals = sh.getDataRange().getValues();\n    var h = vals[0].map(function (x) { return String(x).trim(); });\n    var col = function (r, n) {\n      var j = h.indexOf(n);\n      return j < 0 ? \"\" : (r[j] !== undefined && r[j] !== null ? String(r[j]).trim() : \"\");\n    };\n\n    var rows = [];\n    for (var i = 1; i < vals.length; i++) {\n      var r = vals[i];\n      var submittedAt = col(r, \"신청일시\") || col(r, \"일시\") || col(r, \"접수일시\");\n      var name = col(r, \"이름\") || col(r, \"지원자\") || col(r, \"지원자명\");\n      var phone = col(r, \"연락처\") || col(r, \"전화번호\") || col(r, \"휴대폰\");\n\n      // 빈 행 건너뛰기\n      if (!submittedAt && !name && !phone) continue;\n\n      var imgRaw = col(r, \"첨부사진링크\") || col(r, \"첨부사진\") || col(r, \"사진링크\") || col(r, \"사진\");\n      var images = imgRaw ? imgRaw.split(\"\\n\").map(function(s){ return s.trim(); }).filter(Boolean) : [];\n\n      rows.push({\n        rowId: i + 1,\n        submittedAt: submittedAt,\n        campaignId: col(r, \"캠페인ID\"),\n        hospital: col(r, \"클리닉\") || col(r, \"병원\") || col(r, \"병원명\"),\n        treatment: col(r, \"희망시술\") || col(r, \"캠페인명\"),\n        category: col(r, \"카테고리\"),\n        name: name,\n        birthdate: col(r, \"생년월일\"),\n        phone: phone,\n        blogUrl: col(r, \"블로그주소\") || col(r, \"블로그\"),\n        schedule1: col(r, \"1지망\") || col(r, \"1지망일정\"),\n        schedule2: col(r, \"2지망\") || col(r, \"2지망일정\"),\n        schedule3: col(r, \"3지망\") || col(r, \"3지망일정\"),\n        images: images,\n        imageNote: col(r, \"시술부위 상세설명\") || col(r, \"부위설명/특이사항\") || col(r, \"부위설명\"),\n        userNote: col(r, \"지원동기\") || col(r, \"특이사항\") || col(r, \"지원동기/체험소감\") || col(r, \"체험소감\"),\n        status: col(r, \"진행상태\") || \"1.신규지원\",\n        confirmedDate: col(r, \"예약일\"),\n        guideRoom: col(r, \"비포앤애프터 이미지\") || col(r, \"비포앤애프터\") || col(r, \"비포애프터\") || col(r, \"가이드룸\") || col(r, \"블로거폴더\") || col(r, \"가이드폴더\") || col(r, \"가이드\"),\n        draftUrl: col(r, \"원고 초안 URL\") || col(r, \"원고초안\") || col(r, \"초안 URL\") || col(r, \"초안링크\") || col(r, \"초안\") || col(r, \"검수링크\") || col(r, \"검수 URL\"),\n        postDate: col(r, \"원고 발행일\") || col(r, \"발행일\") || col(r, \"발행일자\"),\n        keyword: col(r, \"타겟 키워드\") || col(r, \"타겟키워드\") || col(r, \"키워드\"),\n        postUrl: col(r, \"포스팅URL\") || col(r, \"포스팅 URL\") || col(r, \"포스팅링크\") || col(r, \"발행원고 URL\") || col(r, \"발행글 URL\") || col(r, \"발행 URL\") || col(r, \"발행링크\"),\n        performance: col(r, \"성과\") || col(r, \"성과지표\") || col(r, \"성과이미지\") || col(r, \"포스팅성과\"),\n        memo: col(r, \"이슈\") || col(r, \"관리자메모\") || \"\",\n        client: col(r, \"고객사\"),\n        shareStatus: (function(v) {\n          if (!v) return \"\";\n          var s = String(v).trim();\n          if (s === \"TRUE\" || s === \"true\" || s === \"공유됨\" || s === \"공유완료\") return \"공유됨\";\n          if (s === \"제외\" || s === \"FALSE\" || s === \"false\" || s === \"미공유\") return \"\";\n          return s;\n        })(col(r, \"공유상태\")),\n        checkStatus: col(r, \"점검\"),\n        syncKey: col(r, \"키\"),\n        roomSyncVal: col(r, \"룸동기값\")\n      });\n    }\n\n    return {\n      result: \"success\",\n      rows: rows,\n      templates: readMessageTemplates_()\n    };\n  } catch (err) {\n    return { result: \"error\", message: err.toString(), rows: [], templates: getDefaultMessageTemplates_() };\n  }\n}\n\n// [신규 기능] '문자템플릿' 탭에서 문자/알림톡 템플릿 목록 읽기\nfunction readMessageTemplates_() {\n  try {\n    var ss = SpreadsheetApp.getActiveSpreadsheet();\n    var sheetNames = [\"문자템플릿\", \"문자 템플릿\", \"메시지템플릿\", \"메시지 템플릿\", \"템플릿\"];\n    var sh = null;\n    for (var s = 0; s < sheetNames.length; s++) {\n      sh = ss.getSheetByName(sheetNames[s]);\n      if (sh) break;\n    }\n    if (!sh || sh.getLastRow() < 1) {\n      return getDefaultMessageTemplates_();\n    }\n\n    var vals = sh.getDataRange().getValues();\n    if (vals.length === 0) return getDefaultMessageTemplates_();\n\n    var h = vals[0].map(function (x) { return String(x).trim(); });\n\n    var colTitleIdx = -1;\n    var colCategoryIdx = -1;\n    var colContentIdx = -1;\n    var colIdIdx = -1;\n\n    for (var c = 0; c < h.length; c++) {\n      var colName = h[c];\n      if (/^(구분|카테고리|분류|상황)$/i.test(colName)) {\n        if (colCategoryIdx < 0) colCategoryIdx = c;\n      }\n      if (/^(제목|타이틀|템플릿명|명칭|템플릿)$/i.test(colName)) {\n        if (colTitleIdx < 0) colTitleIdx = c;\n      }\n      if (/^(내용|문구|메시지|본문|메시지내용|문자내용|템플릿내용)$/i.test(colName)) {\n        if (colContentIdx < 0) colContentIdx = c;\n      }\n      if (/^(id|코드|key)$/i.test(colName)) {\n        if (colIdIdx < 0) colIdIdx = c;\n      }\n    }\n\n    var templates = [];\n\n    // Case 1: 내용(메시지) 헤더가 존재하는 표준 테이블 형태\n    if (colContentIdx >= 0 && vals.length >= 2) {\n      if (colTitleIdx < 0 && colCategoryIdx >= 0) colTitleIdx = colCategoryIdx;\n      if (colTitleIdx < 0) colTitleIdx = (colContentIdx === 0 ? 1 : 0);\n\n      for (var i = 1; i < vals.length; i++) {\n        var row = vals[i];\n        var title = (colTitleIdx >= 0 && row[colTitleIdx]) ? String(row[colTitleIdx]).trim() : \"\";\n        if (!title && colCategoryIdx >= 0 && row[colCategoryIdx]) {\n          title = String(row[colCategoryIdx]).trim();\n        }\n        var content = (colContentIdx >= 0 && row[colContentIdx]) ? String(row[colContentIdx]).trim() : \"\";\n        var id = (colIdIdx >= 0 && row[colIdIdx]) ? String(row[colIdIdx]).trim() : (\"tpl_\" + i);\n\n        if (!title && !content) continue;\n        templates.push({\n          id: id || (\"tpl_\" + i),\n          title: title || (\"템플릿 \" + i),\n          content: content\n        });\n      }\n    } else {\n      // Case 2: 헤더가 없거나 1행=제목들, 2행=내용들(가로 배치) 형태\n      var isHorizontal = vals.length === 2 || (vals.length === 3 && vals[0].length >= 3);\n      if (isHorizontal && vals[0].length >= 2) {\n        for (var colI = 0; colI < vals[0].length; colI++) {\n          var topCell = String(vals[0][colI] || \"\").trim();\n          var bottomCell = String(vals[1][colI] || \"\").trim();\n          if (topCell && bottomCell) {\n            templates.push({\n              id: \"tpl_col_\" + (colI + 1),\n              title: topCell,\n              content: bottomCell\n            });\n          }\n        }\n      }\n\n      // Case 3: 2컬럼 키-값 세로 형태 (Col 1 = 제목, Col 2 = 내용)\n      if (templates.length === 0) {\n        var startRow = (h[0] === \"구분\" || h[0] === \"제목\" || h[1] === \"내용\") ? 1 : 0;\n        for (var r2 = startRow; r2 < vals.length; r2++) {\n          var t2 = String(vals[r2][0] || \"\").trim();\n          var cnt2 = vals[r2].length > 1 ? String(vals[r2][1] || \"\").trim() : \"\";\n          if (t2 && cnt2) {\n            templates.push({\n              id: \"tpl_\" + (r2 + 1),\n              title: t2,\n              content: cnt2\n            });\n          }\n        }\n      }\n    }\n\n    if (templates.length > 0) {\n      return templates;\n    }\n    return getDefaultMessageTemplates_();\n  } catch (err) {\n    Logger.log(\"readMessageTemplates_ error: \" + err.toString());\n    return getDefaultMessageTemplates_();\n  }\n}\n\n// 기본 표준 메시지 템플릿\nfunction getDefaultMessageTemplates_() {\n  return [\n    {\n      id: \"schedule\",\n      title: \"📅 일정 조율\",\n      content: \"[체험단 라운지 - {병원}]\\n안녕하세요, {이름}님!\\n신청해주신 '{희망시술}' 체험단에 선정되셨음을 안내드립니다. 🎉\\n\\n■ 1지망 희망일정: {1지망}\\n■ 내원 및 시술 진행 일정을 조율하고자 하오니, 본 번호로 편하신 시간대 회신 부탁드립니다.\\n\\n감사합니다.\"\n    },\n    {\n      id: \"confirm\",\n      title: \"✓ 예약 확정\",\n      content: \"[체험단 라운지 - {병원}]\\n안녕하세요, {이름}님!\\n신청하신 체험단 예약 일정이 최종 확정되어 안내드립니다.\\n\\n■ 예약 일시: {예약일}\\n■ 병원명: {병원}\\n■ 시술 항목: {희망시술}\\n\\n※ 예약 시간 10분 전까지 내원 부탁드리며, 일정 변경이 필요하신 경우 최소 3일 전 미리 연락 바랍니다.\\n감사합니다.\"\n    },\n    {\n      id: \"review\",\n      title: \"✍️ 리뷰 안내\",\n      content: \"[체험단 라운지 - {병원}]\\n안녕하세요, {이름}님!\\n{병원} 체험은 편안히 잘 받으셨나요?\\n\\n■ 포스팅 마감: 내원일로부터 7일 이내\\n■ 안내사항: 전달드린 리뷰 가이드라인에 맞추어 솔직하고 정성스러운 후기 부탁드립니다.\\n■ 발행 완료 후 포스팅 URL 링크를 본 번호로 회신 부탁드립니다.\\n\\n감사합니다.\"\n    }\n  ];\n}\n\n// 체험단 지원서 사진은 고객사별 '02_지원서사진' 폴더에 쌓는다. (고객사 이름 = 병원정보 탭의 '고객사')\nvar PHOTO_FOLDERS = {\n  \"살만\": \"1j7Jlt2LWPkFzbg2wyEvfaxFgGf7sYgSo\",\n  \"큐어람\": \"1VQihiH2xh_UjIcg5kvT0oOxEbM2VQ9VG\"\n};\nvar PHOTO_FOLDER_DEFAULT = \"살만\"; // 고객사를 못 찾았을 때 쓰는 폴더\n\n// 병원 이름 → 고객사 이름 ('병원정보' 탭의 '시트의 표기' → '고객사'). 접수 알림 메일 제목에 쓴다.\nfunction clientOf_(hospital) {\n  var h = String(hospital || \"\").replace(/\\s+/g, \"\");\n  if (!h) return \"고객사 미확인\";\n  try {\n    var sh = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(\"병원정보\");\n    if (!sh) return \"고객사 미확인\";\n    var rows = sh.getDataRange().getValues().slice(1);\n    for (var i = 0; i < rows.length; i++) { // 정확히 같은 표기\n      if (String(rows[i][0]).replace(/\\s+/g, \"\") === h && rows[i][4]) return String(rows[i][4]).trim();\n    }\n    for (var j = 0; j < rows.length; j++) { // 한쪽이 다른 쪽을 포함 (예: '큐어람' / '큐어람한의원')\n      var k = String(rows[j][0]).replace(/\\s+/g, \"\");\n      if (k && rows[j][4] && (h.indexOf(k) >= 0 || k.indexOf(h) >= 0)) return String(rows[j][4]).trim();\n    }\n  } catch (err) {\n    Logger.log(\"client lookup err: \" + err.toString());\n  }\n  return \"고객사 미확인\";\n}\n\n// 고객사에 맞는 사진 폴더를 돌려준다. 목록에 없으면 기본 폴더(살만).\nfunction getOrCreateFolder(client) {\n  var id = PHOTO_FOLDERS[client] || PHOTO_FOLDERS[PHOTO_FOLDER_DEFAULT];\n  if (!PHOTO_FOLDERS[client]) Logger.log(\"사진 폴더: '\" + client + \"' 미등록 → 기본 폴더 사용\");\n  return DriveApp.getFolderById(id);\n}\n\n// 2. POST 요청 처리 (지원서 접수 & 관리자 상태 업데이트)\nfunction doPost(e) {\n  try {\n    var contents = e.postData.contents;\n    var data = JSON.parse(contents);\n\n    // [신규 기능] 관리자 대시보드에서 보낸 상태/예약일/메모 업데이트 요청 처리\n    if (data && data.action === \"updateStatus\") {\n      return handleUpdateStatus_(data);\n    }\n\n    // [신규 기능] 관리자 대시보드에서 보낸 지원서 행 삭제 요청 처리\n    if (data && data.action === \"deleteRow\") {\n      return handleDeleteRow_(data);\n    }\n\n    // --- 이하 기존 신규 지원서 접수 처리 로직 (100% 원본 유지) ---\n    // 1. 현재 시트에서 \"DB\" 탭 가져오기 (예전 이름 \"접수DB\"도 인식, 없으면 자동 생성)\n    var ss = SpreadsheetApp.getActiveSpreadsheet();\n    var sheet = ss.getSheetByName(\"DB\") || ss.getSheetByName(\"접수DB\");\n    if (!sheet) {\n      sheet = ss.insertSheet(\"DB\");\n    }\n\n    var now = new Date();\n    var dateString = Utilities.formatDate(now, \"Asia/Seoul\", \"yyyy-MM-dd HH:mm:ss\");\n\n    // 2. 첨부 사진을 구글 드라이브에 저장하고 링크 추출\n    var finalImageUrls = [];\n    var rawImages = data.rawImages || data.images || [];\n    var folder = null;\n    try {\n      folder = getOrCreateFolder(clientOf_(data.hospital));\n    } catch (fErr) {\n      Logger.log(\"Folder access err: \" + fErr.toString());\n    }\n\n    var driveNameBase = data.driveFileName || (data.name + \"_\" + (data.campaignId || \"캠페인\"));\n\n    for (var i = 0; i < rawImages.length; i++) {\n      var driveUrl = \"\";\n      var fileName = driveNameBase + \"_사진\" + (i + 1) + \".jpg\";\n\n      if (folder && rawImages[i] && typeof rawImages[i] === \"string\" && rawImages[i].indexOf(\"data:image\") === 0) {\n        try {\n          var parts = rawImages[i].split(\",\");\n          var contentType = (parts[0].match(/:(.*?);/) || [])[1] || \"image/jpeg\";\n          var base64 = parts[1];\n          var blob = Utilities.newBlob(Utilities.base64Decode(base64), contentType, fileName);\n          var file = folder.createFile(blob);\n          driveUrl = file.getUrl();\n        } catch (e1) {\n          Logger.log(\"Drive save err: \" + e1.toString());\n        }\n      }\n\n      if (driveUrl) {\n        finalImageUrls.push(driveUrl);\n      }\n    }\n\n    var imagesString = finalImageUrls.join(\"\\n\");\n\n    // 3. 컬럼 헤더 자동 인식 및 데이터 매핑\n    var headers = [];\n    if (sheet.getLastRow() > 0) {\n      headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];\n    }\n\n    // 만약 시트가 완전히 비어있다면 기본 헤더 자동 생성\n    if (headers.length === 0 || !headers[0]) {\n      headers = [\n        \"신청일시\", \"캠페인ID\", \"클리닉\", \"희망시술\", \"카테고리\",\n        \"이름\", \"생년월일\", \"연락처\", \"블로그주소\",\n        \"블로그지수\", \"1지망\", \"2지망\", \"3지망\",\n        \"개인정보동의\", \"6개월유지동의\", \"미션수행동의\", \"마케팅동의\", \"일정변경불가동의\",\n        \"첨부사진링크\", \"시술부위 상세설명\", \"지원동기\",\n        \"공유상태\", \"점검\", \"고객사\", \"모집정보(원문)\", \"키\",\n        \"진행상태\", \"예약일\", \"원고 발행일\", \"키워드\", \"발행원고 URL\", \"성과\", \"이슈\", \"룸동기값\"\n      ];\n      sheet.appendRow(headers);\n    }\n\n    // 각 헤더명에 대응하는 데이터 매핑 사전\n    var fieldMap = {\n      \"신청일시\": dateString,\n      \"일시\": dateString,\n      \"접수일시\": dateString,\n      \"캠페인ID\": data.campaignId || \"\",\n      \"캠페인명\": data.campaignTitle || \"\",\n      \"병원\": data.hospital || \"\",\n      \"병원명\": data.hospital || \"\",\n      \"클리닉\": data.hospital || \"\",\n      \"희망시술\": data.campaignTitle || \"\",\n      \"카테고리\": data.category || \"\",\n      \"이름\": data.name || \"\",\n      \"지원자\": data.name || \"\",\n      \"지원자명\": data.name || \"\",\n      \"생년월일\": data.birthdate || \"\",\n      \"연락처\": data.phone || \"\",\n      \"전화번호\": data.phone || \"\",\n      \"휴대폰\": data.phone || \"\",\n      \"블로그\": data.blogUrl || \"\",\n      \"블로그주소\": data.blogUrl || \"\",\n      \"1지망일정\": data.schedule1 || \"\",\n      \"1지망\": data.schedule1 || \"\",\n      \"2지망일정\": data.schedule2 || \"\",\n      \"2지망\": data.schedule2 || \"\",\n      \"3지망일정\": data.schedule3 || \"\",\n      \"3지망\": data.schedule3 || \"\",\n      \"개인정보동의\": data.agreePrivacy ? \"동의\" : \"미동의\",\n      \"6개월유지동의\": data.agreeRetention ? \"동의\" : \"미동의\",\n      \"유지동의\": data.agreeRetention ? \"동의\" : \"미동의\",\n      \"미션수행동의\": data.agreeMission ? \"동의\" : \"미동의\",\n      \"미션동의\": data.agreeMission ? \"동의\" : \"미동의\",\n      \"마케팅동의\": data.agreeMarketing ? \"동의\" : \"미동의\",\n      \"일정변경불가동의\": data.agreeNoChange ? \"동의\" : \"미동의\",\n      \"일정변경동의\": data.agreeNoChange ? \"동의\" : \"미동의\",\n      \"첨부사진링크\": imagesString,\n      \"첨부사진\": imagesString,\n      \"사진\": imagesString,\n      \"사진링크\": imagesString,\n      \"부위설명/특이사항\": data.imageNote || \"\",\n      \"부위설명\": data.imageNote || \"\",\n      \"시술부위 상세설명\": data.imageNote || \"\",\n      \"특이사항\": data.userNote || \"\",\n      \"지원동기\": data.userNote || \"\",\n      \"지원동기/체험소감\": data.userNote || \"\",\n      \"체험소감\": data.userNote || \"\",\n      \"진행상태\": data.status || \"1.신규지원\",\n      \"공유상태\": data.shareStatus || \"미공유\"\n    };\n\n    var rowData = [];\n    for (var k = 0; k < headers.length; k++) {\n      var colHeader = String(headers[k]).trim();\n      rowData.push(fieldMap[colHeader] !== undefined ? fieldMap[colHeader] : \"\");\n    }\n    sheet.appendRow(rowData);\n\n    // 연락처·생년월일은 문자로 다시 써서 앞자리 0이 사라지지 않게 한다\n    var newRow = sheet.getLastRow();\n    for (var c = 0; c < headers.length; c++) {\n      var hn = String(headers[c]).trim();\n      if (hn === \"연락처\" || hn === \"전화번호\" || hn === \"휴대폰\" || hn === \"생년월일\" || hn === \"신청일시\") {\n        var cell = sheet.getRange(newRow, c + 1);\n        cell.setNumberFormat(\"@\");\n        cell.setValue(String(rowData[c]));\n      }\n    }\n\n    // 4. 관리자 알림 이메일 발송\n    var emailRecipients = [\"gkt0108@gmail.com\", \"team.archivehey@gmail.com\"];\n    var emailSubject = \"[🍊체험단 지원자] \" + clientOf_(data.hospital) + \" / \" + (data.hospital || \"병원 미확인\") + \" 지원자 등장 📩\";\n\n    var emailBodyHtml = \"<h3>체험단 지원서 접수 알림</h3>\" +\n      \"<p><b>신청일시 :</b> \" + dateString + \"</p>\" +\n      \"<p><b>병원명 :</b> \" + (data.hospital || \"-\") + \"</p>\" +\n      \"<p><b>캠페인명 :</b> \" + (data.campaignTitle || \"-\") + \"</p>\" +\n      \"<p><b>이름 :</b> \" + (data.name || \"\") + \"</p>\" +\n      \"<p><b>연락처 :</b> \" + (data.phone || \"\") + \"</p>\" +\n      \"<p><b>생년월일 :</b> \" + (data.birthdate || \"-\") + \"</p>\" +\n      \"<p><b>블로그주소 :</b> <a href='\" + (data.blogUrl || \"\") + \"'>\" + (data.blogUrl || \"\") + \"</a></p>\" +\n      \"<p><b>1지망 일정 :</b> \" + (data.schedule1 || \"\") + \"</p>\" +\n      \"<p><b>2지망 일정 :</b> \" + (data.schedule2 || \"\") + \"</p>\" +\n      \"<p><b>3지망 일정 :</b> \" + (data.schedule3 || \"\") + \"</p>\" +\n      \"<p><b>첨부사진 (구글 드라이브 링크) :</b><br>\" + (imagesString ? imagesString.split(\"\\n\").map(function(url){ return \"<a href='\" + url + \"' target='_blank'>\" + url + \"</a>\"; }).join(\"<br>\") : \"없음\") + \"</p>\" +\n      \"<p><b>시술부위 상세설명 :</b> \" + (data.imageNote || \"-\") + \"</p>\" +\n      \"<p><b>지원동기 :</b> \" + (data.userNote || \"-\") + \"</p>\";\n\n    for (var j = 0; j < emailRecipients.length; j++) {\n      try {\n        MailApp.sendEmail({\n          to: emailRecipients[j],\n          subject: emailSubject,\n          htmlBody: emailBodyHtml\n        });\n      } catch (e) {\n        Logger.log(\"Email send error: \" + e.toString());\n      }\n    }\n\n    return ContentService\n      .createTextOutput(JSON.stringify({ result: \"success\", message: \"구글 시트 저장 및 드라이브 보관 완료\" }))\n      .setMimeType(ContentService.MimeType.JSON);\n\n  } catch (error) {\n    return ContentService\n      .createTextOutput(JSON.stringify({ result: \"error\", message: error.toString() }))\n      .setMimeType(ContentService.MimeType.JSON);\n  }\n}\n\n// [신규 기능] 관리자 상태/예약일/이슈(메모) 업데이트 처리\nfunction handleUpdateStatus_(data) {\n  try {\n    var ss = SpreadsheetApp.getActiveSpreadsheet();\n    var sh = ss.getSheetByName(\"DB\") || ss.getSheetByName(\"접수DB\");\n    if (!sh) {\n      return ContentService\n        .createTextOutput(JSON.stringify({ result: \"error\", message: \"DB 탭을 찾을 수 없습니다.\" }))\n        .setMimeType(ContentService.MimeType.JSON);\n    }\n\n    var targetRow = parseInt(data.rowId, 10);\n    if (!targetRow || targetRow < 2 || targetRow > sh.getLastRow()) {\n      return ContentService\n        .createTextOutput(JSON.stringify({ result: \"error\", message: \"유효하지 않은 행 번호입니다.\" }))\n        .setMimeType(ContentService.MimeType.JSON);\n    }\n\n    var headers = sh.getRange(1, 1, 1, sh.getLastColumn()).getValues()[0].map(function (x) { return String(x).trim(); });\n\n    var setVal = function(colName, value) {\n      var idx = headers.indexOf(colName);\n      if (idx >= 0 && value !== undefined) {\n        sh.getRange(targetRow, idx + 1).setValue(String(value));\n      }\n    };\n\n    var setAny = function(colCandidates, value) {\n      if (value === undefined) return;\n      for (var ci = 0; ci < colCandidates.length; ci++) {\n        var idx = headers.indexOf(colCandidates[ci]);\n        if (idx >= 0) {\n          sh.getRange(targetRow, idx + 1).setValue(String(value));\n          return;\n        }\n      }\n    };\n\n    if (data.status !== undefined) setVal(\"진행상태\", data.status);\n    if (data.confirmedDate !== undefined) setVal(\"예약일\", data.confirmedDate);\n    if (data.guideRoom !== undefined) setAny([\"비포앤애프터 이미지\", \"비포앤애프터\", \"비포애프터\", \"가이드룸\", \"블로거폴더\", \"가이드폴더\", \"가이드\"], data.guideRoom);\n    if (data.draftUrl !== undefined) setAny([\"원고초안\", \"원고 초안 URL\", \"초안\", \"초안링크\", \"초안 URL\", \"검수링크\", \"검수 URL\"], data.draftUrl);\n    if (data.postDate !== undefined) setAny([\"원고 발행일\", \"발행일\", \"발행일자\"], data.postDate);\n    if (data.postUrl !== undefined) setAny([\"포스팅URL\", \"포스팅 URL\", \"포스팅링크\", \"발행원고 URL\", \"발행글 URL\", \"발행 URL\", \"발행링크\"], data.postUrl);\n    if (data.keyword !== undefined) setAny([\"타겟 키워드\", \"타겟키워드\", \"키워드\"], data.keyword);\n    if (data.performance !== undefined) setAny([\"성과\", \"성과지표\", \"성과이미지\", \"포스팅성과\"], data.performance);\n    if (data.shareStatus !== undefined) {\n      var sVal = data.shareStatus;\n      if (sVal === true || sVal === \"true\" || sVal === \"TRUE\" || sVal === \"공유됨\") {\n        sVal = \"공유됨\";\n      } else if (sVal === false || sVal === \"false\" || sVal === \"FALSE\" || sVal === \"제외\" || !sVal) {\n        sVal = \"\";\n      }\n      setVal(\"공유상태\", sVal);\n    }\n    if (data.memo !== undefined) {\n      setAny([\"이슈\", \"관리자메모\"], data.memo);\n    }\n\n    return ContentService\n      .createTextOutput(JSON.stringify({ result: \"success\", message: \"상태 업데이트 완료\" }))\n      .setMimeType(ContentService.MimeType.JSON);\n  } catch (err) {\n    return ContentService\n      .createTextOutput(JSON.stringify({ result: \"error\", message: err.toString() }))\n      .setMimeType(ContentService.MimeType.JSON);\n  }\n}\n\n// [신규 기능] 관리자 지원서 행 삭제 처리\nfunction handleDeleteRow_(data) {\n  try {\n    var ss = SpreadsheetApp.getActiveSpreadsheet();\n    var sh = ss.getSheetByName(\"DB\") || ss.getSheetByName(\"접수DB\");\n    if (!sh) {\n      return ContentService\n        .createTextOutput(JSON.stringify({ result: \"error\", message: \"DB 탭을 찾을 수 없습니다.\" }))\n        .setMimeType(ContentService.MimeType.JSON);\n    }\n\n    var targetRow = parseInt(data.rowId, 10);\n    if (!targetRow || targetRow < 2 || targetRow > sh.getLastRow()) {\n      return ContentService\n        .createTextOutput(JSON.stringify({ result: \"error\", message: \"유효하지 않은 행 번호입니다.\" }))\n        .setMimeType(ContentService.MimeType.JSON);\n    }\n\n    sh.deleteRow(targetRow);\n\n    return ContentService\n      .createTextOutput(JSON.stringify({ result: \"success\", message: targetRow + \"행 지원서 삭제 완료\" }))\n      .setMimeType(ContentService.MimeType.JSON);\n  } catch (err) {\n    return ContentService\n      .createTextOutput(JSON.stringify({ result: \"error\", message: err.toString() }))\n      .setMimeType(ContentService.MimeType.JSON);\n  }\n}\n\n// 📌 권한 승인 및 드라이브 폴더 생성 확인용 함수 (기존 원본 유지)\nfunction authorizeEverything() {\n  Object.keys(PHOTO_FOLDERS).forEach(function (c) {\n    Logger.log(\"📁 1. \" + c + \" 사진 폴더 연결 성공: \" + getOrCreateFolder(c).getName());\n  });\n  var ss = SpreadsheetApp.getActiveSpreadsheet();\n  var sheet = ss.getSheetByName(\"DB\") || ss.getSheetByName(\"접수DB\") || ss.insertSheet(\"DB\");\n  Logger.log(\"📊 2. 시트 'DB' 탭 연결 성공: \" + sheet.getName());\n}\n";

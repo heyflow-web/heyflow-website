@@ -2,48 +2,49 @@
 
 import { useState, useEffect } from "react";
 
-const ADMIN_STORAGE_KEY = "lounge_admin_session_auth";
-const ADMIN_PASSWORD = "medi1111";
-
 export default function AdminPasswordGate({ children }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [inputPassword, setInputPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // 로그인 여부는 서버가 확인한다 (비밀번호는 화면 코드에 없다)
   useEffect(() => {
-    // 세션 스토리지에서 기존 인증 여부 확인
-    try {
-      const savedAuth = sessionStorage.getItem(ADMIN_STORAGE_KEY);
-      if (savedAuth === "true") {
-        setIsAuthenticated(true);
-      }
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setIsLoading(false);
-    }
+    fetch("/api/admin/session", { cache: "no-store" })
+      .then((res) => res.json())
+      .then((data) => setIsAuthenticated(Boolean(data.authenticated)))
+      .catch(() => setIsAuthenticated(false))
+      .finally(() => setIsLoading(false));
   }, []);
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    if (inputPassword === ADMIN_PASSWORD) {
-      try {
-        sessionStorage.setItem(ADMIN_STORAGE_KEY, "true");
-      } catch (err) {
-        console.error(err);
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+    try {
+      const res = await fetch("/api/admin/session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: inputPassword }),
+      });
+      if (res.ok) {
+        setIsAuthenticated(true);
+        setErrorMessage("");
+      } else {
+        setErrorMessage("비밀번호가 일치하지 않습니다. 다시 확인해 주세요.");
       }
-      setIsAuthenticated(true);
-      setErrorMessage("");
-    } else {
-      setErrorMessage("비밀번호가 일치하지 않습니다. 다시 확인해 주세요.");
+    } catch {
+      setErrorMessage("로그인 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     try {
-      sessionStorage.removeItem(ADMIN_STORAGE_KEY);
+      await fetch("/api/admin/session", { method: "DELETE" });
     } catch (err) {
       console.error(err);
     }
@@ -128,7 +129,7 @@ export default function AdminPasswordGate({ children }) {
             type="submit"
             className="w-full py-3.5 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold text-sm rounded-xl shadow-sm hover:shadow-md transition-all cursor-pointer flex items-center justify-center gap-2"
           >
-            <span>관리자 로그인</span>
+            <span>{isSubmitting ? "확인 중..." : "관리자 로그인"}</span>
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
             </svg>

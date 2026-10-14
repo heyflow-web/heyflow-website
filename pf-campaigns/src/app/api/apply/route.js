@@ -118,12 +118,10 @@ export async function POST(request) {
       userNote,
     });
 
-    const LATEST_WEBHOOK_URL =
-      "https://script.google.com/macros/s/AKfycby2z4HPw0hxVRq2eVa5mbEtviF8bxcWvkaJgl2q8MDWzmgl49Nix5U9gti_XECcDm6guQ/exec";
-    const GOOGLE_SHEET_WEBHOOK_URL =
-      process.env.GOOGLE_SHEET_WEBHOOK_URL && process.env.GOOGLE_SHEET_WEBHOOK_URL.includes("AKfycby2z4")
-        ? process.env.GOOGLE_SHEET_WEBHOOK_URL
-        : LATEST_WEBHOOK_URL;
+    const GOOGLE_SHEET_WEBHOOK_URL = process.env.GOOGLE_SHEET_WEBHOOK_URL;
+    if (!GOOGLE_SHEET_WEBHOOK_URL) {
+      return NextResponse.json({ success: false, error: "접수 주소가 설정되지 않았습니다." }, { status: 500 });
+    }
 
     {
       const sheetResponse = await fetch(GOOGLE_SHEET_WEBHOOK_URL, {
