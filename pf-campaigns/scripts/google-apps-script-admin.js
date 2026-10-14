@@ -114,9 +114,12 @@ function readApplications_() {
         userNote: col(r, "지원동기") || col(r, "특이사항") || col(r, "지원동기/체험소감") || col(r, "체험소감"),
         status: col(r, "진행상태") || "1.신규지원",
         confirmedDate: col(r, "예약일"),
-        postDate: col(r, "원고 발행일"),
+        guideRoom: col(r, "가이드룸") || col(r, "블로거폴더") || col(r, "가이드폴더") || col(r, "가이드"),
+        draftUrl: col(r, "원고 초안 URL") || col(r, "초안 URL") || col(r, "원고초안") || col(r, "초안링크") || col(r, "초안") || col(r, "검수링크") || col(r, "검수 URL"),
+        postDate: col(r, "원고 발행일") || col(r, "발행일"),
         keyword: col(r, "키워드"),
-        postUrl: col(r, "발행원고 URL"),
+        postUrl: col(r, "발행원고 URL") || col(r, "발행글 URL") || col(r, "발행 URL") || col(r, "발행링크"),
+        performance: col(r, "성과") || col(r, "포스팅성과"),
         memo: col(r, "이슈") || col(r, "관리자메모") || "",
         client: col(r, "고객사"),
         shareStatus: (function(v) {
@@ -393,8 +396,25 @@ function handleUpdateStatus_(data) {
       }
     };
 
+    var setAny = function(colCandidates, value) {
+      if (value === undefined) return;
+      for (var ci = 0; ci < colCandidates.length; ci++) {
+        var idx = headers.indexOf(colCandidates[ci]);
+        if (idx >= 0) {
+          sh.getRange(targetRow, idx + 1).setValue(String(value));
+          return;
+        }
+      }
+    };
+
     if (data.status !== undefined) setVal("진행상태", data.status);
     if (data.confirmedDate !== undefined) setVal("예약일", data.confirmedDate);
+    if (data.guideRoom !== undefined) setAny(["가이드룸", "블로거폴더", "가이드폴더", "가이드"], data.guideRoom);
+    if (data.draftUrl !== undefined) setAny(["초안", "원고초안", "초안링크", "초안 URL", "원고 초안 URL", "검수링크", "검수 URL"], data.draftUrl);
+    if (data.postDate !== undefined) setAny(["원고 발행일", "발행일"], data.postDate);
+    if (data.postUrl !== undefined) setAny(["발행원고 URL", "발행글 URL", "발행 URL", "발행링크"], data.postUrl);
+    if (data.keyword !== undefined) setVal("키워드", data.keyword);
+    if (data.performance !== undefined) setAny(["성과", "포스팅성과"], data.performance);
     if (data.shareStatus !== undefined) {
       var sVal = data.shareStatus;
       if (sVal === true || sVal === "true" || sVal === "TRUE" || sVal === "공유됨") {
@@ -405,8 +425,7 @@ function handleUpdateStatus_(data) {
       setVal("공유상태", sVal);
     }
     if (data.memo !== undefined) {
-      if (headers.indexOf("이슈") >= 0) setVal("이슈", data.memo);
-      else if (headers.indexOf("관리자메모") >= 0) setVal("관리자메모", data.memo);
+      setAny(["이슈", "관리자메모"], data.memo);
     }
 
     return ContentService
