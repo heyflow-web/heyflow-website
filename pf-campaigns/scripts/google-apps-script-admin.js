@@ -500,7 +500,7 @@ function admSetShare_(data) {
     return admOut_({ result: 'success', message: warnings.length ? '공유 상태를 바꿨어요.' : '병원 프로젝트룸에 공유했어요.', data: { shareStatus: '공유됨', warnings: warnings } });
   }
   if (admRead_(hit.vals, C_SNAP) || admWasPushed_(admRead_(hit.vals, C_KEY))) {
-    return admErr_('이미 병원 프로젝트룸에 올라간 지원자예요.', ['공유 해제는 프로젝트룸에서 직접 정리해 주세요.']);
+    return admErr_('이미 병원 프로젝트룸에 올라간 지원자예요.', ['공유된 리스트는 프로젝트룸에서만 삭제가 가능합니다.']);
   }
   db.getRange(hit.row, C_STATE).setValue('신규지원');
   return admOut_({ result: 'success', message: '공유를 해제했어요.', data: { shareStatus: '신규지원' } });
