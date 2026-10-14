@@ -1,6 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import Modal from "@/components/ui/Modal";
+import Button from "@/components/ui/Button";
+import Field, { Input, Select, Textarea } from "@/components/ui/Field";
 
 const TIME_SLOTS = [
   "10:00 (오전)",
@@ -260,397 +263,207 @@ export default function ApplyModal({ campaign, isOpen, onClose }) {
     ? campaign.missions.join(" / ")
     : "14일 이내 업로드 / 1,500자+ / 사진 15장+ / 동영상 포함 가이드 준수";
 
+  const agreements = [
+    { name: "agreePrivacy", title: "개인정보 수집 및 이용 동의", desc: "체험단 적격자 확인, 예약 안내 및 본인 확인 목적 (종료 후 3개월 보관)" },
+    { name: "agreeRetention", title: "포스팅 6개월 유지 동의", desc: "작성 콘텐츠 6개월 유지 (미유지 시 시술비 전액 청구될 수 있음)" },
+    { name: "agreeMission", title: "리뷰 미션 가이드 준수 동의", desc: missionText },
+    { name: "agreeMarketing", title: "마케팅 활용 및 2차 가공 동의", desc: "공식 블로그, SNS, 홈페이지 홍보 자료 및 부분 2차 가공 활용 동의" },
+    { name: "agreeNoChange", title: "예약 확정 후 일정 변경 불가 및 취소 시 대기자 이월 동의", desc: "예약 확정 후 변경 불가(취소만 가능)하며, 취소 시 다음 대기자에게 순서가 이월됨에 동의합니다." },
+  ];
+
   return (
-    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-x-hidden max-w-full">
-      <div className="bg-white w-full max-w-md max-h-[90vh] rounded-t-[32px] sm:rounded-[32px] shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-bottom duration-300">
-        
-        {/* Header */}
-        <div className="p-5 border-b border-slate-100 flex items-center justify-between sticky top-0 bg-white z-10">
-          <div>
-            <span className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest block">
-              {campaign?.category} 지원하기
-            </span>
-            <h2 className="text-lg font-bold text-slate-900 tracking-tight line-clamp-1">
-              {campaign?.title}
-            </h2>
+    <Modal
+      open={isOpen}
+      onClose={onClose}
+      sheet
+      size="md"
+      layer={50}
+      closeOnBackdrop={false}
+      ariaLabel="지원 완료"
+      title={isSuccess ? undefined : "지원서 작성"}
+      description={isSuccess ? undefined : campaign?.title}
+    >
+      {isSuccess ? (
+        <div className="py-10 text-center">
+          <div className="w-14 h-14 rounded-full bg-brand-weak text-brand flex items-center justify-center mx-auto">
+            <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" />
+            </svg>
           </div>
-          <button
-            onClick={onClose}
-            className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center text-sm font-bold cursor-pointer"
-          >
-            ✕
-          </button>
+          <h2 className="text-title font-bold text-ink mt-5">지원이 완료됐어요</h2>
+          <p className="text-body text-sub mt-2">
+            신청서를 검토한 뒤 조건에 맞는 분께
+            <br />
+            순서대로 따로 연락드릴게요.
+          </p>
+          <Button size="lg" block className="mt-8" onClick={onClose}>
+            확인
+          </Button>
         </div>
+      ) : (
+        <form onSubmit={handleSubmit} className="space-y-7 pb-2">
+          <Field label="이름" required>
+            <Input name="name" required placeholder="홍길동" autoComplete="name" value={formData.name} onChange={handleChange} />
+          </Field>
 
-        {/* Content Body */}
-        <div className="p-5 overflow-y-auto space-y-6 flex-1 text-slate-800 text-sm">
-          {isSuccess ? (
-            <div className="py-12 text-center space-y-4">
-              <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto text-2xl font-bold">
-                ✓
-              </div>
-              <h3 className="text-xl font-bold text-slate-900">
-                캠페인 지원이 완료되었습니다!
-              </h3>
-              <p className="text-xs text-slate-500 leading-relaxed max-w-xs mx-auto">
-                신청서 검토 후 조건에 부합하는 지원자분들께 순차적으로 개별 안내 연락을 드리겠습니다.
+          <Field label="생년월일" required hint="주민번호 앞 6자리">
+            <Input name="birthdate" required inputMode="numeric" placeholder="981225" value={formData.birthdate} onChange={handleChange} />
+          </Field>
+
+          <Field label="휴대폰 번호" required>
+            <Input
+              type="tel"
+              name="phone"
+              required
+              inputMode="numeric"
+              autoComplete="tel"
+              placeholder="- 없이 숫자만 (01012345678)"
+              value={formData.phone}
+              onChange={handleChange}
+            />
+          </Field>
+
+          <Field label="블로그 주소" required>
+            <Input name="blogUrl" required placeholder="blog.naver.com/아이디" value={formData.blogUrl} onChange={handleChange} />
+          </Field>
+
+          {/* 희망 일정 3개 */}
+          <fieldset className="space-y-3">
+            <legend className="text-small font-semibold text-ink-2">
+              방문 가능한 날짜 3개<span className="text-brand ml-1">*</span>
+            </legend>
+            <div className="rounded-control bg-danger-weak px-4 py-3 text-small text-ink-2">
+              <p className="font-semibold text-danger-strong">예약이 확정되면 일정을 바꿀 수 없어요</p>
+              <p className="mt-1 text-sub">
+                일정 변경을 요청하면 예약이 취소되고 다음 대기자에게 순서가 넘어가요. 1~3순위 모두 실제로 갈 수 있는 날짜로 골라 주세요.
               </p>
-              <button
-                onClick={onClose}
-                className="w-full py-3.5 bg-slate-900 text-white font-bold text-sm rounded-2xl shadow-md mt-4 cursor-pointer"
-              >
-                확인
-              </button>
             </div>
-          ) : (
-            <form onSubmit={handleSubmit} className="space-y-6">
-              
-              {/* Q1. Name */}
-              <div className="space-y-1.5">
-                <label className="block text-xs font-bold text-slate-700">
-                  1. 지원자 성함 <span className="text-rose-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  name="name"
+            {[0, 1, 2].map((idx) => (
+              <div key={idx} className="grid grid-cols-[3.5rem_1fr_1fr] items-center gap-2">
+                <span className="text-small font-semibold text-sub">{idx + 1}순위</span>
+                <Input
+                  type="date"
+                  size="sm"
+                  min={getTodayString()}
                   required
-                  placeholder="성함을 입력하세요 (예: 홍길동)"
-                  value={formData.name}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-slate-900 text-sm"
+                  aria-label={`${idx + 1}순위 날짜`}
+                  value={schedules[idx].date}
+                  onChange={(e) => handleScheduleChange(idx, "date", e.target.value)}
                 />
-              </div>
-
-              {/* Q2. Birthdate */}
-              <div className="space-y-1.5">
-                <label className="block text-xs font-bold text-slate-700">
-                  2. 생년월일 (주민번호 앞 6자리) <span className="text-rose-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  name="birthdate"
+                <Select
+                  size="sm"
                   required
-                  placeholder="예: 981225 (주민번호 앞 6자리)"
-                  value={formData.birthdate}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-slate-900 text-sm"
-                />
-              </div>
-
-              {/* Q3. Phone */}
-              <div className="space-y-1.5">
-                <label className="block text-xs font-bold text-slate-700">
-                  3. 휴대폰 번호 <span className="text-rose-500">*</span>
-                </label>
-                <input
-                  type="tel"
-                  name="phone"
-                  required
-                  placeholder="01012345678 (-없이 숫자만 입력)"
-                  value={formData.phone}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-slate-900 text-sm"
-                />
-              </div>
-
-              {/* Q4. Blog URL */}
-              <div className="space-y-1.5">
-                <label className="block text-xs font-bold text-slate-700">
-                  4. 지원자 블로그 주소 <span className="text-rose-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  name="blogUrl"
-                  required
-                  placeholder="blog.naver.com/아이디"
-                  value={formData.blogUrl}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-slate-900 text-sm"
-                />
-              </div>
-
-              {/* Q5. Schedules (Calendar Date & Time Picker) */}
-              <div className="space-y-3">
-                <div>
-                  <label className="block text-xs font-bold text-slate-700">
-                    5. 방문 가능한 희망 일정 3가지 (달력에서 선택) <span className="text-rose-500">*</span>
-                  </label>
-                  <p className="text-[11px] text-slate-500 leading-tight mt-0.5">
-                    원활한 병원 예약을 위해 방문이 가능한 날짜와 희망 시간대를 3순위까지 달력에서 꼭 선택해 주세요!
-                  </p>
-                  <div className="mt-2.5 p-3 bg-amber-50 border border-amber-200 rounded-xl text-amber-900 text-xs leading-relaxed">
-                    <span className="font-bold text-amber-900">⚠️ [예약 확정 시 일정 변경 불가 안내 (필독)]</span>
-                    <p className="mt-1 text-[11px] text-amber-800">
-                      확정 후에는 일정 변경이 불가능하며 취소만 가능합니다. 일정 변경 요청 시 예약이 취소 처리되어 다음 대기자에게 순서가 넘어갑니다. 반드시 1~3순위 모두 실제 내원이 가능한 날짜로 신중히 선택해 주세요!
-                    </p>
-                  </div>
-                </div>
-
-                <div className="space-y-2.5 pt-0.5">
-                  {[0, 1, 2].map((idx) => (
-                    <div
-                      key={idx}
-                      className="bg-slate-50 p-3 rounded-2xl border border-slate-200/80 space-y-1.5"
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className="text-[11px] font-extrabold text-slate-800 flex items-center gap-1">
-                          <span className="w-4 h-4 rounded-full bg-slate-900 text-white text-[10px] flex items-center justify-center font-bold">
-                            {idx + 1}
-                          </span>
-                          {idx + 1}순위 희망 일정
-                        </span>
-                        <span className="text-[10px] text-slate-400 font-medium">
-                          날짜 + 시간 선택
-                        </span>
-                      </div>
-
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        {/* Date Picker */}
-                        <div className="relative">
-                          <input
-                            type="date"
-                            min={getTodayString()}
-                            required
-                            value={schedules[idx].date}
-                            onChange={(e) =>
-                              handleScheduleChange(idx, "date", e.target.value)
-                            }
-                            className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-900 focus:outline-none focus:border-slate-900 shadow-2xs"
-                          />
-                        </div>
-
-                        {/* Time Select */}
-                        <select
-                          required
-                          value={schedules[idx].time}
-                          onChange={(e) =>
-                            handleScheduleChange(idx, "time", e.target.value)
-                          }
-                          className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-900 focus:outline-none focus:border-slate-900 shadow-2xs cursor-pointer"
-                        >
-                          {TIME_SLOTS.map((time) => (
-                            <option key={time} value={time}>
-                              {time}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                    </div>
+                  aria-label={`${idx + 1}순위 시간`}
+                  value={schedules[idx].time}
+                  onChange={(e) => handleScheduleChange(idx, "time", e.target.value)}
+                >
+                  {TIME_SLOTS.map((time) => (
+                    <option key={time} value={time}>
+                      {time}
+                    </option>
                   ))}
-                </div>
+                </Select>
               </div>
+            ))}
+          </fieldset>
 
-              {/* 6. Photo Upload for Scar / Tattoo / Medical treatment condition */}
-              <div className="space-y-2.5 pt-2 border-t border-slate-100">
-                <div className="flex items-center justify-between">
-                  <label className="block text-xs font-bold text-slate-700">
-                    6. 시술 부위(흉터/문신 등) 상태 사진 첨부{" "}
-                    {isPhotoRequired ? (
-                      <span className="text-rose-500">* (필수)</span>
-                    ) : (
-                      <span className="text-slate-400 font-normal">(선택)</span>
-                    )}
-                  </label>
-                  <span className="text-[11px] font-medium text-slate-400">
-                    {imageList.length}/3장
-                  </span>
-                </div>
+          {/* 시술 부위 사진 */}
+          <div className="space-y-3">
+            <div className="flex items-baseline justify-between gap-2">
+              <p className="text-small font-semibold text-ink-2">
+                시술 부위 사진
+                {isPhotoRequired ? <span className="text-brand ml-1">*</span> : <span className="text-muted font-normal ml-1">(선택)</span>}
+              </p>
+              <span className="text-caption text-muted">{imageList.length}/3장</span>
+            </div>
+            <p className="text-caption text-sub">상담과 시술 가능 여부 확인을 위해 흉터·문신·켈로이드 등 원하는 부위의 사진을 올려 주세요.</p>
 
-                <p className="text-[11px] text-slate-500 leading-relaxed">
-                  정확한 상담 및 시술 가능 여부 확인을 위해 시술을 원하시는 부위(흉터, 문신, 켈로이드 등)의 사진을 첨부해 주세요.
-                </p>
-
-                {/* Upload Button Box */}
-                {imageList.length < 3 && (
-                  <label className="flex flex-col items-center justify-center w-full p-4 border-2 border-dashed border-slate-200 hover:border-slate-400 bg-slate-50/70 hover:bg-slate-100/70 rounded-2xl cursor-pointer transition-all text-center">
-                    <div className="w-10 h-10 rounded-full bg-slate-200/80 text-slate-700 flex items-center justify-center text-lg mb-1">
-                      📸
-                    </div>
-                    <span className="text-xs font-bold text-slate-800">
-                      사진 추가하기 (클릭 또는 파일 선택)
-                    </span>
-                    <span className="text-[10px] text-slate-400 mt-0.5">
-                      JPG, PNG, WEBP (장당 최대 5MB)
-                    </span>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      multiple
-                      onChange={handleImageChange}
-                      className="hidden"
-                    />
-                  </label>
-                )}
-
-                {/* Image Previews Grid */}
-                {imageList.length > 0 && (
-                  <div className="grid grid-cols-3 gap-2.5 pt-1">
-                    {imageList.map((img, idx) => (
-                      <div
-                        key={img.id}
-                        className="relative group aspect-square rounded-xl overflow-hidden border border-slate-200 shadow-xs bg-slate-100"
-                      >
-                        <img
-                          src={img.dataUrl}
-                          alt={`첨부 이미지 ${idx + 1}`}
-                          className="w-full h-full object-cover"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveImage(img.id)}
-                          className="absolute top-1 right-1 w-6 h-6 rounded-full bg-black/70 hover:bg-rose-600 text-white flex items-center justify-center text-xs font-bold transition-colors cursor-pointer shadow-md"
-                          title="삭제"
-                        >
-                          ✕
-                        </button>
-                        <span className="absolute bottom-1 left-1 px-1.5 py-0.5 bg-black/60 text-white rounded text-[9px] font-bold">
-                          #{idx + 1}
-                        </span>
-                      </div>
-                    ))}
+            {imageList.length > 0 && (
+              <div className="grid grid-cols-3 gap-2">
+                {imageList.map((img, idx) => (
+                  <div key={img.id} className="relative aspect-square rounded-control overflow-hidden bg-fill">
+                    <img src={img.dataUrl} alt={`첨부 사진 ${idx + 1}`} className="w-full h-full object-cover" />
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveImage(img.id)}
+                      aria-label={`사진 ${idx + 1} 삭제`}
+                      className="absolute top-1.5 right-1.5 w-7 h-7 rounded-full bg-black/60 hover:bg-black/80 text-white flex items-center justify-center cursor-pointer"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 6l12 12M18 6L6 18" />
+                      </svg>
+                    </button>
                   </div>
-                )}
-
-                {/* Optional Note for photo */}
-                <input
-                  type="text"
-                  name="imageNote"
-                  placeholder="부위/상태 설명 (예: 오른쪽 팔 흉터, 5cm 크기)"
-                  value={imageNote}
-                  onChange={(e) => setImageNote(e.target.value)}
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-slate-900"
-                />
+                ))}
               </div>
+            )}
 
-              {/* 7. Motivation for applying (Required) */}
-              <div className="space-y-1.5 pt-2 border-t border-slate-100">
-                <label className="block text-xs font-bold text-slate-700">
-                  7. 지원동기 <span className="text-rose-500">* (필수)</span>
-                </label>
-                <textarea
-                  name="userNote"
-                  required
-                  rows={2}
-                  placeholder="이번 체험단 캠페인에 지원하시는 계기나 동기를 입력해 주세요."
-                  value={formData.userNote}
-                  onChange={handleChange}
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-slate-900 resize-none"
-                />
-              </div>
+            {imageList.length < 3 && (
+              <label className="flex items-center justify-center gap-2 h-12 rounded-control border border-dashed border-faint text-small font-semibold text-sub hover:bg-fill-weak cursor-pointer transition-colors">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 5v14M5 12h14" />
+                </svg>
+                사진 추가 (최대 3장, 장당 10MB 이하)
+                <input type="file" accept="image/*" multiple onChange={handleImageChange} className="sr-only" />
+              </label>
+            )}
 
-              {/* Agreements (Q1, Q6, Q7, Q8) */}
-              <div className="space-y-3 pt-3 border-t border-slate-100">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-slate-700">필수 약관 동의</span>
-                </div>
+            <Input
+              size="sm"
+              name="imageNote"
+              aria-label="시술 부위 설명"
+              placeholder="부위·상태 설명 (예: 오른쪽 팔 흉터, 5cm)"
+              value={imageNote}
+              onChange={(e) => setImageNote(e.target.value)}
+            />
+          </div>
 
-                {/* 전체 동의 버튼 */}
-                <label className="flex items-center gap-3 cursor-pointer bg-slate-900 text-white p-3.5 rounded-xl font-bold text-xs shadow-sm hover:bg-slate-800 transition-colors">
-                  <input
-                    type="checkbox"
-                    checked={isAllAgreed}
-                    onChange={handleSelectAll}
-                    className="w-4 h-4 rounded text-indigo-600 focus:ring-0 cursor-pointer accent-indigo-500"
-                  />
-                  <span>[전체 동의] 모든 필수 약관에 한번에 동의합니다</span>
-                </label>
+          <Field label="지원동기" required>
+            <Textarea
+              name="userNote"
+              required
+              rows={3}
+              placeholder="이번 캠페인에 지원하는 이유를 적어 주세요."
+              value={formData.userNote}
+              onChange={handleChange}
+            />
+          </Field>
 
-                {/* Q1 */}
-                <label className="flex items-start gap-2.5 cursor-pointer bg-slate-50 p-3 rounded-xl border border-slate-200/80">
-                  <input
-                    type="checkbox"
-                    name="agreePrivacy"
-                    checked={formData.agreePrivacy}
-                    onChange={handleChange}
-                    className="mt-0.5 w-4 h-4 rounded text-slate-900 focus:ring-0"
-                  />
-                  <span className="text-xs text-slate-600 leading-snug">
-                    <strong className="text-slate-900">[필수] 개인정보 수집 및 이용 동의</strong>
-                    <br />
-                    체험단 적격자 확인, 예약 안내 및 본인 확인 목적 (종료 후 3개월 보관)
-                  </span>
-                </label>
-
-                {/* Q6 */}
-                <label className="flex items-start gap-2.5 cursor-pointer bg-slate-50 p-3 rounded-xl border border-slate-200/80">
-                  <input
-                    type="checkbox"
-                    name="agreeRetention"
-                    checked={formData.agreeRetention}
-                    onChange={handleChange}
-                    className="mt-0.5 w-4 h-4 rounded text-slate-900 focus:ring-0"
-                  />
-                  <span className="text-xs text-slate-600 leading-snug">
-                    <strong className="text-slate-900">[필수] 포스팅 6개월 유지 동의</strong>
-                    <br />
-                    작성 콘텐츠 6개월 유지 (미유지 시 시술비 전액 청구될 수 있음)
-                  </span>
-                </label>
-
-                {/* Q7 Dynamic Mission Agreement */}
-                <label className="flex items-start gap-2.5 cursor-pointer bg-indigo-50/60 p-3 rounded-xl border border-indigo-100">
-                  <input
-                    type="checkbox"
-                    name="agreeMission"
-                    checked={formData.agreeMission}
-                    onChange={handleChange}
-                    className="mt-0.5 w-4 h-4 rounded text-slate-900 focus:ring-0"
-                  />
-                  <span className="text-xs text-slate-700 leading-snug">
-                    <strong className="text-indigo-900">[필수] 리뷰 미션 가이드 준수 동의</strong>
-                    <br />
-                    <span className="text-[11px] text-indigo-700 font-semibold">{missionText}</span>
-                  </span>
-                </label>
-
-                {/* Q8 */}
-                <label className="flex items-start gap-2.5 cursor-pointer bg-slate-50 p-3 rounded-xl border border-slate-200/80">
-                  <input
-                    type="checkbox"
-                    name="agreeMarketing"
-                    checked={formData.agreeMarketing}
-                    onChange={handleChange}
-                    className="mt-0.5 w-4 h-4 rounded text-slate-900 focus:ring-0"
-                  />
-                  <span className="text-xs text-slate-600 leading-snug">
-                    <strong className="text-slate-900">[필수] 마케팅 활용 및 2차 가공 동의</strong>
-                    <br />
-                    공식 블로그, SNS, 홈페이지 홍보 자료 및 부분 2차 가공 활용 동의
-                  </span>
-                </label>
-
-                {/* Reservation No Change / Waitlist Transfer Agreement */}
-                <label className="flex items-start gap-2.5 cursor-pointer bg-amber-50/70 p-3 rounded-xl border border-amber-200">
-                  <input
-                    type="checkbox"
-                    name="agreeNoChange"
-                    checked={formData.agreeNoChange}
-                    onChange={handleChange}
-                    className="mt-0.5 w-4 h-4 rounded text-slate-900 focus:ring-0 cursor-pointer accent-indigo-600"
-                  />
-                  <span className="text-xs text-amber-900 leading-snug">
-                    <strong className="text-amber-950">[필수] 예약 확정 후 일정 변경 불가 및 취소 시 대기자 이월 동의</strong>
-                    <br />
-                    <span className="text-[11px] text-amber-800">
-                      예약 확정 후 변경 불가(취소만 가능)하며, 취소 시 다음 대기자에게 순서가 이월됨에 동의합니다.
+          {/* 약관 동의 */}
+          <fieldset className="space-y-1">
+            <legend className="sr-only">약관 동의</legend>
+            <label className="flex items-center gap-3 rounded-control bg-fill px-4 h-14 cursor-pointer">
+              <input type="checkbox" checked={isAllAgreed} onChange={handleSelectAll} className="w-5 h-5 cursor-pointer accent-brand" />
+              <span className="text-body font-semibold text-ink">필수 약관 전체 동의</span>
+            </label>
+            <ul className="pt-1">
+              {agreements.map((a) => (
+                <li key={a.name}>
+                  <label className="flex items-start gap-3 px-4 py-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      name={a.name}
+                      checked={formData[a.name]}
+                      onChange={handleChange}
+                      className="mt-0.5 w-5 h-5 shrink-0 cursor-pointer accent-brand"
+                    />
+                    <span className="min-w-0">
+                      <span className="block text-small font-medium text-ink">[필수] {a.title}</span>
+                      <span className="block text-caption text-sub mt-0.5">{a.desc}</span>
                     </span>
-                  </span>
-                </label>
-              </div>
+                  </label>
+                </li>
+              ))}
+            </ul>
+          </fieldset>
 
-              {/* Submit Button */}
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="w-full py-4 bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm rounded-2xl shadow-lg transition-all cursor-pointer"
-              >
-                {isSubmitting ? "제출 처리 중..." : "신청서 제출하기"}
-              </button>
-            </form>
-          )}
-        </div>
-
-      </div>
-    </div>
+          <div className="sticky -bottom-4 -mx-6 px-6 pt-3 pb-4 bg-white">
+            <Button type="submit" size="lg" block disabled={isSubmitting}>
+              {isSubmitting ? "제출하는 중..." : "지원서 제출"}
+            </Button>
+          </div>
+        </form>
+      )}
+    </Modal>
   );
 }
