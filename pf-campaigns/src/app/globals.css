@@ -2,13 +2,81 @@
 @source "../**/*.{js,jsx,ts,tsx}";
 @source "../../src/**/*.{js,jsx,ts,tsx}";
 
+/* 화면 공통 값: 색, 글꼴, 글자 크기, 모서리. 화면에서는 이 이름(bg-brand, text-sub, rounded-card ...)으로만 쓴다. */
+@theme {
+  --font-sans: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+
+  --color-brand: #3182f6;
+  --color-brand-strong: #1b64da;
+  --color-brand-weak: #e8f3ff;
+
+  --color-ink: #191f28;
+  --color-ink-2: #333d4b;
+  --color-sub: #4e5968;
+  --color-muted: #8b95a1;
+  --color-faint: #b0b8c1;
+  --color-line: #e5e8eb;
+  --color-fill: #f2f4f6;
+  --color-fill-weak: #f9fafb;
+
+  --color-danger: #f04452;
+  --color-danger-strong: #d22030;
+  --color-danger-weak: #ffeeee;
+  --color-success: #03a94d;
+  --color-success-weak: #e5f8ee;
+  --color-success-strong: #027a38;
+  --color-warn: #e58a00;
+  --color-warn-weak: #fff3e0;
+  --color-warn-strong: #9a5200;
+  --color-violet: #7b4fe0;
+  --color-violet-weak: #f1ebfd;
+  --color-violet-strong: #5a2fc2;
+  --color-teal: #0b9a8d;
+  --color-teal-weak: #e3f6f4;
+  --color-teal-strong: #076d63;
+
+  /* 글자 크기는 이 여섯 단계만 쓴다 */
+  --text-caption: 13px;
+  --text-caption--line-height: 1.45;
+  --text-small: 14px;
+  --text-small--line-height: 1.5;
+  --text-body: 15px;
+  --text-body--line-height: 1.6;
+  --text-subtitle: 17px;
+  --text-subtitle--line-height: 1.45;
+  --text-title: 20px;
+  --text-title--line-height: 1.4;
+  --text-display: 26px;
+  --text-display--line-height: 1.35;
+
+  --radius-control: 10px;
+  --radius-card: 14px;
+  --radius-sheet: 20px;
+}
+
 @layer base {
   html, body {
-    overflow-x: hidden;
+    overflow-x: clip;
     max-width: 100vw;
     word-break: keep-all;
     overflow-wrap: break-word;
     -webkit-tap-highlight-color: transparent;
+  }
+  body {
+    background: var(--color-fill);
+    color: var(--color-ink);
+    letter-spacing: -0.01em;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-brand);
+    outline-offset: 2px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
   }
 }
 

@@ -3,18 +3,10 @@
 import { useState, useEffect, useMemo } from "react";
 import AdminPasswordGate from "@/components/AdminPasswordGate";
 import { formatBlogUrl, getDriveThumbnailUrl, getDrivePreviewUrl, getDriveFileId } from "@/lib/parser";
-
-const getStatusStyle = (status) => {
-  if (!status) return "bg-slate-100 text-slate-700 border-slate-200";
-  if (status.includes("발행") || status.includes("6.")) return "bg-emerald-50 text-emerald-700 border-emerald-200";
-  if (status.includes("검수") || status.includes("5.")) return "bg-purple-50 text-purple-700 border-purple-200";
-  if (status.includes("포스팅") || status.includes("4.")) return "bg-teal-50 text-teal-700 border-teal-200";
-  if (status.includes("대기") || status.includes("3.")) return "bg-amber-50 text-amber-800 border-amber-200";
-  if (status.includes("예약") || status.includes("2.")) return "bg-blue-50 text-blue-700 border-blue-200";
-  if (status.includes("신규") || status.includes("1.")) return "bg-indigo-50 text-indigo-700 border-indigo-200";
-  if (status.includes("드랍") || status.includes("취소") || status.includes("7.")) return "bg-rose-50 text-rose-700 border-rose-200";
-  return "bg-slate-100 text-slate-700 border-slate-200";
-};
+import Button from "@/components/ui/Button";
+import Modal from "@/components/ui/Modal";
+import Field, { Input, Select, Textarea } from "@/components/ui/Field";
+import { statusTone } from "@/components/ui/StatusPill";
 
 const isShared = (item) => {
   if (!item || !item.shareStatus) return false;
@@ -23,13 +15,13 @@ const isShared = (item) => {
 };
 
 const STATUS_OPTIONS = [
-  { label: "1.신규지원", color: "bg-indigo-50 text-indigo-700 border-indigo-200" },
-  { label: "2.예약중", color: "bg-blue-50 text-blue-700 border-blue-200" },
-  { label: "3.체험대기중", color: "bg-amber-50 text-amber-800 border-amber-200" },
-  { label: "4.포스팅 작성중", color: "bg-teal-50 text-teal-700 border-teal-200" },
-  { label: "5.원고 검수중", color: "bg-purple-50 text-purple-700 border-purple-200" },
-  { label: "6.발행완료", color: "bg-emerald-50 text-emerald-700 border-emerald-200" },
-  { label: "7.드랍", color: "bg-rose-50 text-rose-700 border-rose-200" },
+  { label: "1.신규지원" },
+  { label: "2.예약중" },
+  { label: "3.체험대기중" },
+  { label: "4.포스팅 작성중" },
+  { label: "5.원고 검수중" },
+  { label: "6.발행완료" },
+  { label: "7.드랍" },
 ];
 
 const extractYearMonth = (dateStr) => {
@@ -104,6 +96,7 @@ function AdminDashboard({ handleLogout }) {
   const [selectedClientFilter, setSelectedClientFilter] = useState("전체");
   const [selectedPostMonthFilter, setSelectedPostMonthFilter] = useState("전체");
   const [selectedBillingMonth, setSelectedBillingMonth] = useState(currentYearMonth()); // 월별 발행 집계 대시보드 기준월 (원고 발행일 기준)
+  const [isBillingOpen, setIsBillingOpen] = useState(false); // 월별 발행 집계 펼침
   const [onlySharedFilter, setOnlySharedFilter] = useState(false); // 체크박스 필터: 룸 공유완료만 보기
   const [sortOrder, setSortOrder] = useState("desc"); // 'desc' | 'asc'
   const [activeItem, setActiveItem] = useState(null); // Side Sheet Drawer
@@ -165,6 +158,16 @@ function AdminDashboard({ handleLogout }) {
   useEffect(() => {
     setEditingField(null);
   }, [activeItem && activeItem.rowId]);
+
+  // 상세 패널은 Esc로 닫는다 (위에 다른 창이 떠 있으면 그 창이 먼저 닫힌다)
+  useEffect(() => {
+    if (!activeItem || messageApplicant || itemToDelete || alertInfo || lightboxImage) return;
+    const onKey = (e) => {
+      if (e.key === "Escape") setActiveItem(null);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [activeItem, messageApplicant, itemToDelete, alertInfo, lightboxImage]);
 
   // 2. 시트 저장 공통 처리 ---------------------------------------------
   // 시트 행은 '행 번호 + 키'로 확인한다. 화면에서 바꾼 칸만 보내고, 실패하면 되돌린다.
@@ -577,836 +580,445 @@ function AdminDashboard({ handleLogout }) {
     showToast("CSV 파일이 다운로드되었습니다.");
   };
 
+  const monthLabel = (ym) => (ym === "전체" ? "전체 기간" : `${ym.replace("-", "년 ")}월`);
+  const hasListFilter =
+    selectedPostMonthFilter !== "전체" || selectedClientFilter !== "전체" || selectedHospital !== "전체";
+  const clearListFilters = () => {
+    setSelectedPostMonthFilter("전체");
+    setSelectedClientFilter("전체");
+    setSelectedHospital("전체");
+    showToast("필터를 해제했습니다.");
+  };
+
+  const renderStatusSelect = (item, size = "sm") => (
+    <select
+      value={item.status}
+      onChange={(e) => handleUpdateStatus(item, e.target.value)}
+      aria-label={`${item.name}님 진행상태`}
+      className={`${size === "sm" ? "h-8 pl-2.5 pr-7 text-caption" : "h-10 pl-3 pr-8 text-small"} rounded-full font-semibold outline-none cursor-pointer border-0 ${statusTone(item.status)}`}
+    >
+      {STATUS_OPTIONS.map((opt) => (
+        <option key={opt.label} value={opt.label}>
+          {opt.label}
+        </option>
+      ))}
+      {!STATUS_OPTIONS.some((o) => o.label === item.status) && item.status && (
+        <option value={item.status}>{item.status}</option>
+      )}
+    </select>
+  );
+
+  const renderShareToggle = (item) => (
+    <label
+      className={`inline-flex items-center gap-2 h-8 px-2.5 rounded-control cursor-pointer select-none text-caption font-semibold transition-colors ${
+        isShared(item) ? "bg-brand-weak text-brand-strong" : "bg-fill text-muted hover:text-sub"
+      }`}
+      title={isShared(item) ? "병원 룸에 공유됨" : "체크하면 병원 룸에 바로 공유"}
+    >
+      <input
+        type="checkbox"
+        checked={isShared(item)}
+        onChange={(e) => handleUpdateShareStatus(item, e.target.checked)}
+        className="w-4 h-4 cursor-pointer accent-brand"
+      />
+      <span>{isShared(item) ? "공유됨" : "미공유"}</span>
+    </label>
+  );
+
+  const linkCls = "text-small font-medium text-brand hover:underline";
+  const sectionTitle = "text-small font-semibold text-sub";
+
   return (
-    <div className="min-h-screen bg-[#F8F9FA] text-[#202124] font-sans antialiased flex flex-col">
-      {/* Toast Notification */}
+    <div className="min-h-screen bg-fill text-ink flex flex-col">
+      {/* 알림 토스트 */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 bg-[#202124] text-white px-5 py-3 rounded-xl shadow-xl text-xs font-semibold flex items-center gap-2 animate-in fade-in slide-in-from-bottom-2 duration-200">
-          <span className="w-2 h-2 rounded-full bg-blue-400"></span>
-          <span>{toastMessage}</span>
+        <div
+          role="status"
+          className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[90] bg-ink text-white px-5 py-3 rounded-card text-small font-medium shadow-lg max-w-[calc(100vw-2rem)]"
+        >
+          {toastMessage}
         </div>
       )}
 
-      {/* 1. Google Material App Bar */}
-      <header className="sticky top-0 z-30 bg-white border-b border-[#E0E3E7] px-4 sm:px-8 py-3.5 flex items-center justify-between gap-4">
-        {/* Left: Brand Identity */}
-        <div className="flex items-center gap-3 shrink-0">
-          <div className="w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center font-black text-base shadow-sm">
-            L
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-base font-bold tracking-tight text-[#202124]">
-                체험단 라운지 Console
-              </h1>
-              <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
-                Admin
-              </span>
-            </div>
-            <p className="text-[11px] text-[#5F6368] hidden sm:block">
-              구글 시트 연동 통합 지원자 관리 시스템
-            </p>
-          </div>
-        </div>
+      {/* 상단 바 */}
+      <header className="sticky top-0 z-30 bg-white border-b border-line">
+        <div className="max-w-7xl mx-auto h-16 px-4 sm:px-8 flex items-center gap-4">
+          <h1 className="text-subtitle font-bold text-ink shrink-0">체험단 관리</h1>
 
-        {/* Center: Google Style Global Search Bar */}
-        <div className="flex-1 max-w-lg hidden md:block">
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="지원자 이름, 연락처(뒷번호), 병원명, 블로그 검색..."
+          <div className="flex-1 max-w-md hidden md:block">
+            <Input
+              size="sm"
+              type="search"
+              placeholder="이름, 연락처, 병원, 블로그 검색"
+              aria-label="지원자 검색"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-9 py-2 bg-[#F1F3F4] hover:bg-[#E8EAED] focus:bg-white border border-transparent focus:border-blue-600 rounded-full text-xs font-medium text-[#202124] placeholder-[#80868B] outline-none transition-all shadow-inner"
             />
-            <svg
-              className="w-4 h-4 text-[#5F6368] absolute left-3.5 top-1/2 -translate-y-1/2"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-              />
-            </svg>
-            {searchQuery && (
-              <button
-                onClick={() => setSearchQuery("")}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-[#5F6368] hover:text-[#202124] cursor-pointer"
-              >
-                ✕
-              </button>
-            )}
           </div>
-        </div>
 
-        {/* Right: Actions */}
-        <div className="flex items-center gap-2 shrink-0">
-          <button
-            onClick={() => fetchData(true)}
-            disabled={isRefreshing}
-            className="p-2 rounded-xl text-[#5F6368] hover:text-[#202124] hover:bg-[#F1F3F4] transition-colors cursor-pointer"
-            title="새로고침"
-          >
-            <svg
-              className={`w-4 h-4 ${isRefreshing ? "animate-spin text-blue-600" : ""}`}
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-              />
-            </svg>
-          </button>
-
-          {sheetUrl && (
-            <a
-              href={sheetUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-[#F8F9FA] text-[#3C4043] border border-[#DADCE0] rounded-xl text-xs font-semibold transition-colors shadow-2xs"
-            >
-              <span className="text-emerald-600 font-bold">▦</span>
-              <span>구글 시트 열기</span>
-              <svg className="w-3 h-3 text-[#5F6368]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+          <div className="ml-auto flex items-center gap-1.5 shrink-0">
+            <Button variant="ghost" size="sm" onClick={() => fetchData(true)} disabled={isRefreshing} aria-label="새로고침">
+              <svg className={`w-4 h-4 ${isRefreshing ? "animate-spin" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
               </svg>
-            </a>
-          )}
-
-          <button
-            onClick={downloadCSV}
-            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-[#F8F9FA] text-[#3C4043] border border-[#DADCE0] rounded-xl text-xs font-semibold transition-colors shadow-2xs cursor-pointer"
-          >
-            <span>CSV 저장</span>
-          </button>
-
-          {sheetUrl && (
-            <a
-              href={sheetUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="flex items-center gap-1 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 rounded-xl text-xs font-semibold transition-colors cursor-pointer"
-            >
-              <span>구글 시트 열기</span>
-            </a>
-          )}
-
-          <button
-            onClick={handleLogout}
-            className="p-2 rounded-xl text-[#5F6368] hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
-            title="로그아웃"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-            </svg>
-          </button>
+              <span className="hidden sm:inline">{isRefreshing ? "불러오는 중" : "새로고침"}</span>
+            </Button>
+            {sheetUrl && (
+              <Button variant="ghost" size="sm" href={sheetUrl} target="_blank" rel="noreferrer">
+                구글 시트
+              </Button>
+            )}
+            <Button variant="ghost" size="sm" onClick={downloadCSV} className="hidden sm:inline-flex">
+              CSV 저장
+            </Button>
+            <Button variant="ghost" size="sm" onClick={handleLogout}>
+              로그아웃
+            </Button>
+          </div>
         </div>
       </header>
 
-      {/* Main Content Area */}
-      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-8 space-y-6">
-        
-        {/* 시트 연결 오류 안내 */}
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-8 py-6 space-y-4">
+        {/* 시트 연결 오류 */}
         {loadError && (
-          <div className="p-4 bg-rose-50 border border-rose-200 rounded-2xl flex items-start justify-between gap-4">
-            <div className="flex items-start gap-3">
-              <span className="text-xl">⚠️</span>
-              <div>
-                <h4 className="text-xs font-bold text-rose-900">구글 시트에서 지원자를 불러오지 못했어요</h4>
-                <p className="text-[11px] text-rose-800 mt-0.5 leading-relaxed">{loadError}</p>
-              </div>
+          <div className="bg-white rounded-card p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <p className="text-body font-semibold text-danger">구글 시트에서 지원자를 불러오지 못했어요</p>
+              <p className="text-small text-sub mt-1">{loadError}</p>
             </div>
-            <button
-              onClick={() => fetchData(true)}
-              className="px-3.5 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold shrink-0 transition-colors shadow-2xs cursor-pointer"
-            >
+            <Button variant="secondary" size="sm" onClick={() => fetchData(true)}>
               다시 시도
-            </button>
+            </Button>
           </div>
         )}
 
-        {/* 2. KPI Metric Cards (Google Style Cards) */}
-        <div className="grid grid-cols-2 lg:grid-cols-5 gap-3.5 sm:gap-4">
-          <div className="bg-white p-4 sm:p-5 rounded-2xl border border-[#E0E3E7] shadow-2xs hover:shadow-xs transition-shadow">
-            <span className="text-[11px] font-bold text-[#5F6368] uppercase tracking-wider block">
-              전체 지원 건수
-            </span>
-            <div className="text-2xl sm:text-3xl font-black text-[#202124] mt-2">
-              {metrics.total}
-              <span className="text-xs font-medium text-[#5F6368] ml-1">건</span>
-            </div>
-            <span className="text-[10px] text-blue-600 font-semibold mt-1 block">
-              ● 실시간 누적 접수
-            </span>
-          </div>
-
-          <div className="bg-white p-4 sm:p-5 rounded-2xl border border-[#E0E3E7] shadow-2xs hover:shadow-xs transition-shadow">
-            <span className="text-[11px] font-bold text-blue-700 uppercase tracking-wider block">
-              🏥 병원 룸 공유
-            </span>
-            <div className="text-2xl sm:text-3xl font-black text-blue-800 mt-2">
-              {metrics.sharedCount}
-              <span className="text-xs font-medium text-blue-700 ml-1">건</span>
-            </div>
-            <span className="text-[10px] text-blue-600 font-semibold mt-1 block">
-              체크박스 실시간 연동
-            </span>
-          </div>
-
-          <div className="bg-white p-4 sm:p-5 rounded-2xl border border-[#E0E3E7] shadow-2xs hover:shadow-xs transition-shadow">
-            <span className="text-[11px] font-bold text-amber-700 uppercase tracking-wider block">
-              2~3.예약/체험대기
-            </span>
-            <div className="text-2xl sm:text-3xl font-black text-amber-800 mt-2">
-              {metrics.waitingVisit}
-              <span className="text-xs font-medium text-amber-700 ml-1">건</span>
-            </div>
-            <span className="text-[10px] text-amber-600 font-semibold mt-1 block">
-              병원 내원 대기 중
-            </span>
-          </div>
-
-          <div className="bg-white p-4 sm:p-5 rounded-2xl border border-[#E0E3E7] shadow-2xs hover:shadow-xs transition-shadow">
-            <span className="text-[11px] font-bold text-emerald-700 uppercase tracking-wider block">
-              6.발행완료
-            </span>
-            <div className="text-2xl sm:text-3xl font-black text-emerald-800 mt-2">
-              {metrics.published}
-              <span className="text-xs font-medium text-emerald-700 ml-1">건</span>
-            </div>
-            <span className="text-[10px] text-emerald-600 font-semibold mt-1 block">
-              블로그 리뷰 발행 완료
-            </span>
-          </div>
-
-          <div className="bg-white p-4 sm:p-5 rounded-2xl border border-[#E0E3E7] shadow-2xs hover:shadow-xs transition-shadow col-span-2 lg:col-span-1">
-            <span className="text-[11px] font-bold text-rose-700 uppercase tracking-wider block">
-              7.드랍 (취소)
-            </span>
-            <div className="text-2xl sm:text-3xl font-black text-rose-800 mt-2">
-              {metrics.dropped}
-              <span className="text-xs font-medium text-rose-700 ml-1">건</span>
-            </div>
-            <span className="text-[10px] text-rose-600 font-semibold mt-1 block">
-              미선정 / 취소 종결
-            </span>
-          </div>
-        </div>
-
-        {/* 2.5 월별 원고발행 정산·진행 현황 (고객사 견적 요청 및 병원별 카운팅 대시보드) */}
-        <div className="bg-white rounded-2xl border border-[#E0E3E7] shadow-2xs overflow-hidden">
-          {/* Card Header with Month Tabs */}
-          <div className="p-4 sm:p-5 border-b border-[#E0E3E7] flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-gradient-to-r from-blue-50/50 via-white to-slate-50">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold text-lg shadow-sm">
-                📅
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <h3 className="text-sm sm:text-base font-bold text-[#202124]">
-                    원고 발행월 기준 정산·진행 현황
-                  </h3>
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-                    견적금액 청구 기준
-                  </span>
-                </div>
-                <p className="text-[11px] text-[#5F6368] mt-0.5">
-                  원고 발행일 달을 기준으로 고객사 견적 요청 및 병원별 진행 인원을 실시간 카운팅합니다.
-                </p>
-              </div>
-            </div>
-
-            {/* Month Selection Buttons */}
-            <div className="flex items-center gap-1.5 bg-[#F1F3F4] p-1 rounded-xl self-start sm:self-auto flex-wrap">
-              {availableBillingMonths.map((ym) => (
-                <button
-                  key={ym}
-                  onClick={() => setSelectedBillingMonth(ym)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                    selectedBillingMonth === ym
-                      ? "bg-white text-blue-700 shadow-2xs"
-                      : "text-[#5F6368] hover:text-[#202124]"
-                  }`}
-                >
-                  {ym.replace("-", "년 ")}월
-                </button>
-              ))}
+        {/* 상태별 건수 = 상태 탭 */}
+        <nav aria-label="진행상태" className="flex items-center gap-2 overflow-x-auto scrollbar-none -mx-4 px-4 sm:mx-0 sm:px-0">
+          {statusTabsList.map((tab) => {
+            const count = tab === "전체" ? applications.length : applications.filter((a) => a.status === tab).length;
+            const isSelected = selectedStatusTab === tab;
+            return (
               <button
-                onClick={() => setSelectedBillingMonth("전체")}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                  selectedBillingMonth === "전체"
-                    ? "bg-white text-blue-700 shadow-2xs"
-                    : "text-[#5F6368] hover:text-[#202124]"
+                key={tab}
+                type="button"
+                onClick={() => setSelectedStatusTab(tab)}
+                aria-pressed={isSelected}
+                className={`shrink-0 h-9 px-4 rounded-full text-small font-semibold flex items-center gap-2 transition-colors cursor-pointer ${
+                  isSelected ? "bg-ink text-white" : "bg-white text-sub hover:text-ink"
                 }`}
               >
-                전체 누적
+                <span>{tab}</span>
+                <span className={isSelected ? "text-white/70" : "text-muted"}>{count}</span>
               </button>
-            </div>
-          </div>
+            );
+          })}
+        </nav>
 
-          {/* Card Body */}
-          <div className="p-4 sm:p-5 grid grid-cols-1 md:grid-cols-3 gap-4">
-            
-            {/* Box 1: 선택 월 총 발행 요약 */}
-            <div className="p-4 rounded-xl bg-blue-50/70 border border-blue-200 flex flex-col justify-between space-y-3">
-              <div>
-                <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-blue-800 uppercase tracking-wider">
-                    {selectedBillingMonth === "전체" ? "전체 누적 발행" : `${selectedBillingMonth.replace("-", "년 ")}월 발행 건수`}
-                  </span>
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-600 text-white">
-                    정산 대상
-                  </span>
-                </div>
-                <div className="text-3xl font-black text-blue-900 mt-2">
-                  {monthlyBillingStats.totalCount}
-                  <span className="text-sm font-semibold text-blue-700 ml-1">명</span>
-                </div>
-                <p className="text-[11px] text-blue-800 mt-1 leading-relaxed">
-                  {selectedBillingMonth === "전체"
-                    ? "원고 발행일이 등록된 전체 블로거 인원수입니다."
-                    : `${selectedBillingMonth.replace("-", "년 ")}월 중 원고 발행이 완료되어 고객사 견적 요청 가능한 총 인원입니다.`}
-                </p>
+        {/* 월별 발행 집계 (원고 발행일 기준) */}
+        <section className="bg-white rounded-card">
+          <button
+            type="button"
+            onClick={() => setIsBillingOpen((v) => !v)}
+            aria-expanded={isBillingOpen}
+            className="w-full flex items-center justify-between gap-4 p-5 text-left cursor-pointer"
+          >
+            <div>
+              <h2 className="text-subtitle font-bold text-ink">월별 발행 집계</h2>
+              <p className="text-small text-sub mt-0.5">원고 발행일 기준 · 고객사 견적 청구용</p>
+            </div>
+            <div className="flex items-center gap-3 shrink-0">
+              <span className="text-small text-sub hidden sm:inline">{monthLabel(selectedBillingMonth)}</span>
+              <span className="text-title font-bold text-ink">{monthlyBillingStats.totalCount}명</span>
+              <svg className={`w-5 h-5 text-muted transition-transform ${isBillingOpen ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
+          </button>
+
+          {isBillingOpen && (
+            <div className="px-5 pb-5 space-y-4">
+              <div className="flex items-center gap-2 overflow-x-auto scrollbar-none">
+                {[...availableBillingMonths, "전체"].map((ym) => (
+                  <button
+                    key={ym}
+                    type="button"
+                    onClick={() => setSelectedBillingMonth(ym)}
+                    aria-pressed={selectedBillingMonth === ym}
+                    className={`shrink-0 h-9 px-4 rounded-full text-small font-semibold cursor-pointer transition-colors ${
+                      selectedBillingMonth === ym ? "bg-ink text-white" : "bg-fill text-sub hover:text-ink"
+                    }`}
+                  >
+                    {ym === "전체" ? "전체 누적" : monthLabel(ym)}
+                  </button>
+                ))}
               </div>
 
-              <button
-                onClick={() => {
-                  setSelectedPostMonthFilter(selectedBillingMonth);
-                  setSelectedClientFilter("전체");
-                  setSelectedHospital("전체");
-                  showToast(`${selectedBillingMonth === "전체" ? "전체" : selectedBillingMonth + "월"} 발행 완료 지원자만 목록에 표시합니다.`);
-                }}
-                className="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold transition-colors cursor-pointer text-center shadow-2xs"
-              >
-                {selectedBillingMonth === "전체" ? "전체 발행 완료자 보기 ↓" : `${selectedBillingMonth.replace("-", "년 ")}월 발행 완료자 보기 ↓`}
-              </button>
-            </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div className="rounded-card bg-fill-weak p-4 flex flex-col justify-between gap-4">
+                  <div>
+                    <p className="text-small text-sub">{monthLabel(selectedBillingMonth)} 발행</p>
+                    <p className="text-display font-bold text-ink mt-1">{monthlyBillingStats.totalCount}명</p>
+                  </div>
+                  <Button
+                    variant="weak"
+                    size="sm"
+                    block
+                    onClick={() => {
+                      setSelectedPostMonthFilter(selectedBillingMonth);
+                      setSelectedClientFilter("전체");
+                      setSelectedHospital("전체");
+                      showToast(`${monthLabel(selectedBillingMonth)} 발행 완료 지원자만 목록에 표시합니다.`);
+                    }}
+                  >
+                    목록에서 보기
+                  </Button>
+                </div>
 
-            {/* Box 2: 고객사별 집계 (살만, 큐어람 등) */}
-            <div className="p-4 rounded-xl bg-[#F8F9FA] border border-[#E0E3E7] space-y-2.5">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-[#202124] flex items-center gap-1.5">
-                  <span>🏢</span>
-                  <span>고객사별 발행 건수 (견적 기준)</span>
-                </span>
-                <span className="text-[10px] text-[#5F6368]">클릭 시 필터</span>
+                {[
+                  { title: "고객사별", rows: monthlyBillingStats.clientBreakdown, onPick: (name) => setSelectedClientFilter(name) },
+                  { title: "병원별", rows: monthlyBillingStats.hospitalBreakdown, onPick: (name) => setSelectedHospital(name) },
+                ].map((box) => (
+                  <div key={box.title} className="rounded-card bg-fill-weak p-4">
+                    <p className="text-small text-sub mb-2">{box.title}</p>
+                    {box.rows.length > 0 ? (
+                      <ul className="max-h-40 overflow-y-auto -mx-2">
+                        {box.rows.map((row) => (
+                          <li key={row.name}>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                box.onPick(row.name);
+                                setSelectedPostMonthFilter(selectedBillingMonth);
+                                showToast(`[${row.name}] ${selectedBillingMonth === "전체" ? "" : selectedBillingMonth + "월 "}발행 건만 필터링합니다.`);
+                              }}
+                              className="w-full flex items-center justify-between gap-2 h-9 px-2 rounded-control text-small hover:bg-white cursor-pointer"
+                            >
+                              <span className="font-medium text-ink truncate">{row.name}</span>
+                              <span className="font-semibold text-ink shrink-0">{row.count}명</span>
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="text-small text-muted py-4">이 기간에 발행된 원고가 없어요.</p>
+                    )}
+                  </div>
+                ))}
               </div>
-
-              {monthlyBillingStats.clientBreakdown.length > 0 ? (
-                <div className="space-y-1.5 max-h-36 overflow-y-auto">
-                  {monthlyBillingStats.clientBreakdown.map((item) => (
-                    <button
-                      key={item.name}
-                      onClick={() => {
-                        setSelectedClientFilter(item.name);
-                        setSelectedPostMonthFilter(selectedBillingMonth);
-                        showToast(`[${item.name}] ${selectedBillingMonth === "전체" ? "" : selectedBillingMonth + "월 "}발행 건만 필터링합니다.`);
-                      }}
-                      className="w-full flex items-center justify-between p-2 rounded-lg bg-white hover:bg-blue-50 border border-[#DADCE0] hover:border-blue-300 transition-colors cursor-pointer text-xs group"
-                    >
-                      <span className="font-bold text-[#202124] group-hover:text-blue-700">
-                        {item.name}
-                      </span>
-                      <div className="flex items-center gap-1.5">
-                        <span className="font-black text-blue-700">{item.count}명</span>
-                        <span className="text-[10px] text-slate-400 group-hover:text-blue-600">→</span>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              ) : (
-                <div className="py-6 text-center text-xs text-slate-400">
-                  해당 월에 등록된 원고 발행 내역이 없습니다.
-                </div>
-              )}
             </div>
+          )}
+        </section>
 
-            {/* Box 3: 병원별 집계 */}
-            <div className="p-4 rounded-xl bg-[#F8F9FA] border border-[#E0E3E7] space-y-2.5">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-[#202124] flex items-center gap-1.5">
-                  <span>🏥</span>
-                  <span>병원별 발행 건수</span>
-                </span>
-                <span className="text-[10px] text-[#5F6368]">클릭 시 필터</span>
-              </div>
-
-              {monthlyBillingStats.hospitalBreakdown.length > 0 ? (
-                <div className="space-y-1.5 max-h-36 overflow-y-auto">
-                  {monthlyBillingStats.hospitalBreakdown.map((item) => (
-                    <button
-                      key={item.name}
-                      onClick={() => {
-                        setSelectedHospital(item.name);
-                        setSelectedPostMonthFilter(selectedBillingMonth);
-                        showToast(`[${item.name}] ${selectedBillingMonth === "전체" ? "" : selectedBillingMonth + "월 "}발행 건만 필터링합니다.`);
-                      }}
-                      className="w-full flex items-center justify-between p-2 rounded-lg bg-white hover:bg-emerald-50 border border-[#DADCE0] hover:border-emerald-300 transition-colors cursor-pointer text-xs group"
-                    >
-                      <span className="font-bold text-[#202124] group-hover:text-emerald-700 truncate max-w-[150px]">
-                        {item.name}
-                      </span>
-                      <div className="flex items-center gap-1.5">
-                        <span className="font-black text-emerald-700">{item.count}명</span>
-                        <span className="text-[10px] text-slate-400 group-hover:text-emerald-600">→</span>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              ) : (
-                <div className="py-6 text-center text-xs text-slate-400">
-                  해당 월에 등록된 원고 발행 내역이 없습니다.
-                </div>
-              )}
-            </div>
-
-          </div>
-
-          {/* Active Filter Indicator Strip (If Filtered by month/client/hospital) */}
-          {(selectedPostMonthFilter !== "전체" || selectedClientFilter !== "전체") && (
-            <div className="px-5 py-2.5 bg-blue-50/80 border-t border-blue-200 flex items-center justify-between text-xs text-blue-900">
+        {/* 지원자 목록 */}
+        <section className="bg-white rounded-card overflow-hidden">
+          <div className="p-5 space-y-3">
+            <div className="flex items-center justify-between gap-3 flex-wrap">
+              <h2 className="text-subtitle font-bold text-ink">
+                지원자 <span className="text-brand">{filteredApplications.length}</span>
+              </h2>
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="font-bold">🔍 현재 필터 적용 중:</span>
+                <label
+                  className={`inline-flex items-center gap-2 h-10 px-3 rounded-control text-small font-semibold cursor-pointer select-none ${
+                    onlySharedFilter ? "bg-brand-weak text-brand-strong" : "bg-fill text-sub"
+                  }`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={onlySharedFilter}
+                    onChange={(e) => setOnlySharedFilter(e.target.checked)}
+                    className="w-4 h-4 cursor-pointer accent-brand"
+                  />
+                  <span>룸 공유만 {metrics.sharedCount}</span>
+                </label>
+                <Select size="sm" className="!w-auto" value={selectedClientFilter} onChange={(e) => setSelectedClientFilter(e.target.value)} aria-label="고객사">
+                  {clientOptions.map((c) => (
+                    <option key={c} value={c}>
+                      {c === "전체" ? "고객사 전체" : c}
+                    </option>
+                  ))}
+                </Select>
+                <Select size="sm" className="!w-auto max-w-48" value={selectedHospital} onChange={(e) => setSelectedHospital(e.target.value)} aria-label="병원">
+                  {hospitalOptions.map((h) => (
+                    <option key={h} value={h}>
+                      {h === "전체" ? "병원 전체" : h}
+                    </option>
+                  ))}
+                </Select>
+                <Select size="sm" className="!w-auto" value={selectedPostMonthFilter} onChange={(e) => setSelectedPostMonthFilter(e.target.value)} aria-label="원고 발행월">
+                  <option value="전체">발행월 전체</option>
+                  {availableBillingMonths.map((m) => (
+                    <option key={m} value={m}>
+                      {monthLabel(m)} 발행
+                    </option>
+                  ))}
+                </Select>
+                <Button variant="secondary" size="sm" className="h-10" onClick={() => setSortOrder(sortOrder === "desc" ? "asc" : "desc")}>
+                  {sortOrder === "desc" ? "최신순" : "오래된순"}
+                </Button>
+              </div>
+            </div>
+
+            <div className="md:hidden">
+              <Input
+                size="sm"
+                type="search"
+                placeholder="이름, 연락처, 병원 검색"
+                aria-label="지원자 검색"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+
+            {hasListFilter && (
+              <div className="flex items-center gap-2 flex-wrap text-small">
                 {selectedPostMonthFilter !== "전체" && (
-                  <span className="px-2 py-0.5 rounded-full bg-blue-600 text-white font-bold text-[11px]">
-                    발행월: {selectedPostMonthFilter.replace("-", "년 ")}월
+                  <span className="h-8 px-3 inline-flex items-center rounded-full bg-brand-weak text-brand-strong font-medium">
+                    {monthLabel(selectedPostMonthFilter)} 발행
                   </span>
                 )}
                 {selectedClientFilter !== "전체" && (
-                  <span className="px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 font-bold text-[11px]">
-                    고객사: {selectedClientFilter}
+                  <span className="h-8 px-3 inline-flex items-center rounded-full bg-brand-weak text-brand-strong font-medium">
+                    {selectedClientFilter}
                   </span>
                 )}
-                <span className="text-[11px] text-blue-700">
-                  (총 {filteredApplications.length}건 표시 중)
-                </span>
-              </div>
-              <button
-                onClick={() => {
-                  setSelectedPostMonthFilter("전체");
-                  setSelectedClientFilter("전체");
-                  setSelectedHospital("전체");
-                  showToast("필터가 초기화되었습니다.");
-                }}
-                className="text-xs font-bold text-blue-700 hover:text-rose-600 hover:underline cursor-pointer"
-              >
-                ✕ 필터 해제
-              </button>
-            </div>
-          )}
-        </div>
-
-        {/* 3. Filter Bar (Google Style Segmented Tabs & Chips) */}
-        <div className="bg-white p-4 rounded-2xl border border-[#E0E3E7] shadow-2xs space-y-3.5">
-          {/* Top Row: Status Tabs */}
-          <div className="flex items-center justify-between gap-4 flex-wrap">
-            <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none pb-1 sm:pb-0">
-              {statusTabsList.map((tab) => {
-                const count =
-                  tab === "전체"
-                    ? applications.length
-                    : applications.filter((a) => a.status === tab).length;
-                const isSelected = selectedStatusTab === tab;
-                return (
-                  <button
-                    key={tab}
-                    onClick={() => setSelectedStatusTab(tab)}
-                    className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all shrink-0 cursor-pointer flex items-center gap-1.5 ${
-                      isSelected
-                        ? "bg-[#202124] text-white shadow-xs"
-                        : "bg-[#F1F3F4] text-[#5F6368] hover:bg-[#E8EAED] hover:text-[#202124]"
-                    }`}
-                  >
-                    <span>{tab}</span>
-                    <span
-                      className={`text-[10px] px-1.5 py-0.2 rounded-full font-semibold ${
-                        isSelected ? "bg-white/20 text-white" : "bg-black/5 text-[#5F6368]"
-                      }`}
-                    >
-                      {count}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Sort & Quick Search for Mobile */}
-            <div className="flex items-center gap-2 ml-auto flex-wrap sm:flex-nowrap">
-              <label
-                className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold cursor-pointer select-none transition-all border ${
-                  onlySharedFilter
-                    ? "bg-blue-50 border-blue-300 text-blue-700 shadow-2xs"
-                    : "bg-[#F1F3F4] border-transparent hover:bg-[#E8EAED] text-[#3C4043]"
-                }`}
-                title="병원 룸에 공유된 지원자만 필터링합니다."
-              >
-                <input
-                  type="checkbox"
-                  checked={onlySharedFilter}
-                  onChange={(e) => setOnlySharedFilter(e.target.checked)}
-                  className="w-4 h-4 text-blue-600 rounded border-[#DADCE0] focus:ring-blue-500 cursor-pointer accent-blue-600"
-                />
-                <span className="flex items-center gap-1.5">
-                  <span>🏥 룸 공유만 보기</span>
-                  <span
-                    className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
-                      onlySharedFilter
-                        ? "bg-blue-600 text-white"
-                        : "bg-black/5 text-[#5F6368]"
-                    }`}
-                  >
-                    {metrics.sharedCount}
+                {selectedHospital !== "전체" && (
+                  <span className="h-8 px-3 inline-flex items-center rounded-full bg-brand-weak text-brand-strong font-medium">
+                    {selectedHospital}
                   </span>
-                </span>
-              </label>
-
-              {/* 고객사 필터 드롭다운 */}
-              <select
-                value={selectedClientFilter}
-                onChange={(e) => setSelectedClientFilter(e.target.value)}
-                className="px-3 py-1.5 bg-[#F1F3F4] hover:bg-[#E8EAED] rounded-xl text-xs font-semibold text-[#3C4043] outline-none cursor-pointer border-none"
-              >
-                {clientOptions.map((c) => (
-                  <option key={c} value={c}>
-                    고객사: {c}
-                  </option>
-                ))}
-              </select>
-
-              {/* 병원 필터 드롭다운 */}
-              <select
-                value={selectedHospital}
-                onChange={(e) => setSelectedHospital(e.target.value)}
-                className="px-3 py-1.5 bg-[#F1F3F4] hover:bg-[#E8EAED] rounded-xl text-xs font-semibold text-[#3C4043] outline-none cursor-pointer border-none"
-              >
-                {hospitalOptions.map((h) => (
-                  <option key={h} value={h}>
-                    병원: {h}
-                  </option>
-                ))}
-              </select>
-
-              {/* 원고 발행월 필터 드롭다운 */}
-              <select
-                value={selectedPostMonthFilter}
-                onChange={(e) => setSelectedPostMonthFilter(e.target.value)}
-                className="px-3 py-1.5 bg-[#F1F3F4] hover:bg-[#E8EAED] rounded-xl text-xs font-semibold text-[#3C4043] outline-none cursor-pointer border-none"
-              >
-                <option value="전체">발행월: 전체</option>
-                {availableBillingMonths.map((m) => (
-                  <option key={m} value={m}>
-                    발행월: {m.replace("-", "년 ")}월
-                  </option>
-                ))}
-              </select>
-
-              <button
-                onClick={() => setSortOrder(sortOrder === "desc" ? "asc" : "desc")}
-                className="px-3 py-1.5 bg-[#F1F3F4] hover:bg-[#E8EAED] rounded-xl text-xs font-semibold text-[#3C4043] flex items-center gap-1 cursor-pointer"
-              >
-                <span>{sortOrder === "desc" ? "최신 신청순 ↓" : "과거 신청순 ↑"}</span>
-              </button>
-            </div>
-          </div>
-
-          {/* Search bar for mobile view */}
-          <div className="block md:hidden pt-2 border-t border-[#F1F3F4]">
-            <input
-              type="text"
-              placeholder="지원자 이름, 연락처, 병원명 검색..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full px-3.5 py-2 bg-[#F1F3F4] rounded-xl text-xs font-medium text-[#202124] outline-none"
-            />
-          </div>
-        </div>
-
-        {/* 4. Material Data Table */}
-        <div className="bg-white rounded-3xl border border-[#E0E3E7] shadow-2xs overflow-hidden">
-          <div className="px-6 py-4 border-b border-[#F1F3F4] flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <h3 className="text-sm font-bold text-[#202124]">
-                지원자 명단
-              </h3>
-              <span className="text-xs text-[#5F6368]">
-                (총 {filteredApplications.length}명)
-              </span>
-            </div>
-            <span className="text-[11px] text-[#80868B]">
-              행을 클릭하면 상세 패널이 열립니다.
-            </span>
+                )}
+                <button type="button" onClick={clearListFilters} className="h-8 px-2 text-sub hover:text-ink underline underline-offset-2 cursor-pointer">
+                  필터 해제
+                </button>
+              </div>
+            )}
           </div>
 
           {isLoading ? (
-            <div className="py-24 text-center">
-              <div className="w-8 h-8 border-3 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
-              <p className="text-xs text-[#5F6368]">구글 시트 지원자 데이터를 불러오는 중...</p>
+            <div className="py-24 text-center" role="status">
+              <div className="w-8 h-8 border-[3px] border-brand border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
+              <p className="text-small text-sub">구글 시트에서 지원자를 불러오는 중이에요</p>
             </div>
           ) : filteredApplications.length === 0 ? (
-            <div className="py-24 text-center space-y-2">
-              <span className="text-3xl">🔍</span>
-              <p className="text-sm font-bold text-[#3C4043]">조건에 일치하는 지원자가 없습니다.</p>
-              <p className="text-xs text-[#80868B]">검색어를 변경하거나 필터를 초기화해 보세요.</p>
+            <div className="py-24 text-center">
+              <p className="text-body font-semibold text-ink-2">조건에 맞는 지원자가 없어요</p>
+              <p className="text-small text-sub mt-1">검색어를 바꾸거나 필터를 해제해 보세요.</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse text-xs">
+              <table className="w-full text-left text-small">
                 <thead>
-                  <tr className="bg-[#F8F9FA] text-[#5F6368] font-bold border-b border-[#E0E3E7] select-none">
-                    <th className="py-3 px-3 w-10 text-center">No</th>
-                    <th className="py-3 px-3 w-24 text-center">룸 공유</th>
-                    <th className="py-3 px-3 w-28">진행 상태</th>
-                    <th className="py-3 px-4 w-32">신청일시</th>
-                    <th className="py-3 px-4 min-w-[150px]">지원자 정보</th>
-                    <th className="py-3 px-4 min-w-[170px]">병원 / 희망시술</th>
-                    <th className="py-3 px-4 min-w-[130px]">블로그</th>
-                    <th className="py-3 px-4 min-w-[170px]">희망 일정 (1~3지망)</th>
-                    <th className="py-3 px-3 w-16 text-center">사진</th>
-                    <th className="py-3 px-3 w-32 text-center">관리</th>
+                  <tr className="border-y border-line text-caption text-muted">
+                    <th className="py-3 pl-5 pr-3 font-medium w-28">룸 공유</th>
+                    <th className="py-3 px-3 font-medium w-36">진행상태</th>
+                    <th className="py-3 px-3 font-medium min-w-40">지원자</th>
+                    <th className="py-3 px-3 font-medium min-w-48">병원 · 시술</th>
+                    <th className="py-3 px-3 font-medium min-w-48">희망 일정</th>
+                    <th className="py-3 px-3 font-medium min-w-36">자료</th>
+                    <th className="py-3 px-3 font-medium w-32">신청일</th>
+                    <th className="py-3 pl-3 pr-5 font-medium w-28"><span className="sr-only">작업</span></th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#F1F3F4]">
+                <tbody className="divide-y divide-line">
                   {filteredApplications.map((item, idx) => {
+                    const client = getClientName(item);
+                    const pending = pendingMessageCount(item);
                     return (
                       <tr
                         key={item.rowId || idx}
                         onClick={() => setActiveItem(item)}
-                        className={`hover:bg-[#F8FAFD] transition-colors cursor-pointer group ${
-                          activeItem?.rowId === item.rowId ? "bg-blue-50/40" : ""
+                        className={`align-top cursor-pointer transition-colors ${
+                          activeItem?.rowId === item.rowId ? "bg-brand-weak/50" : "hover:bg-fill-weak"
                         }`}
                       >
-                        {/* No */}
-                        <td className="py-3.5 px-3 text-center text-[#80868B] font-medium">
-                          {idx + 1}
+                        <td className="py-4 pl-5 pr-3" onClick={(e) => e.stopPropagation()}>
+                          {renderShareToggle(item)}
                         </td>
-
-                        {/* 룸 공유 Checkbox Column */}
-                        <td
-                          className="py-3.5 px-3 text-center"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <label
-                            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border cursor-pointer select-none transition-all ${
-                              isShared(item)
-                                ? "bg-blue-50 border-blue-200 text-blue-700 shadow-2xs hover:bg-blue-100"
-                                : "bg-slate-50 border-slate-200/80 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
-                            }`}
-                            title={isShared(item) ? "병원 룸에 공유됨 (클릭 시 공유 해제)" : "미공유 (클릭 시 병원 룸에 공유)"}
+                        <td className="py-4 px-3" onClick={(e) => e.stopPropagation()}>
+                          {renderStatusSelect(item)}
+                        </td>
+                        <td className="py-4 px-3">
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setActiveItem(item);
+                            }}
+                            className="text-body font-semibold text-ink hover:text-brand text-left cursor-pointer"
                           >
-                            <input
-                              type="checkbox"
-                              checked={isShared(item)}
-                              onChange={(e) => handleUpdateShareStatus(item, e.target.checked)}
-                              className="w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500 cursor-pointer accent-blue-600"
-                            />
-                            <span className="text-[11px] font-bold">
-                              {isShared(item) ? "공유됨" : "미공유"}
-                            </span>
-                          </label>
-                        </td>
-
-                        {/* Status Select */}
-                        <td
-                          className="py-3.5 px-3"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <select
-                            value={item.status}
-                            onChange={(e) => handleUpdateStatus(item, e.target.value)}
-                            className={`px-2.5 py-1 rounded-full text-[11px] font-bold border outline-none cursor-pointer ${getStatusStyle(item.status)}`}
-                          >
-                            {STATUS_OPTIONS.map((opt) => (
-                              <option key={opt.label} value={opt.label}>
-                                {opt.label}
-                              </option>
-                            ))}
-                            {!STATUS_OPTIONS.some((o) => o.label === item.status) && item.status && (
-                              <option value={item.status}>{item.status}</option>
-                            )}
-                          </select>
-                        </td>
-
-                        {/* Date */}
-                        <td className="py-3.5 px-4 text-[#5F6368] font-medium whitespace-nowrap">
-                          {item.submittedAt ? item.submittedAt.slice(0, 16) : "-"}
-                        </td>
-
-                        {/* Applicant */}
-                        <td className="py-3.5 px-4">
-                          <div className="font-bold text-[#202124] flex items-center gap-1.5">
-                            <span>{item.name}</span>
-                            {item.ageInfo && (
-                              <span className="text-[10px] text-[#5F6368] font-normal">
-                                ({item.ageInfo})
-                              </span>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-1 text-[11px] text-[#5F6368] mt-0.5">
+                            {item.name}
+                          </button>
+                          {item.ageInfo && <span className="text-caption text-muted ml-1.5">{item.ageInfo}</span>}
+                          <div className="flex items-center gap-2 text-sub mt-0.5">
                             <span>{item.phone}</span>
                             {item.phone !== "-" && (
                               <button
+                                type="button"
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   copyToClipboard(item.phone, "전화번호");
                                 }}
-                                className="text-slate-400 hover:text-blue-600 cursor-pointer p-0.5"
-                                title="전화번호 복사"
+                                className="text-caption text-muted hover:text-brand cursor-pointer"
                               >
-                                📋
+                                복사
                               </button>
                             )}
                           </div>
                         </td>
-
-                        {/* Hospital & Treatment */}
-                        <td className="py-3.5 px-4">
-                          <div className="flex items-center gap-1 flex-wrap mb-1">
-                            {getClientName(item) && getClientName(item) !== "고객사 미지정" && (
-                              <span className="inline-block px-1.5 py-0.2 rounded bg-blue-50 text-blue-800 border border-blue-200 font-bold text-[9px]">
-                                {getClientName(item)}
-                              </span>
-                            )}
-                            <span className="inline-block px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 font-bold text-[10px]">
-                              {item.hospital}
-                            </span>
-                            <span className="text-[11px] text-[#5F6368] font-medium">
-                              {item.category}
-                            </span>
+                        <td className="py-4 px-3">
+                          <div className="text-ink font-medium">
+                            {item.hospital}
+                            {client && client !== "고객사 미지정" && <span className="text-muted font-normal"> · {client}</span>}
                           </div>
-                          <p className="text-xs font-semibold text-[#202124] line-clamp-1 mt-0.5">
-                            {item.treatment}
-                          </p>
-                        </td>
-
-                        {/* Blog */}
-                        <td
-                          className="py-3.5 px-4"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <div className="space-y-1">
-                            {item.blogUrl ? (
-                              <a
-                                href={formatBlogUrl(item.blogUrl)}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="text-blue-600 hover:text-blue-800 font-semibold flex items-center gap-1 group/link max-w-[140px] truncate"
-                                title={item.blogUrl}
-                              >
-                                <span className="truncate">{item.blogUrl.replace(/^https?:\/\//, "")}</span>
-                                <span className="text-[10px] opacity-70 group-hover/link:opacity-100">↗</span>
-                              </a>
-                            ) : (
-                              <span className="text-slate-400">-</span>
-                            )}
-
-                            {/* Campaign Quick Action Badges */}
-                            <div className="flex items-center gap-1 flex-wrap">
-                              {item.guideRoom && (
-                                <a
-                                  href={item.guideRoom}
-                                  target="_blank"
-                                  rel="noreferrer"
-                                  className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100 transition-colors"
-                                  title="블로거 폴더(원고 초안 · 비포애프터) 열기"
-                                >
-                                  📁폴더
-                                </a>
-                              )}
-                              {item.postUrl && (
-                                <a
-                                  href={item.postUrl}
-                                  target="_blank"
-                                  rel="noreferrer"
-                                  className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 transition-colors"
-                                  title="공식 포스팅 글 바로가기"
-                                >
-                                  🔗포스팅
-                                </a>
-                              )}
-                              {item.postDate && (
-                                <span
-                                  className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold bg-blue-50 text-blue-700 border border-blue-200"
-                                  title={`원고 발행일: ${item.postDate}`}
-                                >
-                                  📅{item.postDate.replace(/^\d{4}-/, "")}
-                                </span>
-                              )}
-                            </div>
+                          <div className="text-sub mt-0.5 line-clamp-1">
+                            {[item.category, item.treatment].filter(Boolean).join(" · ")}
                           </div>
                         </td>
-
-                        {/* Schedule */}
-                        <td className="py-3.5 px-4">
-                          <div className="space-y-0.5">
-                            <div className="text-xs font-bold text-[#202124] flex items-center gap-1">
-                              <span className="w-1.5 h-1.5 rounded-full bg-blue-600"></span>
-                              <span>1지망: {item.schedule1 || item.schedules[0] || "-"}</span>
-                            </div>
-                            {item.schedule2 && (
-                              <div className="text-[11px] text-[#5F6368]">
-                                2지망: {item.schedule2}
-                              </div>
-                            )}
-                            {item.confirmedDate && (
-                              <div className="mt-1 inline-block px-1.5 py-0.5 rounded bg-blue-100 text-blue-800 font-bold text-[10px]">
-                                확정: {item.confirmedDate}
-                              </div>
-                            )}
-                          </div>
-                        </td>
-
-                        {/* Photos */}
-                        <td
-                          className="py-3.5 px-4 text-center"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          {item.imageUrls && item.imageUrls.length > 0 ? (
-                            <button
-                              onClick={() => setLightboxImage(item.imageUrls[0])}
-                              className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-[11px] transition-colors cursor-pointer"
-                            >
-                              <span>📸</span>
-                              <span>{item.imageUrls.length}장</span>
-                            </button>
+                        <td className="py-4 px-3">
+                          {item.confirmedDate ? (
+                            <div className="font-semibold text-brand-strong">확정 {item.confirmedDate}</div>
                           ) : (
-                            <span className="text-slate-300 text-xs">-</span>
+                            <div className="text-ink">1지망 {item.schedule1 || item.schedules[0] || "-"}</div>
                           )}
+                          {!item.confirmedDate && item.schedule2 && <div className="text-sub mt-0.5">2지망 {item.schedule2}</div>}
                         </td>
-
-                        {/* Action View & Delete */}
-                        <td
-                          className="py-3.5 px-4 text-center"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <div className="flex items-center justify-center gap-1.5">
-                            <button
-                              onClick={() => setActiveItem(item)}
-                              className="px-2.5 py-1 rounded-xl bg-slate-100 hover:bg-slate-200 text-[#3C4043] font-bold text-xs transition-colors cursor-pointer"
-                            >
-                              보기
-                            </button>
-                            <button
-                              onClick={() => handleOpenMessageModal(item)}
-                              className="px-2 py-1 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-600 font-bold text-xs transition-colors cursor-pointer"
-                              title="메시지/문자 작성"
-                            >
-                              문자
-                            </button>
-                            <button
-                              onClick={() => setItemToDelete(item)}
-                              className="px-2 py-1 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold text-xs transition-colors cursor-pointer"
-                              title="지원서 삭제"
-                            >
+                        <td className="py-4 px-3" onClick={(e) => e.stopPropagation()}>
+                          <div className="flex flex-col items-start gap-0.5">
+                            {item.blogUrl && (
+                              <a href={formatBlogUrl(item.blogUrl)} target="_blank" rel="noreferrer" className={linkCls}>
+                                블로그
+                              </a>
+                            )}
+                            {item.guideRoom && (
+                              <a href={item.guideRoom} target="_blank" rel="noreferrer" className={linkCls}>
+                                블로거 폴더
+                              </a>
+                            )}
+                            {item.postUrl && (
+                              <a href={item.postUrl} target="_blank" rel="noreferrer" className={linkCls}>
+                                발행글{item.postDate ? ` (${item.postDate.replace(/^\d{4}-/, "")})` : ""}
+                              </a>
+                            )}
+                            {item.imageUrls && item.imageUrls.length > 0 && (
+                              <button type="button" onClick={() => setLightboxImage(item.imageUrls[0])} className={`${linkCls} cursor-pointer`}>
+                                사진 {item.imageUrls.length}장
+                              </button>
+                            )}
+                            {!item.blogUrl && !item.guideRoom && !item.postUrl && !(item.imageUrls && item.imageUrls.length) && (
+                              <span className="text-faint">-</span>
+                            )}
+                          </div>
+                        </td>
+                        <td className="py-4 px-3 text-sub whitespace-nowrap">
+                          {item.submittedAt ? item.submittedAt.slice(0, 16) : "-"}
+                        </td>
+                        <td className="py-4 pl-3 pr-5" onClick={(e) => e.stopPropagation()}>
+                          <div className="flex items-center justify-end gap-1">
+                            <Button variant="weak" size="sm" onClick={() => handleOpenMessageModal(item)}>
+                              문자{pending > 0 ? ` ${pending}` : ""}
+                            </Button>
+                            <Button variant="ghost" size="sm" onClick={() => setItemToDelete(item)} className="text-danger hover:bg-danger-weak">
                               삭제
-                            </button>
+                            </Button>
                           </div>
                         </td>
                       </tr>
@@ -1416,278 +1028,184 @@ function AdminDashboard({ handleLogout }) {
               </table>
             </div>
           )}
-        </div>
+        </section>
       </main>
 
-      {/* 5. Google Style Detail Side Sheet / Drawer */}
+      {/* 지원자 상세 패널 */}
       {activeItem && (
-        <div
-          className="fixed inset-0 z-50 bg-black/40 backdrop-blur-2xs flex justify-end animate-in fade-in duration-200 cursor-pointer"
-          onClick={() => setActiveItem(null)}
-        >
-          <div
-            className="w-full max-w-lg bg-white h-full shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-right duration-300 cursor-default"
+        <div className="fixed inset-0 z-50 bg-black/40 flex justify-end" onClick={() => setActiveItem(null)}>
+          <aside
+            role="dialog"
+            aria-modal="true"
+            aria-label={`${activeItem.name}님 지원서`}
+            className="w-full max-w-lg bg-white h-full flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Drawer Header */}
-            <div className="p-5 border-b border-[#E0E3E7] flex items-center justify-between bg-white sticky top-0 z-10">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-black text-sm">
-                  {activeItem.name?.slice(0, 1) || "지"}
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h2 className="text-base font-bold text-[#202124]">
-                      {activeItem.name} 님 지원서
-                    </h2>
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">
-                      {activeItem.hospital}
-                    </span>
-                  </div>
-                  <span className="text-[11px] text-[#5F6368]">
-                    접수: {activeItem.submittedAt || "-"}
-                  </span>
-                </div>
+            {/* 머리 */}
+            <div className="px-6 pt-6 pb-4 flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <h2 className="text-title font-bold text-ink">{activeItem.name}님</h2>
+                <p className="text-small text-sub mt-0.5 truncate">
+                  {activeItem.hospital} · 접수 {activeItem.submittedAt || "-"}
+                </p>
               </div>
-
               <button
+                type="button"
                 onClick={() => setActiveItem(null)}
-                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-[#5F6368] flex items-center justify-center font-bold text-sm cursor-pointer"
+                aria-label="닫기"
+                className="w-9 h-9 -mr-2 shrink-0 rounded-full text-muted hover:bg-fill hover:text-ink flex items-center justify-center cursor-pointer"
               >
-                ✕
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 6l12 12M18 6L6 18" />
+                </svg>
               </button>
             </div>
 
-            {/* Quick Status & Hospital Sync Top Bar */}
-            <div className="p-4 bg-[#F8F9FA] border-b border-[#E0E3E7] space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-[#5F6368]">진행 상태</span>
-                <select
-                  value={activeItem.status}
-                  onChange={(e) => handleUpdateStatus(activeItem, e.target.value)}
-                  className="px-3 py-1.5 rounded-xl text-xs font-bold bg-white border border-[#DADCE0] shadow-2xs outline-none cursor-pointer"
-                >
-                  {STATUS_OPTIONS.map((opt) => (
-                    <option key={opt.label} value={opt.label}>
-                      {opt.label}
-                    </option>
-                  ))}
-                  {!STATUS_OPTIONS.some((o) => o.label === activeItem.status) && activeItem.status && (
-                    <option value={activeItem.status}>{activeItem.status}</option>
-                  )}
-                </select>
+            {/* 상태 · 공유 */}
+            <div className="mx-6 rounded-card bg-fill-weak p-4 space-y-4">
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-small font-semibold text-sub">진행상태</span>
+                {renderStatusSelect(activeItem, "md")}
               </div>
-
-              {/* Hospital Project Room Sync Status (Checkbox Toggle) */}
-              <div className="pt-2.5 border-t border-[#E0E3E7] flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm">🏥</span>
-                  <div>
-                    <div className="text-xs font-bold text-[#202124] flex items-center gap-1.5">
-                      <span>병원 룸 공유 연동</span>
-                      {activeItem.client && (
-                        <span className="text-[10px] text-[#5F6368] font-normal">({activeItem.client})</span>
-                      )}
-                    </div>
-                    <p className="text-[10px] text-[#5F6368]">
-                      체크하면 바로 병원 프로젝트 룸에 올라가요 (블로그지수 필수)
-                    </p>
-                    <div className="flex items-center gap-1.5 mt-1.5">
-                      <span className="text-[10px] font-bold text-[#5F6368]">블로그지수</span>
-                      <input
-                        type="text"
-                        placeholder="예: 준최4"
-                        defaultValue={activeItem.blogIndex || ""}
-                        key={`blogIndex-${activeItem.rowId}-${activeItem.blogIndex || ""}`}
-                        onBlur={(e) => handleUpdateCampaignField(activeItem, "blogIndex", e.target.value)}
-                        className="w-28 px-2 py-1 bg-[#F8F9FA] focus:bg-white border border-[#DADCE0] focus:border-blue-600 rounded-lg text-[11px] font-medium text-[#202124] outline-none transition-all"
-                      />
-                    </div>
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="text-small font-semibold text-sub">
+                    병원 룸 공유{activeItem.client ? ` · ${activeItem.client}` : ""}
+                  </p>
+                  <p className="text-caption text-muted mt-0.5">체크하면 바로 병원 프로젝트 룸에 올라가요. 블로그지수가 필요해요.</p>
+                  <div className="flex items-center gap-2 mt-2">
+                    <label htmlFor={`blogIndex-${activeItem.rowId}`} className="text-caption font-semibold text-sub shrink-0">
+                      블로그지수
+                    </label>
+                    <Input
+                      id={`blogIndex-${activeItem.rowId}`}
+                      size="sm"
+                      className="!w-32 !bg-white"
+                      placeholder="예: 준최4"
+                      defaultValue={activeItem.blogIndex || ""}
+                      key={`blogIndex-${activeItem.rowId}-${activeItem.blogIndex || ""}`}
+                      onBlur={(e) => handleUpdateCampaignField(activeItem, "blogIndex", e.target.value)}
+                    />
                   </div>
                 </div>
-                <label className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border cursor-pointer select-none transition-all ${
-                  isShared(activeItem)
-                    ? "bg-blue-50 border-blue-300 text-blue-800 shadow-2xs font-bold"
-                    : "bg-white border-[#DADCE0] text-slate-500 hover:bg-slate-50 font-semibold"
-                }`}>
-                  <input
-                    type="checkbox"
-                    checked={isShared(activeItem)}
-                    onChange={(e) => handleUpdateShareStatus(activeItem, e.target.checked)}
-                    className="w-4 h-4 text-blue-600 rounded border-[#DADCE0] focus:ring-blue-500 cursor-pointer accent-blue-600"
-                  />
-                  <span className="text-xs">
-                    {isShared(activeItem) ? "공유됨" : "미공유"}
-                  </span>
-                </label>
+                {renderShareToggle(activeItem)}
               </div>
-
               {activeItem.confirmedDate && (
-                <div className="p-2.5 rounded-xl bg-blue-50 border border-blue-200 text-xs text-blue-900 font-semibold flex items-center justify-between">
-                  <span>확정된 예약일시: <strong>{activeItem.confirmedDate}</strong></span>
+                <div className="flex items-center justify-between gap-3 pt-3 border-t border-line">
+                  <span className="text-small text-ink">
+                    확정 예약일 <strong className="font-semibold text-brand-strong">{activeItem.confirmedDate}</strong>
+                  </span>
                   <button
+                    type="button"
                     onClick={() => handleUpdateStatus(activeItem, activeItem.status, "")}
-                    className="text-[10px] text-blue-600 hover:underline cursor-pointer"
+                    className="text-caption text-sub hover:text-ink underline underline-offset-2 cursor-pointer"
                   >
-                    초기화
+                    확정 취소
                   </button>
                 </div>
               )}
             </div>
 
-            {/* Segmented Tab Switcher */}
-            <div className="flex border-b border-[#E0E3E7] bg-white px-5 pt-1 gap-2">
-              <button
-                type="button"
-                onClick={() => setDrawerTab("recruit")}
-                className={`pb-2.5 px-3 text-xs font-bold transition-colors border-b-2 flex items-center gap-1.5 cursor-pointer ${
-                  drawerTab === "recruit"
-                    ? "border-blue-600 text-blue-600"
-                    : "border-transparent text-slate-500 hover:text-slate-800"
-                }`}
-              >
-                <span>📋</span>
-                <span>모집 정보</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setDrawerTab("campaign")}
-                className={`pb-2.5 px-3 text-xs font-bold transition-colors border-b-2 flex items-center gap-1.5 cursor-pointer relative ${
-                  drawerTab === "campaign"
-                    ? "border-blue-600 text-blue-600"
-                    : "border-transparent text-slate-500 hover:text-slate-800"
-                }`}
-              >
-                <span>🚀</span>
-                <span>캠페인 현황</span>
-                {(activeItem.postUrl || activeItem.guideRoom || activeItem.confirmedDate) && (
-                  <span className="w-1.5 h-1.5 rounded-full bg-blue-600 inline-block"></span>
-                )}
-              </button>
+            {/* 탭 */}
+            <div role="tablist" className="flex gap-6 px-6 mt-4 border-b border-line">
+              {[
+                { key: "recruit", label: "모집 정보" },
+                { key: "campaign", label: "캠페인 현황" },
+              ].map((t) => (
+                <button
+                  key={t.key}
+                  type="button"
+                  role="tab"
+                  aria-selected={drawerTab === t.key}
+                  onClick={() => setDrawerTab(t.key)}
+                  className={`h-11 -mb-px border-b-2 text-body font-semibold cursor-pointer transition-colors ${
+                    drawerTab === t.key ? "border-ink text-ink" : "border-transparent text-muted hover:text-sub"
+                  }`}
+                >
+                  {t.label}
+                </button>
+              ))}
             </div>
 
-            {/* Drawer Body (Tab Switchable) */}
-            <div className="p-6 space-y-6 flex-1 overflow-y-auto">
-              
-              {/* TAB 1: 모집 정보 */}
+            <div className="px-6 py-6 space-y-8 flex-1 overflow-y-auto">
               {drawerTab === "recruit" && (
-                <div className="space-y-6 animate-in fade-in duration-150">
-                  {/* Applicant Contact Profile */}
-                  <div className="space-y-3">
-                    <h4 className="text-xs font-bold text-[#5F6368] uppercase tracking-wider">
-                      지원자 인적사항
-                    </h4>
-                    <div className="grid grid-cols-2 gap-3 text-xs">
-                      <div className="p-3 bg-white border border-[#E0E3E7] rounded-xl space-y-1">
-                        <span className="text-[10px] text-[#80868B] block">연락처</span>
-                        {editingField === "phone" ? (
-                          <div className="flex items-center gap-1.5">
-                            <input
-                              type="tel"
-                              autoFocus
-                              value={editValue}
-                              onChange={(e) => setEditValue(e.target.value)}
-                              onKeyDown={(e) => e.key === "Enter" && handleSaveContact()}
-                              className="w-full px-2 py-1 bg-[#F8F9FA] focus:bg-white border border-[#DADCE0] focus:border-blue-600 rounded-lg text-xs font-medium text-[#202124] outline-none"
-                            />
-                            <button onClick={handleSaveContact} className="text-[11px] font-bold text-blue-600 hover:underline cursor-pointer shrink-0">저장</button>
-                            <button onClick={() => setEditingField(null)} className="text-[11px] text-[#5F6368] hover:underline cursor-pointer shrink-0">취소</button>
-                          </div>
-                        ) : (
-                        <div className="font-bold text-[#202124] flex items-center justify-between">
-                          <span>{activeItem.phone}</span>
-                          <div className="flex items-center gap-2">
-                            <button
-                              onClick={() => startEditContact("phone", activeItem.sheetPhone)}
-                              className="text-[11px] text-[#5F6368] hover:text-blue-600 hover:underline cursor-pointer"
-                            >
-                              수정
-                            </button>
-                            <button
-                              onClick={() => copyToClipboard(activeItem.phone, "전화번호")}
-                              className="text-[11px] text-blue-600 hover:underline cursor-pointer"
-                            >
-                              복사
-                            </button>
-                            <a
-                              href={`tel:${activeItem.rawPhone || activeItem.phone}`}
-                              className="text-[11px] text-[#5F6368] hover:text-blue-600 cursor-pointer"
-                              title="전화 걸기"
-                            >
-                              📞
-                            </a>
-                            <a
-                              href={`sms:${(activeItem.rawPhone || activeItem.phone).replace(/[^0-9]/g, "")}`}
-                              className="text-[11px] text-[#5F6368] hover:text-blue-600 cursor-pointer"
-                              title="문자 보내기"
-                            >
-                              💬
-                            </a>
-                          </div>
-                        </div>
-                        )}
+                <>
+                  {/* 인적사항 */}
+                  <section className="space-y-3">
+                    <h3 className={sectionTitle}>인적사항</h3>
+                    <dl className="divide-y divide-line">
+                      <div className="py-3 flex items-start justify-between gap-3">
+                        <dt className="text-small text-sub shrink-0 w-20">연락처</dt>
+                        <dd className="flex-1 min-w-0">
+                          {editingField === "phone" ? (
+                            <div className="flex items-center gap-2">
+                              <Input
+                                size="sm"
+                                type="tel"
+                                autoFocus
+                                aria-label="연락처"
+                                value={editValue}
+                                onChange={(e) => setEditValue(e.target.value)}
+                                onKeyDown={(e) => e.key === "Enter" && handleSaveContact()}
+                              />
+                              <Button size="sm" onClick={handleSaveContact}>저장</Button>
+                              <Button variant="ghost" size="sm" onClick={() => setEditingField(null)}>취소</Button>
+                            </div>
+                          ) : (
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="text-body font-medium text-ink">{activeItem.phone}</span>
+                              <div className="flex items-center gap-3 text-small shrink-0">
+                                <button type="button" onClick={() => startEditContact("phone", activeItem.sheetPhone)} className="text-sub hover:text-ink cursor-pointer">수정</button>
+                                <button type="button" onClick={() => copyToClipboard(activeItem.phone, "전화번호")} className="text-sub hover:text-ink cursor-pointer">복사</button>
+                                <a href={`tel:${activeItem.rawPhone || activeItem.phone}`} className="text-brand hover:underline">전화</a>
+                                <a href={`sms:${(activeItem.rawPhone || activeItem.phone).replace(/[^0-9]/g, "")}`} className="text-brand hover:underline">문자</a>
+                              </div>
+                            </div>
+                          )}
+                        </dd>
                       </div>
-
-                      <div className="p-3 bg-white border border-[#E0E3E7] rounded-xl space-y-1">
-                        <span className="text-[10px] text-[#80868B] block">생년월일 (나이)</span>
-                        <span className="font-bold text-[#202124] block">
-                          {activeItem.ageInfo || activeItem.birthdate || "-"}
-                        </span>
+                      <div className="py-3 flex items-start justify-between gap-3">
+                        <dt className="text-small text-sub shrink-0 w-20">생년월일</dt>
+                        <dd className="flex-1 text-body font-medium text-ink">{activeItem.ageInfo || activeItem.birthdate || "-"}</dd>
                       </div>
-                    </div>
-
-                    <div className="p-3 bg-white border border-[#E0E3E7] rounded-xl space-y-1 text-xs">
-                      <div className="flex items-center justify-between">
-                        <span className="text-[10px] text-[#80868B] block">블로그 주소</span>
-                        {editingField !== "blogUrl" && (
-                          <button
-                            onClick={() => startEditContact("blogUrl", activeItem.sheetBlog)}
-                            className="text-[11px] text-[#5F6368] hover:text-blue-600 hover:underline cursor-pointer"
-                          >
-                            수정
-                          </button>
-                        )}
+                      <div className="py-3 flex items-start justify-between gap-3">
+                        <dt className="text-small text-sub shrink-0 w-20">블로그</dt>
+                        <dd className="flex-1 min-w-0">
+                          {editingField === "blogUrl" ? (
+                            <div className="flex items-center gap-2">
+                              <Input
+                                size="sm"
+                                type="url"
+                                autoFocus
+                                aria-label="블로그 주소"
+                                value={editValue}
+                                onChange={(e) => setEditValue(e.target.value)}
+                                onKeyDown={(e) => e.key === "Enter" && handleSaveContact()}
+                                placeholder="https://blog.naver.com/아이디"
+                              />
+                              <Button size="sm" onClick={handleSaveContact}>저장</Button>
+                              <Button variant="ghost" size="sm" onClick={() => setEditingField(null)}>취소</Button>
+                            </div>
+                          ) : (
+                            <div className="flex items-start justify-between gap-2">
+                              {activeItem.blogUrl ? (
+                                <a href={formatBlogUrl(activeItem.blogUrl)} target="_blank" rel="noreferrer" className="text-body font-medium text-brand hover:underline break-all">
+                                  {activeItem.blogUrl.replace(/^https?:\/\//, "")}
+                                </a>
+                              ) : (
+                                <span className="text-faint">-</span>
+                              )}
+                              <button type="button" onClick={() => startEditContact("blogUrl", activeItem.sheetBlog)} className="text-small text-sub hover:text-ink cursor-pointer shrink-0">수정</button>
+                            </div>
+                          )}
+                        </dd>
                       </div>
-                      {editingField === "blogUrl" ? (
-                        <div className="flex items-center gap-1.5">
-                          <input
-                            type="url"
-                            autoFocus
-                            value={editValue}
-                            onChange={(e) => setEditValue(e.target.value)}
-                            onKeyDown={(e) => e.key === "Enter" && handleSaveContact()}
-                            placeholder="https://blog.naver.com/아이디"
-                            className="w-full px-2 py-1 bg-[#F8F9FA] focus:bg-white border border-[#DADCE0] focus:border-blue-600 rounded-lg text-xs font-medium text-[#202124] outline-none"
-                          />
-                          <button onClick={handleSaveContact} className="text-[11px] font-bold text-blue-600 hover:underline cursor-pointer shrink-0">저장</button>
-                          <button onClick={() => setEditingField(null)} className="text-[11px] text-[#5F6368] hover:underline cursor-pointer shrink-0">취소</button>
-                        </div>
-                      ) : activeItem.blogUrl ? (
-                        <a
-                          href={formatBlogUrl(activeItem.blogUrl)}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="font-bold text-blue-600 hover:underline break-all block"
-                        >
-                          {activeItem.blogUrl} ↗
-                        </a>
-                      ) : (
-                        <span className="text-slate-400">-</span>
-                      )}
-                    </div>
-                  </div>
+                    </dl>
+                  </section>
 
-                  {/* Schedules (1~3 Choices with 1-click confirmation) */}
-                  <div className="space-y-2.5">
-                    <div className="flex items-center justify-between">
-                      <h4 className="text-xs font-bold text-[#5F6368] uppercase tracking-wider">
-                        희망 예약 일정
-                      </h4>
-                      <span className="text-[10px] text-blue-600 font-semibold">
-                        원클릭 예약 확정 가능
-                      </span>
-                    </div>
-
+                  {/* 희망 일정 */}
+                  <section className="space-y-3">
+                    <h3 className={sectionTitle}>희망 일정</h3>
                     <div className="space-y-2">
                       {[
                         { priority: "1지망", val: activeItem.schedule1 || activeItem.schedules?.[0] },
@@ -1695,144 +1213,109 @@ function AdminDashboard({ handleLogout }) {
                         { priority: "3지망", val: activeItem.schedule3 || activeItem.schedules?.[2] },
                       ]
                         .filter((s) => s.val && s.val.trim() !== "")
-                        .map((item, idx) => {
-                          const isConfirmed = !!activeItem.confirmedDate && slotKey(activeItem.confirmedDate) === slotKey(item.val);
+                        .map((s, idx) => {
+                          const isConfirmed = !!activeItem.confirmedDate && slotKey(activeItem.confirmedDate) === slotKey(s.val);
                           return (
                             <div
                               key={idx}
-                              className={`p-3 rounded-xl border flex items-center justify-between transition-colors ${
-                                isConfirmed
-                                  ? "bg-blue-50 border-blue-500 ring-1 ring-blue-500"
-                                  : "bg-white border-[#E0E3E7] hover:border-slate-300"
+                              className={`flex items-center justify-between gap-3 p-3 pl-4 rounded-card transition-colors ${
+                                isConfirmed ? "bg-brand-weak ring-2 ring-brand" : "bg-fill-weak"
                               }`}
                             >
-                              <div>
-                                <span className="text-[10px] font-extrabold px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 mr-2">
-                                  {item.priority}
-                                </span>
-                                <span className="text-xs font-bold text-[#202124]">
-                                  {item.val}
-                                </span>
+                              <div className="min-w-0">
+                                <span className={`text-caption font-semibold ${isConfirmed ? "text-brand-strong" : "text-muted"}`}>{s.priority}</span>
+                                <p className="text-body font-medium text-ink">{s.val}</p>
                               </div>
-
-                              <button
-                                onClick={() => handleUpdateStatus(activeItem, !activeItem.status || activeItem.status === "1.신규지원" ? "2.예약중" : activeItem.status, item.val)}
-                                className={`px-3 py-1 rounded-lg text-xs font-bold cursor-pointer transition-colors ${
-                                  isConfirmed
-                                    ? "bg-blue-600 text-white"
-                                    : "bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-700"
-                                }`}
-                              >
-                                {isConfirmed ? "✓ 확정됨" : "확정하기"}
-                              </button>
+                              {isConfirmed ? (
+                                <span className="text-small font-semibold text-brand-strong shrink-0 px-2">확정됨</span>
+                              ) : (
+                                <Button
+                                  variant="secondary"
+                                  size="sm"
+                                  className="!bg-white"
+                                  onClick={() =>
+                                    handleUpdateStatus(
+                                      activeItem,
+                                      !activeItem.status || activeItem.status === "1.신규지원" ? "2.예약중" : activeItem.status,
+                                      s.val
+                                    )
+                                  }
+                                >
+                                  이 일정으로 확정
+                                </Button>
+                              )}
                             </div>
                           );
                         })}
                     </div>
-                  </div>
+                  </section>
 
-                  {/* Photos Gallery */}
+                  {/* 첨부 사진 */}
                   {activeItem.imageUrls && activeItem.imageUrls.length > 0 && (
-                    <div className="space-y-2.5">
-                      <h4 className="text-xs font-bold text-[#5F6368] uppercase tracking-wider">
-                        시술 부위 첨부사진 ({activeItem.imageUrls.length}장)
-                      </h4>
-                      <div className="grid grid-cols-3 gap-2.5">
+                    <section className="space-y-3">
+                      <h3 className={sectionTitle}>첨부 사진 {activeItem.imageUrls.length}장</h3>
+                      <div className="grid grid-cols-3 gap-2">
                         {activeItem.imageUrls.map((url, i) => (
-                          <div
+                          <button
                             key={i}
+                            type="button"
                             onClick={() => setLightboxImage(url)}
-                            className="group relative aspect-square rounded-xl overflow-hidden border border-[#E0E3E7] bg-slate-100 cursor-pointer shadow-2xs hover:shadow-md transition-shadow"
+                            aria-label={`사진 ${i + 1} 크게 보기`}
+                            className="aspect-square rounded-control overflow-hidden bg-fill cursor-pointer"
                           >
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
                               src={getDriveThumbnailUrl(url)}
-                              alt={`사진 ${i + 1}`}
-                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                              alt={`첨부 사진 ${i + 1}`}
+                              className="w-full h-full object-cover hover:opacity-90 transition-opacity"
                               onError={(e) => {
                                 e.target.onerror = null;
                                 e.target.src = "https://ssl.gstatic.com/docs/doclist/images/mediatype/icon_1_image_x128.png";
                               }}
                             />
-                            <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-bold">
-                              확대보기 🔍
-                            </div>
-                            <span className="absolute bottom-1 left-1 px-1.5 py-0.5 rounded bg-black/60 text-white text-[9px] font-bold">
-                              #{i + 1}
-                            </span>
-                          </div>
+                          </button>
                         ))}
                       </div>
-                      <div className="pt-1">
-                        {activeItem.imageUrls.map((url, i) => (
-                          <a
-                            key={i}
-                            href={url}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="text-[11px] text-blue-600 hover:underline block truncate"
-                          >
-                            사진 #{i + 1} 구글 드라이브 원본 링크 ↗
-                          </a>
-                        ))}
-                      </div>
-                    </div>
+                    </section>
                   )}
 
-                  {/* Condition Note & User Note */}
-                  <div className="space-y-4">
+                  {/* 지원 내용 */}
+                  <section className="space-y-3">
+                    <h3 className={sectionTitle}>지원 내용</h3>
                     {activeItem.imageNote && (
-                      <div className="space-y-1">
-                        <span className="text-[11px] font-bold text-[#5F6368]">
-                          시술부위 상태 상세설명
-                        </span>
-                        <div className="p-3 bg-[#F8F9FA] rounded-xl border border-[#E0E3E7] text-xs text-[#202124] leading-relaxed">
-                          {activeItem.imageNote}
-                        </div>
+                      <div>
+                        <p className="text-caption text-muted mb-1">시술 부위 설명</p>
+                        <p className="text-body text-ink whitespace-pre-wrap">{activeItem.imageNote}</p>
                       </div>
                     )}
-
-                    <div className="space-y-1">
-                      <span className="text-[11px] font-bold text-[#5F6368]">
-                        지원동기 및 특이사항
-                      </span>
-                      <div className="p-3 bg-[#F8F9FA] rounded-xl border border-[#E0E3E7] text-xs text-[#202124] leading-relaxed whitespace-pre-wrap">
-                        {activeItem.userNote || "기재된 특이사항 없음"}
-                      </div>
+                    <div>
+                      <p className="text-caption text-muted mb-1">지원동기</p>
+                      <p className="text-body text-ink whitespace-pre-wrap">{activeItem.userNote || "적은 내용이 없어요."}</p>
                     </div>
-                  </div>
+                  </section>
 
-                  {/* Admin Memo Editor */}
-                  <div className="space-y-1.5 pt-2 border-t border-[#E0E3E7]">
-                    <span className="text-xs font-bold text-[#3C4043] flex items-center justify-between">
-                      <span>관리자 메모</span>
-                      <span className="text-[10px] text-[#80868B] font-normal">자동 저장</span>
-                    </span>
-                    <textarea
-                      rows={3}
-                      placeholder="병원 전달 특이사항이나 진행 메모를 입력하세요."
-                      defaultValue={activeItem.memo || ""}
-                      key={`recruit-memo-${activeItem.rowId}-${activeItem.memo || ""}`}
-                      onBlur={(e) => handleUpdateMemo(activeItem, e.target.value)}
-                      className="w-full p-3 bg-white border border-[#DADCE0] focus:border-blue-600 rounded-xl text-xs text-[#202124] outline-none"
-                    />
-                  </div>
-                </div>
+                  {/* 관리자 메모 */}
+                  <section>
+                    <Field label="관리자 메모" aside="입력칸을 벗어나면 저장돼요">
+                      <Textarea
+                        rows={3}
+                        size="sm"
+                        placeholder="병원 전달 특이사항이나 진행 메모"
+                        defaultValue={activeItem.memo || ""}
+                        key={`recruit-memo-${activeItem.rowId}-${activeItem.memo || ""}`}
+                        onBlur={(e) => handleUpdateMemo(activeItem, e.target.value)}
+                      />
+                    </Field>
+                  </section>
+                </>
               )}
 
-              {/* TAB 2: 캠페인 현황 (병원 프로젝트 룸 '블로거관리' 연동) */}
               {drawerTab === "campaign" && (
-                <div className="space-y-5 animate-in fade-in duration-150">
-                  
-                  {/* 진행 단계 마일스톤 (클릭 제거, 단계 안내 전용) */}
-                  <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-2xl space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[11px] font-bold text-[#5F6368]">진행 단계 마일스톤</span>
-                      <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-blue-100 text-blue-800">
-                        현재: {activeItem.status || "1.신규지원"}
-                      </span>
-                    </div>
-                    <div className="grid grid-cols-6 gap-1 text-[10px] text-center">
+                <>
+                  {/* 진행 단계 */}
+                  <section className="space-y-3">
+                    <h3 className={sectionTitle}>진행 단계</h3>
+                    <ol className="grid grid-cols-6 gap-1">
                       {[
                         { step: "1.신규", full: "1.신규지원" },
                         { step: "2.예약", full: "2.예약중" },
@@ -1843,596 +1326,338 @@ function AdminDashboard({ handleLogout }) {
                       ].map((s) => {
                         const isActive = activeItem.status?.includes(s.step.slice(0, 2)) || activeItem.status === s.full;
                         return (
-                          <div
-                            key={s.step}
-                            className={`py-1.5 px-1 rounded-lg border transition-all ${
-                              isActive
-                                ? "bg-blue-600 text-white border-blue-600 font-bold shadow-xs"
-                                : "bg-white text-slate-500 border-slate-200"
-                            }`}
-                          >
-                            <div className="font-bold truncate">{s.step}</div>
-                          </div>
+                          <li key={s.step} aria-current={isActive ? "step" : undefined} className="text-center">
+                            <div className={`h-1.5 rounded-full ${isActive ? "bg-brand" : "bg-line"}`}></div>
+                            <span className={`block mt-2 text-caption truncate ${isActive ? "font-semibold text-brand-strong" : "text-muted"}`}>{s.step}</span>
+                          </li>
                         );
                       })}
-                    </div>
-                  </div>
+                    </ol>
+                  </section>
 
-                  {/* 1. 내원 예약일시 (모집정보에서 확정된 예약일 노출 전용) */}
-                  <div className="p-3.5 bg-[#F8F9FA] border border-[#E0E3E7] rounded-2xl flex items-center justify-between">
-                    <div className="flex items-center gap-2.5">
-                      <span className="text-lg">📅</span>
-                      <div>
-                        <span className="text-[10px] text-[#5F6368] font-semibold block">내원 예약일시 (확정일)</span>
-                        <span className="text-xs font-bold text-[#202124]">
-                          {activeItem.confirmedDate || "예약일 미확정 (모집정보 탭에서 확정 가능)"}
-                        </span>
+                  {/* 예약 · 폴더 */}
+                  <section>
+                    <dl className="divide-y divide-line">
+                      <div className="py-3 flex items-start justify-between gap-3">
+                        <dt className="text-small text-sub shrink-0 w-24">내원 예약일</dt>
+                        <dd className="flex-1 text-body text-right">
+                          {activeItem.confirmedDate ? (
+                            <span className="font-semibold text-ink">{activeItem.confirmedDate}</span>
+                          ) : (
+                            <span className="text-muted">미확정 · 모집 정보 탭에서 확정</span>
+                          )}
+                        </dd>
                       </div>
-                    </div>
-                    {activeItem.confirmedDate ? (
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
-                        확정완료
-                      </span>
-                    ) : (
-                      <span className="text-[10px] text-slate-400 bg-white px-2 py-0.5 rounded-full border border-slate-200">
-                        미정
-                      </span>
-                    )}
-                  </div>
+                      <div className="py-3 flex items-start justify-between gap-3">
+                        <dt className="text-small text-sub shrink-0 w-24">블로거 폴더</dt>
+                        <dd className="flex-1 text-right">
+                          {activeItem.guideRoom ? (
+                            <a href={activeItem.guideRoom} target="_blank" rel="noreferrer" className="text-body font-medium text-brand hover:underline">
+                              폴더 열기
+                            </a>
+                          ) : (
+                            <span className="text-body text-muted">아직 없음</span>
+                          )}
+                          <p className="text-caption text-muted mt-1">
+                            {activeItem.guideRoom
+                              ? "원고 초안 문서와 비포애프터 이미지 폴더가 들어 있어요. 화면에서는 고칠 수 없어요."
+                              : "3.체험대기중이 되면 자동으로 만들어져요."}
+                          </p>
+                        </dd>
+                      </div>
+                    </dl>
+                  </section>
 
-                  {/* 2. 블로거 폴더 (자동 생성 · 읽기 전용) */}
-                  <div className="p-4 bg-white border border-[#E0E3E7] rounded-2xl space-y-2.5">
+                  {/* 발행 정보 */}
+                  <section className="space-y-4">
                     <div className="flex items-center justify-between">
-                      <label className="text-xs font-bold text-[#202124] flex items-center gap-1.5">
-                        <span>📁</span>
-                        <span>블로거 폴더 (원고 초안 · 비포애프터 이미지)</span>
-                      </label>
-                      {activeItem.guideRoom && (
-                        <a
-                          href={activeItem.guideRoom}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="px-2.5 py-1 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 rounded-lg text-[11px] font-bold flex items-center gap-1 cursor-pointer transition-colors shadow-2xs"
-                        >
-                          <span>📁 폴더 바로열기</span>
-                        </a>
-                      )}
-                    </div>
-                    <p className="text-[11px] text-[#5F6368]">
-                      {activeItem.guideRoom
-                        ? "체험대기중이 되면 자동으로 만들어진 폴더예요. 원고 초안 문서와 비포애프터 이미지 폴더가 들어 있어요. (화면에서는 수정할 수 없어요)"
-                        : "아직 폴더가 없어요. 3.체험대기중이 되면 10분 안에 자동으로 만들어져요."}
-                    </p>
-                  </div>
-
-                  {/* 4. 발행완료 정보 (공식 포스팅) - 포스팅 URL, 원고 발행일, 타겟 키워드 행 분리 */}
-                  <div className="p-4 bg-white border border-[#E0E3E7] rounded-2xl space-y-3.5">
-                    <div className="flex items-center justify-between">
-                      <label className="text-xs font-bold text-[#202124] flex items-center gap-1.5">
-                        <span>🔗</span>
-                        <span>발행완료 정보 (공식 포스팅)</span>
-                      </label>
+                      <h3 className={sectionTitle}>발행 정보</h3>
                       {activeItem.postUrl && (
-                        <a
-                          href={activeItem.postUrl}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="px-2.5 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 rounded-lg text-[11px] font-bold flex items-center gap-1 cursor-pointer transition-colors shadow-2xs"
-                        >
-                          <span>🔗 포스팅 바로가기</span>
-                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                        <a href={activeItem.postUrl} target="_blank" rel="noreferrer" className={linkCls}>
+                          발행글 열기
                         </a>
                       )}
                     </div>
-
-                    {/* 포스팅 URL */}
-                    <div>
-                      <span className="text-[11px] font-bold text-[#5F6368] block mb-1">포스팅 URL</span>
-                      <input
-                        type="text"
-                        placeholder="https://blog.naver.com/.../1234567890 (구글 시트에 입력값이 있으면 노출)"
+                    <Field label="발행글 URL">
+                      <Input
+                        size="sm"
+                        placeholder="https://blog.naver.com/.../1234567890"
                         defaultValue={activeItem.postUrl || ""}
                         key={`postUrl-${activeItem.rowId}-${activeItem.postUrl || ""}`}
                         onBlur={(e) => handleUpdateCampaignField(activeItem, "postUrl", e.target.value)}
-                        className="w-full px-3 py-2 bg-[#F8F9FA] focus:bg-white border border-[#DADCE0] focus:border-blue-600 rounded-xl text-xs font-medium text-[#202124] outline-none transition-all"
                       />
-                    </div>
-
-                    {/* 행 분리 1: 원고 발행일 */}
-                    <div>
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-[11px] font-bold text-[#5F6368]">원고 발행일</span>
-                        <span className="text-[10px] text-blue-600 font-semibold">월별 견적/정산 기준일</span>
-                      </div>
-                      <input
-                        type="text"
+                    </Field>
+                    <Field label="원고 발행일" hint="이 날짜의 달로 월별 발행 집계(견적 기준)에 들어가요.">
+                      <Input
+                        size="sm"
                         placeholder="예: 2026-11-04"
                         defaultValue={activeItem.postDate || ""}
                         key={`postDate-${activeItem.rowId}-${activeItem.postDate || ""}`}
                         onBlur={(e) => handleUpdateCampaignField(activeItem, "postDate", e.target.value)}
-                        className="w-full px-3 py-2 bg-[#F8F9FA] focus:bg-white border border-[#DADCE0] focus:border-blue-600 rounded-xl text-xs font-medium text-[#202124] outline-none transition-all"
                       />
-                      <p className="text-[10px] text-[#80868B] mt-1">
-                        ※ 실제 블로그에 발행된 날짜를 입력하면 대시보드에서 해당 월의 정산 인원으로 자동 집계됩니다.
-                      </p>
-                    </div>
+                    </Field>
+                  </section>
 
-                  </div>
-
-                  {/* 5. 성과 지표 (가이드룸 성과 캡처/이미지 보관 공간) */}
-                  <div className="p-4 bg-white border border-[#E0E3E7] rounded-2xl space-y-3">
+                  {/* 성과 */}
+                  <section className="space-y-3">
                     <div className="flex items-center justify-between">
-                      <label className="text-xs font-bold text-[#202124] flex items-center gap-1.5">
-                        <span>📊</span>
-                        <span>성과 지표 (가이드룸 성과 캡처 이미지)</span>
-                      </label>
+                      <h3 className={sectionTitle}>성과</h3>
                       {activeItem.performance && activeItem.performance.startsWith("http") && (
-                        <a
-                          href={activeItem.performance}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="px-2.5 py-1 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 rounded-lg text-[11px] font-bold flex items-center gap-1 cursor-pointer transition-colors shadow-2xs"
-                        >
-                          <span>📊 원본 이미지 열기</span>
-                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                        <a href={activeItem.performance} target="_blank" rel="noreferrer" className={linkCls}>
+                          원본 열기
                         </a>
                       )}
                     </div>
-
-                    <p className="text-[11px] text-[#5F6368]">
-                      블로거 가이드룸에 저장된 노출 순위, 조회수 등의 성과 캡처 이미지 링크입니다.
-                    </p>
-
-                    <input
-                      type="text"
-                      placeholder="https://drive.google.com/file/d/... 또는 이미지 URL"
-                      defaultValue={activeItem.performance || ""}
-                      key={`performance-${activeItem.rowId}-${activeItem.performance || ""}`}
-                      onBlur={(e) => handleUpdateCampaignField(activeItem, "performance", e.target.value)}
-                      className="w-full px-3 py-2 bg-[#F8F9FA] focus:bg-white border border-[#DADCE0] focus:border-blue-600 rounded-xl text-xs font-medium text-[#202124] outline-none transition-all"
-                    />
-
-                    {/* 성과 캡처 이미지 미리보기 영역 */}
+                    <Field label="성과 캡처 이미지 링크" hint="가이드룸에 저장된 노출 순위·조회수 캡처 링크예요.">
+                      <Input
+                        size="sm"
+                        placeholder="https://drive.google.com/file/d/..."
+                        defaultValue={activeItem.performance || ""}
+                        key={`performance-${activeItem.rowId}-${activeItem.performance || ""}`}
+                        onBlur={(e) => handleUpdateCampaignField(activeItem, "performance", e.target.value)}
+                      />
+                    </Field>
                     {activeItem.performance && activeItem.performance.startsWith("http") && (
-                      <div className="pt-1">
-                        <div
-                          onClick={() => setLightboxImage(activeItem.performance)}
-                          className="group relative aspect-video max-h-40 w-full rounded-xl overflow-hidden border border-[#E0E3E7] bg-slate-100 cursor-pointer shadow-2xs hover:shadow-md transition-shadow flex items-center justify-center"
-                        >
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img
-                            src={getDriveThumbnailUrl(activeItem.performance)}
-                            alt="성과 캡처 이미지"
-                            className="w-full h-full object-contain group-hover:scale-102 transition-transform duration-200"
-                            onError={(e) => {
-                              e.target.onerror = null;
-                              e.target.src = "https://ssl.gstatic.com/docs/doclist/images/mediatype/icon_1_image_x128.png";
-                            }}
-                          />
-                          <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-bold gap-1">
-                            <span>확대보기 🔍</span>
-                          </div>
-                        </div>
-                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setLightboxImage(activeItem.performance)}
+                        aria-label="성과 캡처 크게 보기"
+                        className="w-full aspect-video max-h-40 rounded-card overflow-hidden bg-fill flex items-center justify-center cursor-pointer"
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={getDriveThumbnailUrl(activeItem.performance)}
+                          alt="성과 캡처 이미지"
+                          className="w-full h-full object-contain"
+                          onError={(e) => {
+                            e.target.onerror = null;
+                            e.target.src = "https://ssl.gstatic.com/docs/doclist/images/mediatype/icon_1_image_x128.png";
+                          }}
+                        />
+                      </button>
                     )}
+                  </section>
 
-                    {/* 이슈 및 병원 전달 메모 */}
-                    <div className="pt-2 border-t border-[#E0E3E7]">
-                      <div className="flex items-center justify-between mb-1">
-                        <label className="text-xs font-bold text-[#202124] flex items-center gap-1.5">
-                          <span>⚠️</span>
-                          <span>이슈 및 병원 전달 메모</span>
-                        </label>
-                        <span className="text-[10px] text-[#80868B]">자동 저장</span>
-                      </div>
-                      <textarea
+                  {/* 메모 */}
+                  <section>
+                    <Field label="이슈 · 병원 전달 메모" aside="입력칸을 벗어나면 저장돼요">
+                      <Textarea
                         rows={3}
-                        placeholder="진행 중 발생한 이슈나 병원 전달 특이사항을 기록하세요."
+                        size="sm"
+                        placeholder="진행 중 생긴 이슈나 병원 전달 사항"
                         defaultValue={activeItem.memo || ""}
                         key={`campaign-memo-${activeItem.rowId}-${activeItem.memo || ""}`}
                         onBlur={(e) => handleUpdateMemo(activeItem, e.target.value)}
-                        className="w-full p-3 bg-[#F8F9FA] focus:bg-white border border-[#DADCE0] focus:border-blue-600 rounded-xl text-xs text-[#202124] outline-none transition-all"
                       />
-                    </div>
-                  </div>
-
-                </div>
+                    </Field>
+                  </section>
+                </>
               )}
-
             </div>
 
-            {/* Drawer Bottom Bar */}
-            <div className="p-4 border-t border-[#E0E3E7] bg-white flex items-center gap-2">
-              <button
-                onClick={() => setItemToDelete(activeItem)}
-                className="px-4 py-3 bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 hover:border-rose-300 rounded-xl text-xs font-bold transition-colors cursor-pointer flex items-center gap-1.5 shrink-0"
-                title="지원서 삭제"
-              >
-                <span>🗑️</span>
-                <span>삭제</span>
-              </button>
-              <button
-                onClick={() => handleOpenMessageModal(activeItem)}
-                className="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold text-center transition-colors cursor-pointer flex items-center justify-center gap-1.5 shadow-sm"
-              >
-                <span>💬</span>
-                <span>메시지 보내기</span>
-              </button>
+            {/* 아래 버튼 */}
+            <div className="p-4 px-6 border-t border-line flex items-center gap-2">
+              <Button variant="dangerWeak" size="lg" onClick={() => setItemToDelete(activeItem)}>
+                삭제
+              </Button>
+              <Button size="lg" block onClick={() => handleOpenMessageModal(activeItem)}>
+                문자 보내기
+              </Button>
             </div>
-          </div>
+          </aside>
         </div>
       )}
 
-      {/* 6. Full Image Lightbox Modal */}
-      {lightboxImage && (
-        <div
-          className="fixed inset-0 z-60 bg-black/80 backdrop-blur-xs flex items-center justify-center p-4"
-          onClick={() => setLightboxImage(null)}
-        >
-          <div
-            className="max-w-2xl max-h-[85vh] bg-white rounded-3xl overflow-hidden shadow-2xl relative flex flex-col"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="p-3 bg-slate-900 text-white flex items-center justify-between px-5">
-              <span className="text-xs font-bold">첨부사진 확대 뷰어</span>
-              <button
-                onClick={() => setLightboxImage(null)}
-                className="w-6 h-6 rounded-full bg-white/20 hover:bg-white/30 text-white text-xs font-bold cursor-pointer"
-              >
-                ✕
-              </button>
-            </div>
-            <div className="p-4 flex items-center justify-center bg-black/5 overflow-auto max-h-[70vh]">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={getDriveThumbnailUrl(lightboxImage)}
-                alt="확대 사진"
-                className="max-w-full max-h-full object-contain rounded-xl"
-              />
-            </div>
-            <div className="p-3 bg-white border-t border-slate-100 flex items-center justify-between px-5">
-              <a
-                href={lightboxImage}
-                target="_blank"
-                rel="noreferrer"
-                className="text-xs font-bold text-blue-600 hover:underline"
-              >
-                구글 드라이브에서 열기 ↗
-              </a>
-              <button
-                onClick={() => setLightboxImage(null)}
-                className="px-4 py-1.5 bg-slate-900 text-white text-xs font-bold rounded-xl"
-              >
-                닫기
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* 사진 크게 보기 */}
+      <Modal
+        open={Boolean(lightboxImage)}
+        onClose={() => setLightboxImage(null)}
+        title="사진"
+        size="lg"
+        layer={80}
+        footer={
+          <>
+            <Button variant="secondary" href={lightboxImage || undefined} target="_blank" rel="noreferrer">
+              구글 드라이브에서 열기
+            </Button>
+            <Button className="ml-auto" onClick={() => setLightboxImage(null)}>
+              닫기
+            </Button>
+          </>
+        }
+      >
+        {lightboxImage && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={getDriveThumbnailUrl(lightboxImage)} alt="첨부 사진 크게 보기" className="max-w-full max-h-[60vh] mx-auto object-contain rounded-control" />
+        )}
+      </Modal>
 
-      {/* 8. Message Sending Modal Dialog (Google M3 Style) */}
-      {messageApplicant && (
-        <div
-          className="fixed inset-0 z-70 bg-black/60 backdrop-blur-2xs flex items-center justify-center p-4 animate-in fade-in duration-150"
-          onClick={() => setMessageApplicant(null)}
-        >
-          <div
-            className="w-full max-w-lg bg-white rounded-3xl shadow-2xl overflow-hidden border border-[#E0E3E7] animate-in zoom-in-95 duration-200 flex flex-col max-h-[90vh]"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Modal Header */}
-            <div className="p-5 border-b border-[#E0E3E7] flex items-center justify-between bg-white">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl shrink-0">
-                  💬
-                </div>
-                <div>
-                  <h3 className="text-base font-bold text-[#202124] flex items-center gap-1.5">
-                    <span>메시지 보내기</span>
-                    <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-blue-100 text-blue-800">
-                      {messageApplicant.name} 님
-                    </span>
-                  </h3>
-                  <p className="text-xs text-[#5F6368] mt-0.5">
-                    수신 번호: <strong className="text-[#202124]">{messageApplicant.phone}</strong> · {messageApplicant.hospital}
-                  </p>
-                </div>
-              </div>
-
-              <button
-                onClick={() => setMessageApplicant(null)}
-                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-[#5F6368] flex items-center justify-center font-bold text-sm cursor-pointer"
-              >
-                ✕
-              </button>
-            </div>
-
-            {/* Modal Body */}
-            <div className="p-5 space-y-4 overflow-y-auto">
-              
-              {/* 이 지원자에게 자동으로 만들어진 문자 (시트 '문자발송' 탭) */}
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between">
-                  <label className="text-xs font-bold text-[#5F6368] block">
-                    자동 생성된 문자 선택
-                  </label>
-                  <span className="text-[11px] text-blue-600 font-medium bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100 flex items-center gap-1">
-                    <span>📊</span>
-                    <span>문자발송 탭 {messagesFor(messageApplicant).length}건</span>
-                  </span>
-                </div>
-                {messagesFor(messageApplicant).length === 0 && (
-                  <p className="text-[11px] text-[#5F6368] p-2.5 bg-slate-50 border border-slate-200 rounded-xl">
-                    아직 만들어진 문자가 없어요. 진행상태가 바뀌면 10분 안에 자동으로 만들어져요. (7.드랍은 문자를 보내지 않아요)
-                  </p>
-                )}
-                <div className="flex flex-wrap gap-1.5">
-                  {messagesFor(messageApplicant).map((m) => (
-                    <button
-                      key={m.key}
-                      type="button"
-                      onClick={() => handleSelectTemplate(m.key)}
-                      className={`py-2 px-3 rounded-xl text-xs font-bold transition-all text-center cursor-pointer border ${
-                        selectedTemplateKey === m.key
-                          ? "bg-blue-600 text-white border-blue-600 shadow-2xs"
-                          : "bg-[#F8F9FA] hover:bg-slate-100 text-[#3C4043] border-[#E0E3E7]"
-                      }`}
-                    >
-                      {m.tpl}
-                      {m.sent ? " ✓보냄" : ""}
-                    </button>
-                  ))}
-                  <button
-                    key="custom"
-                    type="button"
-                    onClick={() => handleSelectTemplate("custom")}
-                    className={`py-2 px-3 rounded-xl text-xs font-bold transition-all text-center cursor-pointer border ${
-                      selectedTemplateKey === "custom"
-                        ? "bg-blue-600 text-white border-blue-600 shadow-2xs"
-                        : "bg-[#F8F9FA] hover:bg-slate-100 text-[#3C4043] border-[#E0E3E7]"
-                    }`}
-                  >
-                    ✏️ 직접 작성
-                  </button>
-                </div>
-                {selectedSheetMessage && selectedSheetMessage.warn && (
-                  <p className="text-[11px] text-amber-800 p-2 bg-amber-50 border border-amber-200 rounded-xl">
-                    ⚠️ 점검: {selectedSheetMessage.warn}
-                  </p>
-                )}
-              </div>
-
-              {/* Message Editor Textarea */}
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between text-xs">
-                  <label className="font-bold text-[#202124]">
-                    메시지 내용 (문자 / 알림톡)
-                  </label>
-                  <span className="text-[11px] text-[#80868B]">
-                    {customMessageText.length}자
-                  </span>
-                </div>
-                <textarea
-                  rows={9}
-                  value={customMessageText}
-                  onChange={(e) => setCustomMessageText(e.target.value)}
-                  placeholder="보내실 메시지 내용을 입력하세요..."
-                  className="w-full p-3.5 bg-[#F8F9FA] border border-[#DADCE0] focus:border-blue-600 focus:bg-white rounded-2xl text-xs text-[#202124] leading-relaxed outline-none transition-colors"
-                />
-              </div>
-
-              {/* Tips */}
-              <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-[11px] text-[#5F6368] space-y-1">
-                <p className="font-semibold text-[#202124]">💡 안내</p>
-                <p>• 문구는 자동화가 시트의 <strong>[문자발송]</strong> 탭에 만들어 둔 것이에요. 문구를 고쳐 <strong>[문구 저장]</strong>하면 자동 갱신으로 덮어쓰지 않아요.</p>
-                <p>• 문자를 보낸 뒤 <strong>[보냄 표시]</strong>를 눌러야 같은 문자가 다시 만들어지거나 중복 발송되지 않아요.</p>
-                <p>• <strong>[메시지 복사]</strong>로 문자 발송 솔루션에 붙여넣거나, <strong>[문자 앱 열기]</strong>로 바로 보낼 수 있어요.</p>
-              </div>
-
-            </div>
-
-            {/* Modal Actions */}
-            <div className="p-4 px-5 border-t border-[#E0E3E7] bg-white flex items-center justify-between gap-2">
-              <a
-                href={`tel:${messageApplicant.rawPhone || messageApplicant.phone}`}
-                className="px-3.5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-colors cursor-pointer flex items-center gap-1 shrink-0"
-                title="음성 전화 연결"
-              >
-                <span>📞</span>
-                <span className="hidden sm:inline">전화 걸기</span>
-              </a>
-
-              <div className="flex items-center gap-2">
+      {/* 문자 보내기 */}
+      <Modal
+        open={Boolean(messageApplicant)}
+        onClose={() => setMessageApplicant(null)}
+        title={messageApplicant ? `${messageApplicant.name}님에게 문자` : ""}
+        description={messageApplicant ? `${messageApplicant.phone} · ${messageApplicant.hospital}` : ""}
+        size="lg"
+        layer={60}
+        footer={
+          messageApplicant && (
+            <div className="w-full flex flex-wrap items-center gap-2">
+              <Button variant="ghost" href={`tel:${messageApplicant.rawPhone || messageApplicant.phone}`}>
+                전화 걸기
+              </Button>
+              <div className="ml-auto flex flex-wrap items-center gap-2">
                 {selectedSheetMessage && !selectedSheetMessage.sent && (
-                  <button
-                    onClick={handleSaveMessageText}
-                    disabled={customMessageText === selectedSheetMessage.text}
-                    className="px-3 py-2.5 rounded-xl text-xs font-bold border bg-white hover:bg-slate-100 text-[#3C4043] border-[#DADCE0] cursor-pointer disabled:opacity-40 disabled:cursor-default"
-                  >
+                  <Button variant="secondary" onClick={handleSaveMessageText} disabled={customMessageText === selectedSheetMessage.text}>
                     문구 저장
-                  </button>
+                  </Button>
                 )}
                 {selectedSheetMessage && (
-                  <button
-                    onClick={() => handleMarkSent(!selectedSheetMessage.sent)}
-                    className={`px-3 py-2.5 rounded-xl text-xs font-bold border cursor-pointer ${
-                      selectedSheetMessage.sent
-                        ? "bg-emerald-50 text-emerald-700 border-emerald-300"
-                        : "bg-white hover:bg-emerald-50 text-emerald-700 border-emerald-300"
-                    }`}
-                  >
-                    {selectedSheetMessage.sent ? "✓ 보냄 (되돌리기)" : "보냄 표시"}
-                  </button>
+                  <Button variant={selectedSheetMessage.sent ? "weak" : "secondary"} onClick={() => handleMarkSent(!selectedSheetMessage.sent)}>
+                    {selectedSheetMessage.sent ? "보냄 취소" : "보냄 표시"}
+                  </Button>
                 )}
-                <button
+                <Button
+                  variant="secondary"
                   onClick={() => {
                     navigator.clipboard.writeText(customMessageText);
                     setCopiedMessage(true);
                     setTimeout(() => setCopiedMessage(false), 2000);
-                    showToast("메시지가 클립보드에 복사되었습니다!");
+                    showToast("메시지를 복사했습니다.");
                   }}
-                  className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 border ${
-                    copiedMessage
-                      ? "bg-emerald-50 text-emerald-700 border-emerald-300"
-                      : "bg-white hover:bg-slate-100 text-[#3C4043] border-[#DADCE0]"
-                  }`}
                 >
-                  <span>{copiedMessage ? "✓" : "📋"}</span>
-                  <span>{copiedMessage ? "복사 완료!" : "메시지 복사"}</span>
-                </button>
-
-                <a
+                  {copiedMessage ? "복사했어요" : "복사"}
+                </Button>
+                <Button
                   href={`sms:${(messageApplicant.rawPhone || messageApplicant.phone).replace(/[^0-9]/g, "")}?body=${encodeURIComponent(customMessageText)}`}
-                  className="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition-colors cursor-pointer flex items-center gap-1.5 shadow-sm"
                 >
-                  <span>💬</span>
-                  <span>문자 앱 열기</span>
-                </a>
+                  문자 앱 열기
+                </Button>
               </div>
             </div>
-          </div>
-        </div>
-      )}
-
-      {/* 점검/경고 알림창 */}
-      {alertInfo && (
-        <div
-          className="fixed inset-0 z-80 bg-black/60 backdrop-blur-2xs flex items-center justify-center p-4 animate-in fade-in duration-150"
-          onClick={() => setAlertInfo(null)}
-        >
-          <div
-            className="w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden border border-amber-100 animate-in zoom-in-95 duration-200"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="p-6 pb-3 flex items-start gap-3.5">
-              <div className="w-11 h-11 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center text-xl shrink-0">
-                ⚠️
-              </div>
-              <div className="space-y-2">
-                <h3 className="text-base font-bold text-[#202124]">{alertInfo.title}</h3>
-                {alertInfo.lines.length > 0 && (
-                  <ul className="space-y-1">
-                    {alertInfo.lines.map((line, i) => (
-                      <li key={i} className="text-xs text-[#3C4043] leading-relaxed">
-                        • {line}
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-            </div>
-            <div className="p-4 px-6 mt-3 bg-[#F8F9FA] border-t border-[#E0E3E7] flex items-center justify-end">
-              <button
-                onClick={() => setAlertInfo(null)}
-                className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition-colors cursor-pointer shadow-sm"
-              >
-                확인
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* 9. Deletion Confirmation Modal Dialog (Google M3 Alert Dialog) */}
-      {itemToDelete && (
-        <div
-          className="fixed inset-0 z-70 bg-black/60 backdrop-blur-2xs flex items-center justify-center p-4 animate-in fade-in duration-150"
-          onClick={() => !isDeleting && setItemToDelete(null)}
-        >
-          <div
-            className="w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden border border-rose-100 animate-in zoom-in-95 duration-200"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Dialog Header */}
-            <div className="p-6 pb-4 flex items-start gap-3.5">
-              <div className="w-11 h-11 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center text-xl shrink-0">
-                ⚠️
-              </div>
-              <div className="space-y-1">
-                <h3 className="text-base font-bold text-[#202124]">
-                  지원서 삭제 확인
-                </h3>
-                <p className="text-xs text-[#5F6368]">
-                  선택하신 지원자 데이터를 영구 삭제합니다.
+          )
+        }
+      >
+        {messageApplicant && (
+          <div className="space-y-5">
+            <div className="space-y-2">
+              <p className="text-small font-semibold text-ink-2">
+                자동으로 만든 문자 <span className="text-muted font-normal">{messagesFor(messageApplicant).length}건</span>
+              </p>
+              {messagesFor(messageApplicant).length === 0 && (
+                <p className="text-small text-sub">
+                  아직 만들어진 문자가 없어요. 진행상태가 바뀌면 10분 안에 자동으로 만들어져요. (7.드랍은 문자를 보내지 않아요)
                 </p>
+              )}
+              <div className="flex flex-wrap gap-2">
+                {[...messagesFor(messageApplicant).map((m) => ({ key: m.key, label: `${m.tpl}${m.sent ? " · 보냄" : ""}` })), { key: "custom", label: "직접 작성" }].map((opt) => (
+                  <button
+                    key={opt.key}
+                    type="button"
+                    onClick={() => handleSelectTemplate(opt.key)}
+                    aria-pressed={selectedTemplateKey === opt.key}
+                    className={`h-9 px-4 rounded-full text-small font-semibold cursor-pointer transition-colors ${
+                      selectedTemplateKey === opt.key ? "bg-ink text-white" : "bg-fill text-sub hover:text-ink"
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
               </div>
+              {selectedSheetMessage && selectedSheetMessage.warn && (
+                <p className="text-small text-danger-strong bg-danger-weak rounded-control px-3 py-2">점검: {selectedSheetMessage.warn}</p>
+              )}
             </div>
 
-            {/* Target Applicant Info Card */}
-            <div className="px-6 py-2">
-              <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-1.5 text-xs">
-                <div className="flex items-center justify-between">
-                  <span className="text-[#5F6368]">지원자</span>
-                  <span className="font-bold text-[#202124]">
-                    {itemToDelete.name || "미지정"} ({itemToDelete.phone || "-"})
-                  </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-[#5F6368]">병원 / 희망시술</span>
-                  <span className="font-semibold text-[#202124] max-w-[220px] truncate">
-                    {itemToDelete.hospital} / {itemToDelete.treatment}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-[#5F6368]">접수일시</span>
-                  <span className="text-[#5F6368]">
-                    {itemToDelete.submittedAt || "-"}
-                  </span>
-                </div>
-                {itemToDelete.shareStatus && (
-                  <div className="flex items-center justify-between pt-1 border-t border-slate-200">
-                    <span className="text-[#5F6368]">병원 룸 연동상태</span>
-                    <span className="font-bold text-indigo-700 bg-indigo-50 border border-indigo-200 px-1.5 py-0.5 rounded text-[10px]">
-                      {itemToDelete.shareStatus}
-                    </span>
-                  </div>
-                )}
-              </div>
+            <Field label="내용" aside={`${customMessageText.length}자`}>
+              <Textarea
+                rows={9}
+                value={customMessageText}
+                onChange={(e) => setCustomMessageText(e.target.value)}
+                placeholder="보낼 내용을 입력하세요"
+              />
+            </Field>
 
-              <div className="mt-3 p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-[11px] leading-relaxed">
-                <p className="font-semibold">⚠️ 주의: 삭제 시 되돌릴 수 없습니다.</p>
-                <p className="mt-0.5 text-rose-700">
-                  구글 스프레드시트(DB 탭)에서도 해당 행이 완전히 삭제되며 복구할 수 없습니다. 계속 진행하시겠습니까?
-                </p>
-                {itemToDelete.shareStatus && (
-                  <p className="mt-1.5 font-semibold text-rose-900 bg-rose-100/80 p-1.5 rounded text-[10px]">
-                    ※ 현재 병원 프로젝트 룸과 연동({itemToDelete.shareStatus}) 중인 데이터입니다.
-                  </p>
-                )}
-              </div>
-            </div>
-
-            {/* Dialog Actions */}
-            <div className="p-4 px-6 mt-3 bg-[#F8F9FA] border-t border-[#E0E3E7] flex items-center justify-end gap-2.5">
-              <button
-                onClick={() => setItemToDelete(null)}
-                disabled={isDeleting}
-                className="px-4 py-2.5 rounded-xl bg-white hover:bg-slate-100 border border-[#DADCE0] text-xs font-bold text-[#3C4043] transition-colors cursor-pointer disabled:opacity-50"
-              >
-                취소
-              </button>
-              <button
-                onClick={handleConfirmDelete}
-                disabled={isDeleting}
-                className="px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold transition-colors cursor-pointer shadow-sm flex items-center gap-1.5 disabled:opacity-50"
-              >
-                {isDeleting ? (
-                  <>
-                    <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    <span>삭제 중...</span>
-                  </>
-                ) : (
-                  <>
-                    <span>🗑️</span>
-                    <span>삭제하기</span>
-                  </>
-                )}
-              </button>
-            </div>
+            <ul className="text-caption text-sub space-y-1 list-disc pl-4">
+              <li>문구는 시트의 [문자발송] 탭에 자동으로 만들어진 것이에요. 고쳐서 [문구 저장]하면 자동 갱신으로 덮어쓰지 않아요.</li>
+              <li>보낸 뒤 [보냄 표시]를 눌러야 같은 문자가 다시 만들어지거나 중복 발송되지 않아요.</li>
+              <li>이미 보낸 문자는 고칠 수 없어요.</li>
+            </ul>
           </div>
-        </div>
-      )}
+        )}
+      </Modal>
 
+      {/* 점검 · 경고 알림 */}
+      <Modal
+        open={Boolean(alertInfo)}
+        onClose={() => setAlertInfo(null)}
+        title={alertInfo?.title}
+        size="sm"
+        layer={70}
+        footer={
+          <Button size="lg" block onClick={() => setAlertInfo(null)}>
+            확인
+          </Button>
+        }
+      >
+        {alertInfo && alertInfo.lines.length > 0 && (
+          <ul className="space-y-1.5">
+            {alertInfo.lines.map((line, i) => (
+              <li key={i} className="text-body text-ink-2">
+                {line}
+              </li>
+            ))}
+          </ul>
+        )}
+      </Modal>
+
+      {/* 삭제 확인 */}
+      <Modal
+        open={Boolean(itemToDelete)}
+        onClose={() => setItemToDelete(null)}
+        dismissable={!isDeleting}
+        title="지원서를 삭제할까요?"
+        description="구글 시트에서도 이 행이 완전히 지워지고 되돌릴 수 없어요."
+        size="sm"
+        layer={60}
+        footer={
+          <>
+            <Button variant="secondary" size="lg" block onClick={() => setItemToDelete(null)} disabled={isDeleting}>
+              취소
+            </Button>
+            <Button variant="danger" size="lg" block onClick={handleConfirmDelete} disabled={isDeleting}>
+              {isDeleting ? "삭제 중..." : "삭제"}
+            </Button>
+          </>
+        }
+      >
+        {itemToDelete && (
+          <dl className="rounded-card bg-fill-weak p-4 space-y-2 text-small">
+            <div className="flex justify-between gap-3">
+              <dt className="text-sub">지원자</dt>
+              <dd className="font-semibold text-ink text-right">
+                {itemToDelete.name || "미지정"} ({itemToDelete.phone || "-"})
+              </dd>
+            </div>
+            <div className="flex justify-between gap-3">
+              <dt className="text-sub shrink-0">병원 · 시술</dt>
+              <dd className="text-ink text-right truncate">
+                {itemToDelete.hospital} · {itemToDelete.treatment}
+              </dd>
+            </div>
+            <div className="flex justify-between gap-3">
+              <dt className="text-sub">접수</dt>
+              <dd className="text-ink text-right">{itemToDelete.submittedAt || "-"}</dd>
+            </div>
+            {itemToDelete.shareStatus && (
+              <div className="flex justify-between gap-3 pt-2 border-t border-line">
+                <dt className="text-sub">병원 룸</dt>
+                <dd className="font-semibold text-danger text-right">{itemToDelete.shareStatus} · 룸과 연결된 지원자예요</dd>
+              </div>
+            )}
+          </dl>
+        )}
+      </Modal>
     </div>
   );
 }

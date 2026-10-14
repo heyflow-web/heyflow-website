@@ -9,9 +9,13 @@ export default function RootLayout({ children }) {
   return (
     <html lang="ko">
       <body className="antialiased font-sans">
+        <link
+          rel="stylesheet"
+          href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"
+          precedence="default"
+        />
         {children}
       </body>
     </html>
   );
 }
-
