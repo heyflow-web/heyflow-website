@@ -5,7 +5,7 @@ import AdminPasswordGate from "@/components/AdminPasswordGate";
 import { formatBlogUrl, getDriveThumbnailUrl, getDrivePreviewUrl, getDriveFileId } from "@/lib/parser";
 import Button from "@/components/ui/Button";
 import Modal from "@/components/ui/Modal";
-import Field, { Input, Select, Textarea } from "@/components/ui/Field";
+import Field, { Input, Select, SelectChevron, Textarea } from "@/components/ui/Field";
 import { statusTone } from "@/components/ui/StatusPill";
 
 const isShared = (item) => {
@@ -591,24 +591,41 @@ function AdminDashboard({ handleLogout }) {
   };
 
   const renderStatusSelect = (item, size = "sm") => (
-    <select
-      value={item.status}
-      onChange={(e) => handleUpdateStatus(item, e.target.value)}
-      aria-label={`${item.name}님 진행상태`}
-      className={`${size === "sm" ? "h-8 pl-2.5 pr-7 text-caption" : "h-10 pl-3 pr-8 text-small"} rounded-full font-semibold outline-none cursor-pointer border-0 ${statusTone(item.status)}`}
-    >
-      {STATUS_OPTIONS.map((opt) => (
-        <option key={opt.label} value={opt.label}>
-          {opt.label}
-        </option>
-      ))}
-      {!STATUS_OPTIONS.some((o) => o.label === item.status) && item.status && (
-        <option value={item.status}>{item.status}</option>
-      )}
-    </select>
+    <span className={`relative inline-block rounded-full ${statusTone(item.status)}`}>
+      <select
+        value={item.status}
+        onChange={(e) => handleUpdateStatus(item, e.target.value)}
+        aria-label={`${item.name}님 진행상태`}
+        className={`${size === "sm" ? "h-8 pl-3 pr-9 text-caption" : "h-10 pl-4 pr-10 text-small"} appearance-none bg-transparent text-inherit rounded-full font-semibold cursor-pointer border-0`}
+      >
+        {STATUS_OPTIONS.map((opt) => (
+          <option key={opt.label} value={opt.label}>
+            {opt.label}
+          </option>
+        ))}
+        {!STATUS_OPTIONS.some((o) => o.label === item.status) && item.status && (
+          <option value={item.status}>{item.status}</option>
+        )}
+      </select>
+      <SelectChevron className={size === "sm" ? "right-3" : "right-3.5"} />
+    </span>
   );
 
-  const renderShareToggle = (item) => (
+  const renderShareToggle = (item, compact = false) =>
+    compact ? (
+      <label
+        className="inline-flex items-center justify-center w-9 h-9 rounded-control cursor-pointer hover:bg-fill"
+        title={isShared(item) ? "병원 룸에 공유됨" : "체크하면 병원 룸에 바로 공유"}
+      >
+        <input
+          type="checkbox"
+          checked={isShared(item)}
+          onChange={(e) => handleUpdateShareStatus(item, e.target.checked)}
+          aria-label={`${item.name}님 병원 룸 공유`}
+          className="w-4 h-4 cursor-pointer accent-brand"
+        />
+      </label>
+    ) : (
     <label
       className={`inline-flex items-center gap-2 h-8 px-2.5 rounded-control cursor-pointer select-none text-caption font-semibold transition-colors ${
         isShared(item) ? "bg-brand-weak text-brand-strong" : "bg-fill text-muted hover:text-sub"
@@ -623,7 +640,7 @@ function AdminDashboard({ handleLogout }) {
       />
       <span>{isShared(item) ? "공유됨" : "미공유"}</span>
     </label>
-  );
+    );
 
   const linkCls = "text-small font-medium text-brand hover:underline";
   const sectionTitle = "text-small font-semibold text-sub";
@@ -908,7 +925,7 @@ function AdminDashboard({ handleLogout }) {
               <table className="w-full text-left text-small">
                 <thead>
                   <tr className="border-y border-line text-caption text-muted">
-                    <th className="py-3 pl-5 pr-3 font-medium w-28">룸 공유</th>
+                    <th className="py-3 pl-5 pr-3 font-medium w-20">룸 공유</th>
                     <th className="py-3 px-3 font-medium w-36">진행상태</th>
                     <th className="py-3 px-3 font-medium min-w-40">지원자</th>
                     <th className="py-3 px-3 font-medium min-w-48">병원 · 시술</th>
@@ -931,7 +948,7 @@ function AdminDashboard({ handleLogout }) {
                         }`}
                       >
                         <td className="py-4 pl-5 pr-3" onClick={(e) => e.stopPropagation()}>
-                          {renderShareToggle(item)}
+                          {renderShareToggle(item, true)}
                         </td>
                         <td className="py-4 px-3" onClick={(e) => e.stopPropagation()}>
                           {renderStatusSelect(item)}
@@ -1061,49 +1078,10 @@ function AdminDashboard({ handleLogout }) {
               </button>
             </div>
 
-            {/* 상태 · 공유 */}
-            <div className="mx-6 rounded-card bg-fill-weak p-4 space-y-4">
-              <div className="flex items-center justify-between gap-3">
-                <span className="text-small font-semibold text-sub">진행상태</span>
-                {renderStatusSelect(activeItem, "md")}
-              </div>
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <p className="text-small font-semibold text-sub">
-                    병원 룸 공유{activeItem.client ? ` · ${activeItem.client}` : ""}
-                  </p>
-                  <p className="text-caption text-muted mt-0.5">체크하면 바로 병원 프로젝트 룸에 올라가요. 블로그지수가 필요해요.</p>
-                  <div className="flex items-center gap-2 mt-2">
-                    <label htmlFor={`blogIndex-${activeItem.rowId}`} className="text-caption font-semibold text-sub shrink-0">
-                      블로그지수
-                    </label>
-                    <Input
-                      id={`blogIndex-${activeItem.rowId}`}
-                      size="sm"
-                      className="!w-32 !bg-white"
-                      placeholder="예: 준최4"
-                      defaultValue={activeItem.blogIndex || ""}
-                      key={`blogIndex-${activeItem.rowId}-${activeItem.blogIndex || ""}`}
-                      onBlur={(e) => handleUpdateCampaignField(activeItem, "blogIndex", e.target.value)}
-                    />
-                  </div>
-                </div>
-                {renderShareToggle(activeItem)}
-              </div>
-              {activeItem.confirmedDate && (
-                <div className="flex items-center justify-between gap-3 pt-3 border-t border-line">
-                  <span className="text-small text-ink">
-                    확정 예약일 <strong className="font-semibold text-brand-strong">{activeItem.confirmedDate}</strong>
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => handleUpdateStatus(activeItem, activeItem.status, "")}
-                    className="text-caption text-sub hover:text-ink underline underline-offset-2 cursor-pointer"
-                  >
-                    확정 취소
-                  </button>
-                </div>
-              )}
+            {/* 진행상태 */}
+            <div className="px-6 pb-2 flex items-center justify-between gap-3">
+              <span className="text-small font-semibold text-sub">진행상태</span>
+              {renderStatusSelect(activeItem, "md")}
             </div>
 
             {/* 탭 */}
@@ -1130,6 +1108,31 @@ function AdminDashboard({ handleLogout }) {
             <div className="px-6 py-6 space-y-8 flex-1 overflow-y-auto">
               {drawerTab === "recruit" && (
                 <>
+                  {/* 병원 룸 공유 */}
+                  <section className="space-y-3">
+                    <div className="flex items-center justify-between gap-3">
+                      <h3 className={sectionTitle}>
+                        병원 룸 공유{activeItem.client ? ` · ${activeItem.client}` : ""}
+                      </h3>
+                      {renderShareToggle(activeItem)}
+                    </div>
+                    <p className="text-caption text-sub">체크하면 바로 병원 프로젝트 룸에 올라가요. 블로그지수가 필요해요.</p>
+                    <div className="flex items-center gap-3">
+                      <label htmlFor={`blogIndex-${activeItem.rowId}`} className="text-small text-sub shrink-0 w-20">
+                        블로그지수
+                      </label>
+                      <Input
+                        id={`blogIndex-${activeItem.rowId}`}
+                        size="sm"
+                        className="!w-40"
+                        placeholder="예: 준최4"
+                        defaultValue={activeItem.blogIndex || ""}
+                        key={`blogIndex-${activeItem.rowId}-${activeItem.blogIndex || ""}`}
+                        onBlur={(e) => handleUpdateCampaignField(activeItem, "blogIndex", e.target.value)}
+                      />
+                    </div>
+                  </section>
+
                   {/* 인적사항 */}
                   <section className="space-y-3">
                     <h3 className={sectionTitle}>인적사항</h3>
@@ -1205,7 +1208,23 @@ function AdminDashboard({ handleLogout }) {
 
                   {/* 희망 일정 */}
                   <section className="space-y-3">
-                    <h3 className={sectionTitle}>희망 일정</h3>
+                    <div className="flex items-center justify-between gap-3">
+                      <h3 className={sectionTitle}>희망 일정</h3>
+                      {activeItem.confirmedDate && (
+                        <button
+                          type="button"
+                          onClick={() => handleUpdateStatus(activeItem, activeItem.status, "")}
+                          className="text-caption text-sub hover:text-ink underline underline-offset-2 cursor-pointer"
+                        >
+                          확정 취소
+                        </button>
+                      )}
+                    </div>
+                    {activeItem.confirmedDate && (
+                      <p className="text-small text-ink">
+                        확정 예약일 <strong className="font-semibold text-brand-strong">{activeItem.confirmedDate}</strong>
+                      </p>
+                    )}
                     <div className="space-y-2">
                       {[
                         { priority: "1지망", val: activeItem.schedule1 || activeItem.schedules?.[0] },
