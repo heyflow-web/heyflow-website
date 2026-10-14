@@ -97,6 +97,8 @@ function AdminDashboard({ handleLogout }) {
   const [copiedMessage, setCopiedMessage] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
   const [loadError, setLoadError] = useState("");
+  const [editingField, setEditingField] = useState(null); // 연락처/블로그 주소 인라인 수정: "phone" | "blogUrl"
+  const [editValue, setEditValue] = useState("");
 
   const showToast = (msg) => {
     setToastMessage(msg);
@@ -137,6 +139,10 @@ function AdminDashboard({ handleLogout }) {
   useEffect(() => {
     fetchData();
   }, []);
+
+  useEffect(() => {
+    setEditingField(null);
+  }, [activeItem && activeItem.rowId]);
 
   // 2. 시트 저장 공통 처리 ---------------------------------------------
   // 시트 행은 '행 번호 + 키'로 확인한다. 화면에서 바꾼 칸만 보내고, 실패하면 되돌린다.
@@ -229,6 +235,28 @@ function AdminDashboard({ handleLogout }) {
     const next = String(value).trim();
     if ((item[fieldName] || "") === next) return;
     return saveChanges(item, { [fieldName]: next }, "구글 시트에 저장되었습니다.");
+  };
+
+  // 연락처 / 블로그 주소 수정 (시트 DB와 프로젝트룸 모집정보에 같이 반영)
+  const startEditContact = (field, current) => {
+    setEditingField(field);
+    setEditValue(current || "");
+  };
+  const handleSaveContact = async () => {
+    if (!activeItem || !editingField) return;
+    const field = editingField;
+    const next = editValue.trim();
+    const current = field === "phone" ? activeItem.sheetPhone : activeItem.sheetBlog;
+    const same = field === "phone" ? digitsOf(next) === digitsOf(current) : next === (current || "");
+    if (same) {
+      setEditingField(null);
+      return;
+    }
+    const ok = await saveChanges(activeItem, { [field]: next }, "저장되었습니다.");
+    if (ok) {
+      setEditingField(null);
+      await fetchData(true);
+    }
   };
 
   // 3. 지원서 완전 삭제 (키로 같은 사람인지 확인한 뒤 삭제)
@@ -1530,9 +1558,29 @@ function AdminDashboard({ handleLogout }) {
                     <div className="grid grid-cols-2 gap-3 text-xs">
                       <div className="p-3 bg-white border border-[#E0E3E7] rounded-xl space-y-1">
                         <span className="text-[10px] text-[#80868B] block">연락처</span>
+                        {editingField === "phone" ? (
+                          <div className="flex items-center gap-1.5">
+                            <input
+                              type="tel"
+                              autoFocus
+                              value={editValue}
+                              onChange={(e) => setEditValue(e.target.value)}
+                              onKeyDown={(e) => e.key === "Enter" && handleSaveContact()}
+                              className="w-full px-2 py-1 bg-[#F8F9FA] focus:bg-white border border-[#DADCE0] focus:border-blue-600 rounded-lg text-xs font-medium text-[#202124] outline-none"
+                            />
+                            <button onClick={handleSaveContact} className="text-[11px] font-bold text-blue-600 hover:underline cursor-pointer shrink-0">저장</button>
+                            <button onClick={() => setEditingField(null)} className="text-[11px] text-[#5F6368] hover:underline cursor-pointer shrink-0">취소</button>
+                          </div>
+                        ) : (
                         <div className="font-bold text-[#202124] flex items-center justify-between">
                           <span>{activeItem.phone}</span>
                           <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => startEditContact("phone", activeItem.sheetPhone)}
+                              className="text-[11px] text-[#5F6368] hover:text-blue-600 hover:underline cursor-pointer"
+                            >
+                              수정
+                            </button>
                             <button
                               onClick={() => copyToClipboard(activeItem.phone, "전화번호")}
                               className="text-[11px] text-blue-600 hover:underline cursor-pointer"
@@ -1555,6 +1603,7 @@ function AdminDashboard({ handleLogout }) {
                             </a>
                           </div>
                         </div>
+                        )}
                       </div>
 
                       <div className="p-3 bg-white border border-[#E0E3E7] rounded-xl space-y-1">
@@ -1565,9 +1614,33 @@ function AdminDashboard({ handleLogout }) {
                       </div>
                     </div>
 
-                    {activeItem.blogUrl && (
-                      <div className="p-3 bg-white border border-[#E0E3E7] rounded-xl space-y-1 text-xs">
+                    <div className="p-3 bg-white border border-[#E0E3E7] rounded-xl space-y-1 text-xs">
+                      <div className="flex items-center justify-between">
                         <span className="text-[10px] text-[#80868B] block">블로그 주소</span>
+                        {editingField !== "blogUrl" && (
+                          <button
+                            onClick={() => startEditContact("blogUrl", activeItem.sheetBlog)}
+                            className="text-[11px] text-[#5F6368] hover:text-blue-600 hover:underline cursor-pointer"
+                          >
+                            수정
+                          </button>
+                        )}
+                      </div>
+                      {editingField === "blogUrl" ? (
+                        <div className="flex items-center gap-1.5">
+                          <input
+                            type="url"
+                            autoFocus
+                            value={editValue}
+                            onChange={(e) => setEditValue(e.target.value)}
+                            onKeyDown={(e) => e.key === "Enter" && handleSaveContact()}
+                            placeholder="https://blog.naver.com/아이디"
+                            className="w-full px-2 py-1 bg-[#F8F9FA] focus:bg-white border border-[#DADCE0] focus:border-blue-600 rounded-lg text-xs font-medium text-[#202124] outline-none"
+                          />
+                          <button onClick={handleSaveContact} className="text-[11px] font-bold text-blue-600 hover:underline cursor-pointer shrink-0">저장</button>
+                          <button onClick={() => setEditingField(null)} className="text-[11px] text-[#5F6368] hover:underline cursor-pointer shrink-0">취소</button>
+                        </div>
+                      ) : activeItem.blogUrl ? (
                         <a
                           href={formatBlogUrl(activeItem.blogUrl)}
                           target="_blank"
@@ -1576,8 +1649,10 @@ function AdminDashboard({ handleLogout }) {
                         >
                           {activeItem.blogUrl} ↗
                         </a>
-                      </div>
-                    )}
+                      ) : (
+                        <span className="text-slate-400">-</span>
+                      )}
+                    </div>
                   </div>
 
                   {/* Schedules (1~3 Choices with 1-click confirmation) */}

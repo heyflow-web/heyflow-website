@@ -333,6 +333,8 @@ function admList_() {
         submittedAt: admRead_(r, C_TS),
         name: admRead_(r, C_NAME),
         sheetName: admRead_(r, C_NAME),
+        sheetPhone: admRead_(r, C_PHONE),
+        sheetBlog: admRead_(r, C_BLOG),
         shareStatus: admRead_(r, C_STATE),
         checkStatus: admRead_(r, C_WARN),
         status: canonStatus_(admRead_(r, C_PROG)) || '1.신규지원',
@@ -430,6 +432,12 @@ function admUpdateFields_(data) {
     put(C_IDX, String(ch.blogIndex).trim());
     refreshRows_(db, [hit.row]);
   }
+  if (ch.phone !== undefined || ch.blogUrl !== undefined) {
+    var newPhone = ch.phone !== undefined ? admPhone_(ch.phone) : admRead_(hit.vals, C_PHONE);
+    var newBlog = ch.blogUrl !== undefined ? admBlog_(ch.blogUrl) : admRead_(hit.vals, C_BLOG);
+    var contactNote = admContactChange_(db, hit, newPhone, newBlog);
+    if (contactNote) warnings.push(contactNote);
+  }
   var r = db.getRange(hit.row, 1, 1, C_SNAP).getDisplayValues()[0];
   var status = canonStatus_(admRead_(r, C_PROG));
   if (status === '3.체험대기중' && !admRead_(r, C_RES)) warnings.push('예약일이 비어 있어요. 예약 전날·체험 후 문자가 만들어지지 않아요.');
@@ -441,7 +449,8 @@ function admUpdateFields_(data) {
 function admRowObj_(r) {
   return { status: canonStatus_(admRead_(r, C_PROG)), confirmedDate: admRead_(r, C_RES), postDate: admRead_(r, C_PUB),
     postUrl: admRead_(r, C_URL), performance: admRead_(r, C_PERF), memo: admRead_(r, C_ISSUE),
-    blogIndex: admRead_(r, C_IDX), shareStatus: admRead_(r, C_STATE), checkStatus: admRead_(r, C_WARN) };
+    blogIndex: admRead_(r, C_IDX), shareStatus: admRead_(r, C_STATE), checkStatus: admRead_(r, C_WARN),
+    sheetPhone: admRead_(r, C_PHONE), sheetBlog: admRead_(r, C_BLOG) };
 }
 
 /** 병원 프로젝트룸 공유 체크박스. 공유됨으로 바꾸면 10분 안에 자동화(pushShared_)가 룸에 올린다. */
@@ -530,4 +539,78 @@ function admSelfTest() {
   Logger.log('비밀키 설정됨: ' + !!PropertiesService.getScriptProperties().getProperty('ADMIN_API_SECRET'));
   var out = JSON.parse(admList_().getContent());
   Logger.log('결과: ' + out.result + ' / 지원자 ' + (out.rows || []).length + '명 / 문자 ' + (out.messages || []).length + '건 ' + (out.message || ''));
+}
+
+
+/** 연락처: 숫자만 남기고 010… 형태로 맞춘다 (앞자리 0이 빠진 10자리도 보정) */
+function admPhone_(v) {
+  var d = String(v || '').replace(/\D/g, '');
+  if (d.length === 10 && d.indexOf('10') === 0) d = '0' + d;
+  if (d.length < 10 || d.length > 11) throw new Error('연락처 형식을 확인해 주세요: ' + v);
+  return d;
+}
+/** 블로그 주소: 앞에 https://가 없으면 붙인다 */
+function admBlog_(v) {
+  v = String(v || '').trim();
+  if (!v) throw new Error('블로그 주소를 입력해 주세요.');
+  if (!/^https?:\/\//i.test(v)) v = 'https://' + v.replace(/^\/+/, '');
+  return v;
+}
+
+/**
+ * 연락처·블로그 주소를 바꾼다. 연락처는 시트의 '같은 지원서' 판단(연락처+클리닉+시술)에 쓰이므로,
+ * 이미 프로젝트룸에 올라간 지원자는 룸의 모집정보 글과 만들어진 문자(문자발송 탭)도 같이 바꿔서 연결이 끊기지 않게 한다.
+ * 돌려주는 값: 알려줄 내용(없으면 '')
+ */
+function admContactChange_(db, hit, newPhone, newBlog) {
+  var oldPhone = admRead_(hit.vals, C_PHONE), oldBlog = admRead_(hit.vals, C_BLOG);
+  if (oldPhone === newPhone && oldBlog === newBlog) return '';
+  var oldRaw = admRead_(hit.vals, C_RAW);
+  var key = admRead_(hit.vals, C_KEY);
+  var inRoom = !!admRead_(hit.vals, C_SNAP) || admWasPushed_(key);
+  var note = '';
+  var clinics = loadClinics_(), maps = loadMaps_();
+  var oldDk = oldRaw ? dupKey_(parseFull_(oldRaw), clinics, maps) : '';
+  var strip = function (p) { return String(p).replace(/\D/g, '').replace(/^0+/, ''); };
+
+  if (inRoom && oldDk) {
+    var client = loadClients_().filter(function (c) { return c.name === admRead_(hit.vals, C_CLIENT); })[0];
+    var fixed = 0;
+    if (client && client.roomId) {
+      SpreadsheetApp.openById(client.roomId).getSheets().forEach(function (sh) {
+        var vals = sh.getDataRange().getValues();
+        var h = findHeader_(vals);
+        if (!h) return;
+        for (var r = h.hr + 1; r < vals.length; r++) {
+          var info = String(vals[r][h.infoCol]).trim();
+          if (!info || dupKey_(parseFull_(info), clinics, maps) !== oldDk) continue;
+          var next = info
+            .replace(/(연락처\s*:\s*)[^\n]*/, function (m, a) { return a + newPhone; })
+            .replace(/(블로그주소\s*:\s*)[^\n]*/, function (m, a) { return a + newBlog; });
+          sh.getRange(r + 1, h.infoCol + 1).setValue(next);
+          fixed++;
+        }
+      });
+    }
+    if (!fixed) note = '프로젝트룸에서 이 지원자 행을 찾지 못해 시트만 바꿨어요. 룸의 모집정보 글도 직접 고쳐 주세요.';
+  }
+
+  db.getRange(hit.row, C_PHONE).setNumberFormat('@').setValue(newPhone);
+  db.getRange(hit.row, C_BLOG).setNumberFormat('@').setValue(newBlog);
+  refreshRows_(db, [hit.row]); // 점검·모집정보 원문 새로고침
+
+  // 이미 만들어진 문자(문자발송 탭)의 연락처·키도 새 번호로 맞춘다 (같은 문자가 다시 만들어지지 않게)
+  if (oldDk && strip(oldPhone) !== strip(newPhone)) {
+    var out = SpreadsheetApp.getActive().getSheetByName(OUT_SHEET);
+    if (out && out.getLastRow() >= 2) {
+      var newDk = strip(newPhone) + oldDk.slice(oldDk.indexOf('|'));
+      var rows = out.getRange(2, 1, out.getLastRow() - 1, 5).getValues();
+      for (var i = 0; i < rows.length; i++) {
+        if (String(rows[i][0]).indexOf(oldDk + '|') !== 0) continue;
+        out.getRange(i + 2, 1).setValue(newDk + String(rows[i][0]).slice(oldDk.length));
+        out.getRange(i + 2, 5).setValue(newPhone);
+      }
+    }
+  }
+  return note;
 }
