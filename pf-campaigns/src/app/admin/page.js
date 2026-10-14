@@ -46,6 +46,28 @@ const extractYearMonth = (dateStr) => {
   return null;
 };
 
+// "2026-10-14 14:00 (오후)" 와 "2026-10-14 14:00" 처럼 표기가 달라도 같은 일정인지 비교하기 위한 값
+const slotKey = (v) => {
+  const s = String(v || "");
+  const d = s.match(/(\d{4})[-./]\s*(\d{1,2})[-./]\s*(\d{1,2})/);
+  if (!d) return "";
+  let hh = "";
+  let mi = "";
+  const t = s.match(/(\d{1,2}):(\d{2})/);
+  if (t) {
+    hh = t[1];
+    mi = t[2];
+  } else {
+    const k = s.match(/(오전|오후)\s*(\d{1,2})시(?:\s*(\d{1,2})분)?/);
+    if (k) {
+      hh = String((Number(k[2]) % 12) + (k[1] === "오후" ? 12 : 0));
+      mi = k[3] || "0";
+    }
+  }
+  const p2 = (x) => String(x).padStart(2, "0");
+  return `${d[1]}-${p2(d[2])}-${p2(d[3])} ${hh ? p2(hh) : ""}:${mi ? p2(mi) : ""}`;
+};
+
 const currentYearMonth = () => {
   const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
@@ -1674,13 +1696,13 @@ function AdminDashboard({ handleLogout }) {
                       ]
                         .filter((s) => s.val && s.val.trim() !== "")
                         .map((item, idx) => {
-                          const isConfirmed = activeItem.confirmedDate === item.val;
+                          const isConfirmed = !!activeItem.confirmedDate && slotKey(activeItem.confirmedDate) === slotKey(item.val);
                           return (
                             <div
                               key={idx}
                               className={`p-3 rounded-xl border flex items-center justify-between transition-colors ${
                                 isConfirmed
-                                  ? "bg-blue-50 border-blue-300"
+                                  ? "bg-blue-50 border-blue-500 ring-1 ring-blue-500"
                                   : "bg-white border-[#E0E3E7] hover:border-slate-300"
                               }`}
                             >

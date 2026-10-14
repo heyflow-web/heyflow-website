@@ -451,6 +451,15 @@ function admUpdateFields_(data) {
     }
   }
   var status = canonStatus_(admRead_(r, C_PROG));
+  // 체험대기중(트리거 상태)이 되면 블로거 폴더를 바로 만든다 (10분을 기다리지 않음)
+  if (ch.status !== undefined && status === String(getConfig_()['트리거 상태']).trim() && (admRead_(r, C_SNAP) || admWasPushed_(admRead_(r, C_KEY)))) {
+    try {
+      run();
+      r = db.getRange(hit.row, 1, 1, C_SNAP).getDisplayValues()[0];
+    } catch (err) {
+      warnings.push('블로거 폴더는 10분 안의 자동 실행에서 만들어져요: ' + String(err && err.message ? err.message : err));
+    }
+  }
   if (status === '3.체험대기중' && !admRead_(r, C_RES)) warnings.push('예약일이 비어 있어요. 예약 전날·체험 후 문자가 만들어지지 않아요.');
   if (status === '6.발행완료' && !admRead_(r, C_PUB)) warnings.push('원고 발행일이 비어 있어요. 발행완료 문자가 만들어지지 않아요.');
   if (status === '7.드랍') warnings.push('드랍은 문자를 보내지 않아요.');
@@ -461,7 +470,7 @@ function admRowObj_(r) {
   return { status: canonStatus_(admRead_(r, C_PROG)), confirmedDate: admRead_(r, C_RES), postDate: admRead_(r, C_PUB),
     postUrl: admRead_(r, C_URL), performance: admRead_(r, C_PERF), memo: admRead_(r, C_ISSUE),
     blogIndex: admRead_(r, C_IDX), shareStatus: admRead_(r, C_STATE), checkStatus: admRead_(r, C_WARN),
-    sheetPhone: admRead_(r, C_PHONE), sheetBlog: admRead_(r, C_BLOG) };
+    sheetPhone: admRead_(r, C_PHONE), sheetBlog: admRead_(r, C_BLOG), guideRoom: admRead_(r, C_GUIDE) };
 }
 
 /** 병원 프로젝트룸 공유 체크박스. 공유됨으로 바꾸면 10분 안에 자동화(pushShared_)가 룸에 올린다. */
