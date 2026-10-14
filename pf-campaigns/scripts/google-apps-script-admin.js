@@ -517,3 +517,13 @@ function admWasPushed_(key) {
   }
   return false;
 }
+
+/** 점검용: Apps Script 편집기에서 이 함수를 선택해 실행하면 실행 로그에 연결 상태가 나온다 (개인정보는 출력하지 않는다) */
+function admSelfTest() {
+  var db = dbSheet_();
+  Logger.log('DB 탭: ' + (db ? db.getName() : '없음') + ' / 마지막 행: ' + (db ? db.getLastRow() : '-'));
+  Logger.log('열 순서 OK: ' + layoutOk_());
+  Logger.log('비밀키 설정됨: ' + !!PropertiesService.getScriptProperties().getProperty('ADMIN_API_SECRET'));
+  var out = JSON.parse(admList_().getContent());
+  Logger.log('결과: ' + out.result + ' / 지원자 ' + (out.rows || []).length + '명 / 문자 ' + (out.messages || []).length + '건 ' + (out.message || ''));
+}
