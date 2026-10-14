@@ -6,6 +6,13 @@ import { callSheet, webhookUrl } from "@/lib/sheetApi";
 const SHEET_URL =
   "https://docs.google.com/spreadsheets/d/1kjwDdMS8AIspbWnDF2ILAlewOA7Dcyp-zk1hE29rbu8/edit?usp=sharing";
 
+export const maxDuration = 60; // 시트가 자동 동기화 중이면 응답이 늦을 수 있어요
+
+const friendlyError = (error) =>
+  error && (error.name === "TimeoutError" || error.name === "AbortError" || /abort|timeout/i.test(error.message || ""))
+    ? "구글 시트 응답이 늦어요. 자동 동기화 중일 수 있어요. 1분 뒤에 다시 시도해 주세요."
+    : error.message;
+
 const unauthorized = () =>
   NextResponse.json({ success: false, error: "로그인이 필요합니다." }, { status: 401 });
 
@@ -42,7 +49,7 @@ export async function GET() {
         images: row.images,
         userNote: row.userNote,
       });
-      return { ...row, ...parsed, status: row.status || "1.신규지원" };
+      return { ...row, ...parsed, sheetName: row.name, status: row.status || "1.신규지원" };
     });
     return NextResponse.json({
       success: true,
@@ -53,7 +60,7 @@ export async function GET() {
     });
   } catch (error) {
     console.error("Admin applications API error:", error);
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    return NextResponse.json({ success: false, error: friendlyError(error) }, { status: 500 });
   }
 }
 
@@ -78,6 +85,6 @@ export async function POST(request) {
     return NextResponse.json({ success: true, message: json.message || "", data: json.data || null });
   } catch (error) {
     console.error("Admin update error:", error);
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    return NextResponse.json({ success: false, error: friendlyError(error) }, { status: 500 });
   }
 }

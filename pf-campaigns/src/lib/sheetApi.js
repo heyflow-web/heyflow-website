@@ -14,7 +14,7 @@ export async function callSheet(action, payload = {}) {
     body: JSON.stringify({ action, token: process.env.ADMIN_API_SECRET || "", ...payload }),
     redirect: "follow",
     cache: "no-store",
-    signal: AbortSignal.timeout(25000),
+    signal: AbortSignal.timeout(55000),
   });
   const text = await res.text();
   try {

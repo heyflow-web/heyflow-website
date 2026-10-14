@@ -143,7 +143,7 @@ function AdminDashboard({ handleLogout }) {
   const identityOf = (item) => ({
     rowId: item.rowId,
     key: item.syncKey || "",
-    name: item.name || "",
+    name: item.sheetName || item.name || "",
     submittedAt: item.submittedAt || "",
   });
 
@@ -186,7 +186,8 @@ function AdminDashboard({ handleLogout }) {
     } catch (err) {
       console.error(err);
       patchApp(item.rowId, before);
-      showToast("저장 중 오류가 발생했습니다.");
+      showToast("저장 중 오류가 발생했습니다. 시트 상태를 다시 불러옵니다.");
+      fetchData(true);
       return false;
     }
   };

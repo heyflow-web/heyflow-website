@@ -297,7 +297,7 @@ function admRoute_(data) {
   if (!secret || String(data.token || '') !== secret) return admErr_('인증에 실패했어요. ADMIN_API_SECRET을 확인해 주세요.');
   if (!layoutOk_()) return admErr_('DB 탭 열 순서가 자동화와 달라 멈췄어요.');
   var lock = LockService.getScriptLock();
-  if (!lock.tryLock(25000)) return admErr_('다른 동기화가 진행 중이에요. 잠시 후 다시 시도해 주세요.');
+  if (!lock.tryLock(40000)) return admErr_('자동 동기화가 진행 중이에요. 1분 뒤에 다시 시도해 주세요.');
   try {
     switch (data.action) {
       case 'listApplications': return admList_();
@@ -332,6 +332,7 @@ function admList_() {
         syncKey: admRead_(r, C_KEY),
         submittedAt: admRead_(r, C_TS),
         name: admRead_(r, C_NAME),
+        sheetName: admRead_(r, C_NAME),
         shareStatus: admRead_(r, C_STATE),
         checkStatus: admRead_(r, C_WARN),
         status: canonStatus_(admRead_(r, C_PROG)) || '1.신규지원',
@@ -380,8 +381,11 @@ function admRow_(db, id) {
   if (!row || row < 2 || row > db.getLastRow()) throw new Error('행 번호가 달라졌어요. 새로고침 후 다시 시도해 주세요.');
   var r = db.getRange(row, 1, 1, C_SNAP).getDisplayValues()[0];
   var sheetKey = admRead_(r, C_KEY);
-  var ok = sheetKey ? sheetKey === String(id.key || '').trim()
-                    : (admRead_(r, C_NAME) === String(id.name || '').trim() && admRead_(r, C_TS) === String(id.submittedAt || '').trim());
+  var idKey = String(id.key || '').trim();
+  // 키가 양쪽에 있으면 키로 확인한다. 화면이 불러올 때는 키가 없었는데 그사이 자동화가 키를 채운 새 지원자는 이름+신청일시로 확인한다.
+  var ok = (sheetKey && idKey)
+    ? sheetKey === idKey
+    : (admRead_(r, C_NAME) === String(id.name || '').trim() && admRead_(r, C_TS) === String(id.submittedAt || '').trim());
   if (!ok) throw new Error('시트에서 행이 바뀌었어요(' + admRead_(r, C_NAME) + '). 새로고침 후 다시 시도해 주세요.');
   return { row: row, vals: r };
 }
