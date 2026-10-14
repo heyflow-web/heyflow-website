@@ -439,6 +439,17 @@ function admUpdateFields_(data) {
     if (contactNote) warnings.push(contactNote);
   }
   var r = db.getRange(hit.row, 1, 1, C_SNAP).getDisplayValues()[0];
+  // 프로젝트룸과 주고받는 칸(상태·예약일·발행일·발행URL·성과·이슈)을 바꿨고 이미 룸에 올라간 지원자라면, 10분을 기다리지 않고 바로 룸에 맞춘다
+  var roomFields = ['status', 'confirmedDate', 'postDate', 'postUrl', 'performance', 'memo'];
+  var touchedRoom = roomFields.some(function (k) { return ch[k] !== undefined; });
+  if (touchedRoom && (admRead_(r, C_SNAP) || admWasPushed_(admRead_(r, C_KEY)))) {
+    try {
+      syncRoom_();
+      r = db.getRange(hit.row, 1, 1, C_SNAP).getDisplayValues()[0];
+    } catch (err) {
+      warnings.push('시트에는 저장했지만 프로젝트룸에는 아직 반영하지 못했어요. 10분 안의 자동 동기화에서 반영돼요: ' + String(err && err.message ? err.message : err));
+    }
+  }
   var status = canonStatus_(admRead_(r, C_PROG));
   if (status === '3.체험대기중' && !admRead_(r, C_RES)) warnings.push('예약일이 비어 있어요. 예약 전날·체험 후 문자가 만들어지지 않아요.');
   if (status === '6.발행완료' && !admRead_(r, C_PUB)) warnings.push('원고 발행일이 비어 있어요. 발행완료 문자가 만들어지지 않아요.');
