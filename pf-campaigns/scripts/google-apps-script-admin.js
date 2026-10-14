@@ -114,12 +114,12 @@ function readApplications_() {
         userNote: col(r, "지원동기") || col(r, "특이사항") || col(r, "지원동기/체험소감") || col(r, "체험소감"),
         status: col(r, "진행상태") || "1.신규지원",
         confirmedDate: col(r, "예약일"),
-        guideRoom: col(r, "가이드룸") || col(r, "블로거폴더") || col(r, "가이드폴더") || col(r, "가이드"),
-        draftUrl: col(r, "원고 초안 URL") || col(r, "초안 URL") || col(r, "원고초안") || col(r, "초안링크") || col(r, "초안") || col(r, "검수링크") || col(r, "검수 URL"),
-        postDate: col(r, "원고 발행일") || col(r, "발행일"),
-        keyword: col(r, "키워드"),
-        postUrl: col(r, "발행원고 URL") || col(r, "발행글 URL") || col(r, "발행 URL") || col(r, "발행링크"),
-        performance: col(r, "성과") || col(r, "포스팅성과"),
+        guideRoom: col(r, "비포앤애프터 이미지") || col(r, "비포앤애프터") || col(r, "비포애프터") || col(r, "가이드룸") || col(r, "블로거폴더") || col(r, "가이드폴더") || col(r, "가이드"),
+        draftUrl: col(r, "원고 초안 URL") || col(r, "원고초안") || col(r, "초안 URL") || col(r, "초안링크") || col(r, "초안") || col(r, "검수링크") || col(r, "검수 URL"),
+        postDate: col(r, "원고 발행일") || col(r, "발행일") || col(r, "발행일자"),
+        keyword: col(r, "타겟 키워드") || col(r, "타겟키워드") || col(r, "키워드"),
+        postUrl: col(r, "포스팅URL") || col(r, "포스팅 URL") || col(r, "포스팅링크") || col(r, "발행원고 URL") || col(r, "발행글 URL") || col(r, "발행 URL") || col(r, "발행링크"),
+        performance: col(r, "성과") || col(r, "성과지표") || col(r, "성과이미지") || col(r, "포스팅성과"),
         memo: col(r, "이슈") || col(r, "관리자메모") || "",
         client: col(r, "고객사"),
         shareStatus: (function(v) {
@@ -409,12 +409,12 @@ function handleUpdateStatus_(data) {
 
     if (data.status !== undefined) setVal("진행상태", data.status);
     if (data.confirmedDate !== undefined) setVal("예약일", data.confirmedDate);
-    if (data.guideRoom !== undefined) setAny(["가이드룸", "블로거폴더", "가이드폴더", "가이드"], data.guideRoom);
-    if (data.draftUrl !== undefined) setAny(["초안", "원고초안", "초안링크", "초안 URL", "원고 초안 URL", "검수링크", "검수 URL"], data.draftUrl);
-    if (data.postDate !== undefined) setAny(["원고 발행일", "발행일"], data.postDate);
-    if (data.postUrl !== undefined) setAny(["발행원고 URL", "발행글 URL", "발행 URL", "발행링크"], data.postUrl);
-    if (data.keyword !== undefined) setVal("키워드", data.keyword);
-    if (data.performance !== undefined) setAny(["성과", "포스팅성과"], data.performance);
+    if (data.guideRoom !== undefined) setAny(["비포앤애프터 이미지", "비포앤애프터", "비포애프터", "가이드룸", "블로거폴더", "가이드폴더", "가이드"], data.guideRoom);
+    if (data.draftUrl !== undefined) setAny(["원고초안", "원고 초안 URL", "초안", "초안링크", "초안 URL", "검수링크", "검수 URL"], data.draftUrl);
+    if (data.postDate !== undefined) setAny(["원고 발행일", "발행일", "발행일자"], data.postDate);
+    if (data.postUrl !== undefined) setAny(["포스팅URL", "포스팅 URL", "포스팅링크", "발행원고 URL", "발행글 URL", "발행 URL", "발행링크"], data.postUrl);
+    if (data.keyword !== undefined) setAny(["타겟 키워드", "타겟키워드", "키워드"], data.keyword);
+    if (data.performance !== undefined) setAny(["성과", "성과지표", "성과이미지", "포스팅성과"], data.performance);
     if (data.shareStatus !== undefined) {
       var sVal = data.shareStatus;
       if (sVal === true || sVal === "true" || sVal === "TRUE" || sVal === "공유됨") {

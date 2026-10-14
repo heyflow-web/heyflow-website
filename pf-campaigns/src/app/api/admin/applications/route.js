@@ -65,7 +65,13 @@ https://drive.google.com/file/d/1_sample_obliv_toenail_01/view
     shareStatus: "공유됨",
     client: "온리프",
     confirmedDate: "2026-10-08 11:30 (오전)",
-    memo: "시술 완료, 2주 내 블로그 원고 작성 예정",
+    postDate: "2026-10-25",
+    postUrl: "https://blog.naver.com/mw_review_lab/223610291",
+    keyword: "온리프 피부클리닉, 여드름 흉터치료 후기",
+    guideRoom: "https://drive.google.com/drive/folders/sample_onleaf_folder",
+    draftUrl: "https://blog.naver.com/draft/sample1",
+    performance: "스마트블록 1위 노출 (조회수 1,420회)",
+    memo: "시술 완료 및 10월 정기 발행 완료",
     ...parseRecruitInfo(`[온리프/피부클리닉]
 이름 : 정민우
 연락처 : 01039401928
@@ -79,7 +85,7 @@ https://drive.google.com/file/d/1_sample_obliv_toenail_01/view
 시술부위 상세설명 : 볼 부위 3cm 여드름 패인 흉터 2곳
 첨부사진URL :
 https://drive.google.com/file/d/1_sample_onleaf_scar_01/view
-특이사항 : 2회 내원 및 전후 경과 사진 꼼꼼하게 포스팅 가능합니다.`),
+특이사항 : 2회 내원 및 전후 경과 사진 꼼꼼하게 포스팅 완료되었습니다.`),
   },
   {
     rowId: 5,
@@ -103,6 +109,82 @@ https://drive.google.com/file/d/1_sample_onleaf_scar_01/view
 첨부사진URL :
 https://drive.google.com/file/d/1_sample_leshine_tattoo_01/view
 특이사항 : 릴스 및 블로그 동시 노출 가능합니다!`),
+  },
+  {
+    rowId: 6,
+    submittedAt: "2026-10-03 10:20:00",
+    status: "6.발행완료",
+    shareStatus: "공유됨",
+    client: "살만",
+    confirmedDate: "2026-10-20 14:00",
+    postDate: "2026-11-04",
+    postUrl: "https://blog.naver.com/salman_review/223650012",
+    keyword: "살만드림의원, 슈링크 유니버스, 피부탄력 리프팅",
+    guideRoom: "https://drive.google.com/drive/folders/sample_salman_dream",
+    draftUrl: "https://blog.naver.com/draft/sample_salman1",
+    performance: "https://ssl.gstatic.com/docs/doclist/images/mediatype/icon_1_image_x128.png",
+    memo: "11월 살만 견적 청구 대상 (발행완료)",
+    ...parseRecruitInfo(`[살만드림의원/리프팅]
+이름 : 고보경
+연락처 : 010-9281-3012
+생년월일 : 920815
+블로그주소 : https://blog.naver.com/salman_review
+희망시술 : 슈링크 유니버스 리프팅 300샷 무상 시술
+희망예약일자 :
+- 1지망 : 2026-10-20 14:00
+- 2지망 : 2026-10-21 15:00
+시술부위 상세설명 : 턱선 및 볼 탄력 저하 고민
+특이사항 : 11월 4일 발행완료되었습니다.`),
+  },
+  {
+    rowId: 7,
+    submittedAt: "2026-10-02 11:00:00",
+    status: "6.발행완료",
+    shareStatus: "공유됨",
+    client: "살만",
+    confirmedDate: "2026-10-22 15:30",
+    postDate: "2026-11-08",
+    postUrl: "https://blog.naver.com/salman_skin/223650890",
+    keyword: "살만연세의원, 잡티제거 레이저토닝",
+    guideRoom: "https://drive.google.com/drive/folders/sample_salman_yonsei",
+    draftUrl: "https://blog.naver.com/draft/sample_salman2",
+    performance: "네이버 VIEW 1위 / 스마트블록 노출",
+    memo: "11월 살만 견적 청구 대상 (발행완료)",
+    ...parseRecruitInfo(`[살만연세의원/토닝]
+이름 : 최서연
+연락처 : 010-3341-9920
+생년월일 : 950419
+블로그주소 : https://blog.naver.com/salman_skin
+희망시술 : 피코토닝 + 잡티 듀얼 레이저
+희망예약일자 :
+- 1지망 : 2026-10-22 15:30
+시술부위 상세설명 : 양볼 기미 잡티 고민
+특이사항 : 11월 8일 원고 발행 완료.`),
+  },
+  {
+    rowId: 8,
+    submittedAt: "2026-10-01 09:30:00",
+    status: "6.발행완료",
+    shareStatus: "공유됨",
+    client: "큐어람",
+    confirmedDate: "2026-10-18 11:00",
+    postDate: "2026-11-10",
+    postUrl: "https://blog.naver.com/cureram_clinic/223651120",
+    keyword: "큐어람한의원, 편평사마귀 한방제거",
+    guideRoom: "https://drive.google.com/drive/folders/sample_cureram_folder",
+    draftUrl: "https://blog.naver.com/draft/sample_cureram",
+    performance: "조회수 1,280회",
+    memo: "11월 큐어람 견적 청구 대상 (발행완료)",
+    ...parseRecruitInfo(`[큐어람한의원/사마귀치료]
+이름 : 박지은
+연락처 : 010-5512-8823
+생년월일 : 901201
+블로그주소 : https://blog.naver.com/cureram_clinic
+희망시술 : 한방 편평사마귀 제거 프로그램
+희망예약일자 :
+- 1지망 : 2026-10-18 11:00
+시술부위 상세설명 : 목 주변 사마귀
+특이사항 : 11월 10일 정성 후기 발행 완료.`),
   },
 ];
 
