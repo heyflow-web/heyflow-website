@@ -456,9 +456,17 @@ function admSetShare_(data) {
     if (fromDay && day && day < fromDay) issues.push('공유 시작일(' + fromDay + ') 이전에 신청한 분이라 자동 공유 대상이 아니에요.');
     if (issues.length) return admErr_('공유 조건이 맞지 않아요.', issues);
     db.getRange(hit.row, C_STATE).setValue('공유됨');
-    return admOut_({ result: 'success', message: '공유됨으로 바꿨어요. 10분 안에 병원 프로젝트룸에 올라가요.', data: { shareStatus: '공유됨' } });
+    // 10분을 기다리지 않고 바로 프로젝트룸에 올린다
+    var warnings = [];
+    try {
+      pushShared_();
+    } catch (err) {
+      warnings.push('공유됨으로는 바꿨지만 프로젝트룸에 올리지 못했어요: ' + String(err && err.message ? err.message : err));
+    }
+    if (isTrue_(getConfig_()['공유 연습 실행'])) warnings.push('설정의 "공유 연습 실행"이 켜져 있어 실제로는 올리지 않고 기록만 남겼어요.');
+    return admOut_({ result: 'success', message: warnings.length ? '공유 상태를 바꿨어요.' : '병원 프로젝트룸에 공유했어요.', data: { shareStatus: '공유됨', warnings: warnings } });
   }
-  if (admRead_(hit.vals, C_SNAP)) {
+  if (admRead_(hit.vals, C_SNAP) || admWasPushed_(admRead_(hit.vals, C_KEY))) {
     return admErr_('이미 병원 프로젝트룸에 올라간 지원자예요.', ['공유 해제는 프로젝트룸에서 직접 정리해 주세요.']);
   }
   db.getRange(hit.row, C_STATE).setValue('신규지원');
@@ -495,4 +503,17 @@ function admSaveMessage_(data) {
   if (h.out.getRange(h.row, 9).getValue() === true) throw new Error('이미 보낸 문자는 고칠 수 없어요.');
   h.out.getRange(h.row, 6).setValue(String(data.text || ''));
   return admOut_({ result: 'success', message: '문구를 저장했어요. 자동 원문이 바뀌기 전까지 유지돼요.' });
+}
+
+
+/** 처리기록에 이 지원자를 룸에 올린 기록이 있는지 (룸동기값이 생기기 전에도 공유 해제를 막기 위해) */
+function admWasPushed_(key) {
+  if (!key) return false;
+  var log = SpreadsheetApp.getActive().getSheetByName(LOG_SHEET);
+  if (!log || log.getLastRow() < 2) return false;
+  var rows = log.getRange(2, 1, log.getLastRow() - 1, 3).getValues();
+  for (var i = rows.length - 1; i >= 0; i--) {
+    if (String(rows[i][0]) === '공유|' + key && String(rows[i][2]) === '공유됨') return true;
+  }
+  return false;
 }

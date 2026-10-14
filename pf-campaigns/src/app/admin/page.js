@@ -214,7 +214,9 @@ function AdminDashboard({ handleLogout }) {
         return;
       }
       patchApp(item.rowId, { shareStatus: (data.data && data.data.shareStatus) || "" });
-      showToast(`[${item.name}님] ${data.message}`);
+      const warnings = (data.data && data.data.warnings) || [];
+      if (warnings.length) setAlertInfo({ title: data.message || "확인해 주세요", lines: warnings });
+      else showToast(`[${item.name}님] ${data.message}`);
     } catch (err) {
       console.error(err);
       showToast("공유상태 저장 중 오류가 발생했습니다.");
@@ -1437,7 +1439,7 @@ function AdminDashboard({ handleLogout }) {
                       )}
                     </div>
                     <p className="text-[10px] text-[#5F6368]">
-                      체크하면 10분 안에 병원 프로젝트 룸에 올라가요 (블로그지수 필수)
+                      체크하면 바로 병원 프로젝트 룸에 올라가요 (블로그지수 필수)
                     </p>
                     <div className="flex items-center gap-1.5 mt-1.5">
                       <span className="text-[10px] font-bold text-[#5F6368]">블로그지수</span>
