@@ -306,6 +306,7 @@ function admRoute_(data) {
       case 'deleteRow': return admDelete_(data);
       case 'markSent': return admMarkSent_(data);
       case 'saveMessage': return admSaveMessage_(data);
+      case 'renderMessages': return admRenderMessages_(data);
     }
     return admErr_('알 수 없는 요청: ' + data.action);
   } catch (err) {
@@ -538,6 +539,62 @@ function admSaveMessage_(data) {
   return admOut_({ result: 'success', message: '문구를 저장했어요. 자동 원문이 바뀌기 전까지 유지돼요.' });
 }
 
+
+/**
+ * 이 지원자에게 보낼 수 있는 모든 단계의 문자를, 지원자 정보로 채워서 돌려준다.
+ * (문자템플릿 탭의 모든 행. 지금 진행상태와 상관없이 전부.) 시트에는 아무것도 쓰지 않는다.
+ */
+function admRenderMessages_(data) {
+  var db = dbSheet_();
+  var hit = admRow_(db, data.id || data);
+  var v = hit.vals;
+  var templates = loadTemplates_();
+  var clinics = loadClinics_();
+  var maps = loadMaps_();
+  var info = loadClinicInfo_();
+  var guides = loadGuides_();
+  var cfg = getConfig_();
+  var dueDays = Number(cfg['포스팅 마감 기간(일)']) || 14;
+  var p = parseFull_(admRead_(v, C_RAW));
+  if (!p.name) { p.name = admRead_(v, C_NAME); p.clinic = admRead_(v, C_CLINIC); p.proc = admRead_(v, C_PROC); }
+  var ci = info[p.clinic] || { name: p.clinic, addr: '', link: '' };
+  var resRaw = admRead_(v, C_RES);
+  var visit = resRaw ? fmtVisit_(resRaw) : '';
+  var vDay = resRaw ? visitDay_(resRaw) : '';
+  var client = null;
+  loadClients_().forEach(function (c) { if (c.name === admRead_(v, C_CLIENT)) client = c; });
+  var current = canonStatus_(admRead_(v, C_PROG)) || '';
+
+  var list = [];
+  Object.keys(templates).forEach(function (tk) {
+    var tpl = templates[tk];
+    var warn = [];
+    if (tpl.indexOf('{방문일시}') >= 0 && !visit) warn.push('예약일이 아직 없어요');
+    if (tpl.indexOf('{주소}') >= 0 && !ci.addr) warn.push('병원 주소 없음');
+    if (tpl.indexOf('{지도링크}') >= 0 && !ci.link) warn.push('지도 링크 없음');
+    var vars = {
+      '이름': p.name, '시술명': p.proc, '방문일시': visit || '(예약일 미입력)',
+      '병원명': ci.name, '주소': ci.addr, '지도링크': ci.link
+    };
+    if (tpl.indexOf('{마감일}') >= 0) vars['마감일'] = vDay ? fmtDue_(vDay, dueDays) : '(예약일 미입력)';
+    if (tpl.indexOf('{가이드링크}') >= 0) {
+      var gl = guides[String(p.clinic).trim() + '|' + shortProcedure_(p.proc, maps)] || '';
+      vars['가이드링크'] = gl || '(가이드 링크 없음)';
+      if (!gl) warn.push('시술 가이드 링크 없음');
+    }
+    if (tpl.indexOf('{원고링크}') >= 0) {
+      var link = '';
+      try {
+        var clinicName = clinics[p.clinic] || '', procName = shortProcedure_(p.proc, maps);
+        if (client && clinicName && procName) link = docLink_(client.folderId, clinicName + '_' + procName + '_' + p.name);
+      } catch (e) {}
+      vars['원고링크'] = link || '(원고 링크 없음)';
+      if (!link) warn.push('원고 링크 없음(폴더 미생성)');
+    }
+    list.push({ tpl: tk, text: fillTemplate_(tpl, vars), warn: warn.join(' / '), current: tk === current });
+  });
+  return admOut_({ result: 'success', data: { messages: list, phone: admRead_(v, C_PHONE) } });
+}
 
 /** 처리기록에 이 지원자를 룸에 올린 기록이 있는지 (룸동기값이 생기기 전에도 공유 해제를 막기 위해) */
 function admWasPushed_(key) {

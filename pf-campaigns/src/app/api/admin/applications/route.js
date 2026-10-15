@@ -70,7 +70,7 @@ export async function POST(request) {
   try {
     const body = await request.json();
     const { action } = body;
-    const allowed = ["updateFields", "setShare", "deleteRow", "markSent", "saveMessage"];
+    const allowed = ["updateFields", "setShare", "deleteRow", "markSent", "saveMessage", "renderMessages"];
     if (!allowed.includes(action)) {
       return NextResponse.json({ success: false, error: "알 수 없는 요청입니다." }, { status: 400 });
     }

@@ -106,8 +106,10 @@ function AdminDashboard({ handleLogout }) {
   const [itemToDelete, setItemToDelete] = useState(null); // 삭제 확인 모달 대상 지원서
   const [isDeleting, setIsDeleting] = useState(false); // 삭제 진행 중 상태
   const [messageApplicant, setMessageApplicant] = useState(null); // 메시지 전송 대상 지원서
-  const [sheetMessages, setSheetMessages] = useState([]); // 시트 '문자발송' 탭에 자동으로 만들어진 문자
-  const [selectedTemplateKey, setSelectedTemplateKey] = useState("custom");
+  const [renderedMessages, setRenderedMessages] = useState([]); // 이 지원자에게 보낼 수 있는 모든 단계 문자 [{tpl,text,warn,current}]
+  const [messagesLoading, setMessagesLoading] = useState(false);
+  const [messagesError, setMessagesError] = useState("");
+  const [selectedTemplateKey, setSelectedTemplateKey] = useState("");
   const [customMessageText, setCustomMessageText] = useState("");
   const [copiedMessage, setCopiedMessage] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
@@ -135,7 +137,6 @@ function AdminDashboard({ handleLogout }) {
 
       if (data.success) {
         setApplications(data.applications || []);
-        setSheetMessages(data.messages || []);
         setLoadError("");
         if (data.sheetUrl) setSheetUrl(data.sheetUrl);
         if (isManual) showToast("구글 시트 최신 데이터를 불러왔습니다.");
@@ -308,24 +309,36 @@ function AdminDashboard({ handleLogout }) {
     }
   };
 
-  // 4. 문자: 시트 '문자발송' 탭에 자동으로 만들어진 문구를 그대로 쓴다
   const digitsOf = (v) => String(v || "").replace(/\D/g, "").replace(/^0+/, "");
-  const messagesFor = (app) => {
-    if (!app) return [];
-    const ph = digitsOf(app.rawPhone || app.phone);
-    return sheetMessages.filter(
-      (m) => m.name === app.name && ph.length >= 8 && digitsOf(m.phone).slice(-8) === ph.slice(-8)
-    );
-  };
-  const pendingMessageCount = (app) => messagesFor(app).filter((m) => !m.sent).length;
 
-  const handleOpenMessageModal = (applicant) => {
+  // 4. 문자: 지원자 정보로 채운 모든 단계 문구를 보여주고, 매니저가 골라서 복사·전송한다
+  const handleOpenMessageModal = async (applicant) => {
     setMessageApplicant(applicant);
-    const list = messagesFor(applicant);
-    const first = list.find((m) => !m.sent) || list[0];
-    setSelectedTemplateKey(first ? first.key : "custom");
-    setCustomMessageText(first ? first.text : "");
+    setRenderedMessages([]);
+    setMessagesError("");
+    setSelectedTemplateKey("");
+    setCustomMessageText("");
     setCopiedMessage(false);
+    setMessagesLoading(true);
+    try {
+      const data = await callAdmin({ action: "renderMessages", id: identityOf(applicant) });
+      if (!data.success) {
+        setMessagesError(data.error || "문자 문구를 불러오지 못했어요.");
+        return;
+      }
+      const list = (data.data && data.data.messages) || [];
+      setRenderedMessages(list);
+      const first = list.find((m) => m.current) || list[0];
+      if (first) {
+        setSelectedTemplateKey(first.tpl);
+        setCustomMessageText(first.text);
+      }
+    } catch (err) {
+      console.error(err);
+      setMessagesError("문자 문구를 불러오는 중 오류가 발생했어요. 잠시 뒤 다시 열어 주세요.");
+    } finally {
+      setMessagesLoading(false);
+    }
   };
 
   const handleSelectTemplate = (key) => {
@@ -333,46 +346,12 @@ function AdminDashboard({ handleLogout }) {
     if (key === "custom") {
       setCustomMessageText("");
     } else {
-      const target = sheetMessages.find((m) => m.key === key);
+      const target = renderedMessages.find((m) => m.tpl === key);
       if (target) setCustomMessageText(target.text);
     }
   };
 
-  const selectedSheetMessage = sheetMessages.find((m) => m.key === selectedTemplateKey) || null;
-
-  const handleMarkSent = async (sent = true) => {
-    if (!selectedSheetMessage) return;
-    try {
-      const data = await callAdmin({ action: "markSent", key: selectedSheetMessage.key, sent });
-      if (data.success) {
-        setSheetMessages((prev) => prev.map((m) => (m.key === selectedSheetMessage.key ? { ...m, sent } : m)));
-        showToast(data.message);
-      } else {
-        setAlertInfo({ title: "보냄 표시를 저장하지 못했어요", lines: [data.error || ""] });
-      }
-    } catch (err) {
-      console.error(err);
-      showToast("보냄 표시 저장 중 오류가 발생했습니다.");
-    }
-  };
-
-  const handleSaveMessageText = async () => {
-    if (!selectedSheetMessage) return;
-    try {
-      const data = await callAdmin({ action: "saveMessage", key: selectedSheetMessage.key, text: customMessageText });
-      if (data.success) {
-        setSheetMessages((prev) =>
-          prev.map((m) => (m.key === selectedSheetMessage.key ? { ...m, text: customMessageText } : m))
-        );
-        showToast(data.message);
-      } else {
-        setAlertInfo({ title: "문구를 저장하지 못했어요", lines: [data.error || ""] });
-      }
-    } catch (err) {
-      console.error(err);
-      showToast("문구 저장 중 오류가 발생했습니다.");
-    }
-  };
+  const selectedRendered = renderedMessages.find((m) => m.tpl === selectedTemplateKey) || null;
 
   // 병원 목록 고유값 추출
   const hospitalOptions = useMemo(() => {
@@ -938,7 +917,6 @@ function AdminDashboard({ handleLogout }) {
                 <tbody className="divide-y divide-line">
                   {filteredApplications.map((item, idx) => {
                     const client = getClientName(item);
-                    const pending = pendingMessageCount(item);
                     return (
                       <tr
                         key={item.rowId || idx}
@@ -1031,7 +1009,7 @@ function AdminDashboard({ handleLogout }) {
                         <td className="py-4 pl-3 pr-5" onClick={(e) => e.stopPropagation()}>
                           <div className="flex items-center justify-end gap-1">
                             <Button variant="weak" size="sm" onClick={() => handleOpenMessageModal(item)}>
-                              문자{pending > 0 ? ` ${pending}` : ""}
+                              문자
                             </Button>
                             <Button variant="ghost" size="sm" onClick={() => setItemToDelete(item)} className="text-danger hover:bg-danger-weak">
                               삭제
@@ -1526,16 +1504,6 @@ function AdminDashboard({ handleLogout }) {
                 전화 걸기
               </Button>
               <div className="ml-auto flex flex-wrap items-center gap-2">
-                {selectedSheetMessage && !selectedSheetMessage.sent && (
-                  <Button variant="secondary" onClick={handleSaveMessageText} disabled={customMessageText === selectedSheetMessage.text}>
-                    문구 저장
-                  </Button>
-                )}
-                {selectedSheetMessage && (
-                  <Button variant={selectedSheetMessage.sent ? "weak" : "secondary"} onClick={() => handleMarkSent(!selectedSheetMessage.sent)}>
-                    {selectedSheetMessage.sent ? "보냄 취소" : "보냄 표시"}
-                  </Button>
-                )}
                 <Button
                   variant="secondary"
                   onClick={() => {
@@ -1561,15 +1529,17 @@ function AdminDashboard({ handleLogout }) {
           <div className="space-y-5">
             <div className="space-y-2">
               <p className="text-small font-semibold text-ink-2">
-                자동으로 만든 문자 <span className="text-muted font-normal">{messagesFor(messageApplicant).length}건</span>
+                단계별 문자 <span className="text-muted font-normal">{renderedMessages.length}건</span>
               </p>
-              {messagesFor(messageApplicant).length === 0 && (
-                <p className="text-small text-sub">
-                  아직 만들어진 문자가 없어요. 진행상태가 바뀌면 10분 안에 자동으로 만들어져요. (7.드랍은 문자를 보내지 않아요)
-                </p>
+              {messagesLoading && <p className="text-small text-sub">지원자 정보로 문구를 만드는 중이에요…</p>}
+              {messagesError && (
+                <p className="text-small text-danger-strong bg-danger-weak rounded-control px-3 py-2">{messagesError}</p>
               )}
               <div className="flex flex-wrap gap-2">
-                {[...messagesFor(messageApplicant).map((m) => ({ key: m.key, label: `${m.tpl}${m.sent ? " · 보냄" : ""}` })), { key: "custom", label: "직접 작성" }].map((opt) => (
+                {[
+                  ...renderedMessages.map((m) => ({ key: m.tpl, label: `${m.tpl}${m.current ? " · 지금 단계" : ""}` })),
+                  { key: "custom", label: "직접 작성" },
+                ].map((opt) => (
                   <button
                     key={opt.key}
                     type="button"
@@ -1583,8 +1553,8 @@ function AdminDashboard({ handleLogout }) {
                   </button>
                 ))}
               </div>
-              {selectedSheetMessage && selectedSheetMessage.warn && (
-                <p className="text-small text-danger-strong bg-danger-weak rounded-control px-3 py-2">점검: {selectedSheetMessage.warn}</p>
+              {selectedRendered && selectedRendered.warn && (
+                <p className="text-small text-danger-strong bg-danger-weak rounded-control px-3 py-2">확인: {selectedRendered.warn}</p>
               )}
             </div>
 
@@ -1598,9 +1568,8 @@ function AdminDashboard({ handleLogout }) {
             </Field>
 
             <ul className="text-caption text-sub space-y-1 list-disc pl-4">
-              <li>문구는 시트의 [문자발송] 탭에 자동으로 만들어진 것이에요. 고쳐서 [문구 저장]하면 자동 갱신으로 덮어쓰지 않아요.</li>
-              <li>보낸 뒤 [보냄 표시]를 눌러야 같은 문자가 다시 만들어지거나 중복 발송되지 않아요.</li>
-              <li>이미 보낸 문자는 고칠 수 없어요.</li>
+              <li>모든 단계의 문구가 이 지원자의 이름·시술·예약일·병원 정보로 채워져 있어요. 보낼 단계를 골라 주세요.</li>
+              <li>내용을 고쳐도 시트에는 저장되지 않아요. 복사하거나 문자 앱으로 바로 보내세요.</li>
             </ul>
           </div>
         )}
