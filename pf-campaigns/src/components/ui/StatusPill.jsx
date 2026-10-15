@@ -6,8 +6,8 @@ export const statusTone = (status) => {
   if (s.includes("포스팅") || s.includes("4.")) return "bg-teal-weak text-teal-strong";
   if (s.includes("대기") || s.includes("3.")) return "bg-warn-weak text-warn-strong";
   if (s.includes("예약") || s.includes("2.")) return "bg-brand-weak text-brand-strong";
-  if (s.includes("신규") || s.includes("1.")) return "bg-fill text-ink-2";
-  if (s.includes("드랍") || s.includes("취소") || s.includes("7.")) return "bg-danger-weak text-danger-strong";
+  if (s.includes("신규") || s.includes("1.")) return "bg-danger-weak text-danger-strong";
+  if (s.includes("드랍") || s.includes("취소") || s.includes("7.")) return "bg-fill text-ink-2";
   return "bg-fill text-sub";
 };
 
