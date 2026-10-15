@@ -116,6 +116,8 @@ function AdminDashboard({ handleLogout }) {
   const [loadError, setLoadError] = useState("");
   const [editingField, setEditingField] = useState(null); // 연락처/블로그 주소 인라인 수정: "phone" | "blogUrl"
   const [editValue, setEditValue] = useState("");
+  const [editingDate, setEditingDate] = useState(false); // 확정 예약일 직접 입력
+  const [dateDraft, setDateDraft] = useState("");
 
   const showToast = (msg) => {
     setToastMessage(msg);
@@ -228,6 +230,28 @@ function AdminDashboard({ handleLogout }) {
     const changes = { status: newStatus };
     if (confirmedDate !== null) changes.confirmedDate = confirmedDate;
     return saveChanges(item, changes, `[${item.name}님] 상태가 '${newStatus}'(으)로 변경되었습니다.`);
+  };
+
+  useEffect(() => {
+    setEditingDate(false);
+  }, [activeItem?.rowId]);
+
+  // 확정 예약일을 희망 일정과 상관없이 직접 정하거나 바꾼다 (입력값은 "2026-10-27T11:00" 형태)
+  const startEditDate = () => {
+    const m = String(activeItem?.confirmedDate || "").match(/(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{2}):(\d{2}))?/);
+    setDateDraft(m ? `${m[1]}-${m[2]}-${m[3]}T${m[4] ? `${m[4]}:${m[5]}` : "10:00"}` : "");
+    setEditingDate(true);
+  };
+  const handleSaveDate = async () => {
+    if (!activeItem || !dateDraft) return;
+    const value = dateDraft.replace("T", " ");
+    if (slotKey(value) === slotKey(activeItem.confirmedDate)) {
+      setEditingDate(false);
+      return;
+    }
+    const nextStatus = !activeItem.status || activeItem.status === "1.신규지원" ? "2.예약중" : activeItem.status;
+    const ok = await handleUpdateStatus(activeItem, nextStatus, value);
+    if (ok !== false) setEditingDate(false);
   };
 
   const handleUpdateMemo = (item, newMemo) => {
@@ -1224,6 +1248,32 @@ function AdminDashboard({ handleLogout }) {
                       <p className="text-small text-ink">
                         확정 예약일 <strong className="font-semibold text-brand-strong">{activeItem.confirmedDate}</strong>
                       </p>
+                    )}
+                    {editingDate ? (
+                      <div className="flex flex-wrap items-center gap-2">
+                        <Input
+                          size="sm"
+                          type="datetime-local"
+                          aria-label="확정 예약일"
+                          value={dateDraft}
+                          onChange={(e) => setDateDraft(e.target.value)}
+                          className="max-w-60"
+                        />
+                        <Button size="sm" onClick={handleSaveDate} disabled={!dateDraft}>
+                          저장
+                        </Button>
+                        <Button size="sm" variant="ghost" onClick={() => setEditingDate(false)}>
+                          취소
+                        </Button>
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={startEditDate}
+                        className="text-small text-sub hover:text-ink underline underline-offset-2 cursor-pointer"
+                      >
+                        {activeItem.confirmedDate ? "예약일 직접 변경" : "예약일 직접 입력"}
+                      </button>
                     )}
                     <div className="space-y-2">
                       {[
