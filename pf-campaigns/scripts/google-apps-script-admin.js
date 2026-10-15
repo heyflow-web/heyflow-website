@@ -266,16 +266,6 @@ function doPost(e) {
   }
 }
 
-// 📌 권한 승인 및 드라이브 폴더 생성 확인용 함수
-function authorizeEverything() {
-  Object.keys(PHOTO_FOLDERS).forEach(function (c) {
-    Logger.log("📁 1. " + c + " 사진 폴더 연결 성공: " + getOrCreateFolder(c).getName());
-  });
-  var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var sheet = ss.getSheetByName("DB") || ss.getSheetByName("접수DB") || ss.insertSheet("DB");
-  Logger.log("📊 2. 시트 'DB' 탭 연결 성공: " + sheet.getName());
-}
-
 /* =====================================================================
  * 관리자 화면(pf-campaigns /admin) 연동
  *  - 모든 요청은 POST + 비밀키(스크립트 속성 ADMIN_API_SECRET)로 확인한다. 키가 없으면 아무것도 읽거나 쓰지 않는다.
@@ -304,8 +294,6 @@ function admRoute_(data) {
       case 'updateFields': return admUpdateFields_(data);
       case 'setShare': return admSetShare_(data);
       case 'deleteRow': return admDelete_(data);
-      case 'markSent': return admMarkSent_(data);
-      case 'saveMessage': return admSaveMessage_(data);
       case 'renderMessages': return admRenderMessages_(data);
       case 'markMessageSent': return admMarkMessageSent_(data);
     }
@@ -365,18 +353,7 @@ function admList_() {
       });
     }
   }
-  // 자동으로 만들어진 문자 (문자발송 탭)
-  var messages = [];
-  var out = SpreadsheetApp.getActive().getSheetByName(OUT_SHEET);
-  if (out && out.getLastRow() >= 2) {
-    out.getRange(2, 1, out.getLastRow() - 1, 10).getValues().forEach(function (m, i) {
-      if (!m[0]) return;
-      messages.push({ key: String(m[0]), tpl: String(m[1]), client: String(m[2]), name: String(m[3]),
-        phone: String(m[4]).replace(/\D/g, ''), text: String(m[5]), warn: String(m[6]),
-        madeAt: String(m[7]), sent: m[8] === true });
-    });
-  }
-  return admOut_({ result: 'success', rows: rows, messages: messages });
+  return admOut_({ result: 'success', rows: rows });
 }
 
 /** 화면에서 본 지원자가 시트의 그 행과 같은지 확인한다. 같으면 행 번호를 돌려준다. */
@@ -498,7 +475,6 @@ function admSetShare_(data) {
     } catch (err) {
       warnings.push('공유됨으로는 바꿨지만 프로젝트룸에 올리지 못했어요: ' + String(err && err.message ? err.message : err));
     }
-    if (isTrue_(getConfig_()['공유 연습 실행'])) warnings.push('설정의 "공유 연습 실행"이 켜져 있어 실제로는 올리지 않고 기록만 남겼어요.');
     return admOut_({ result: 'success', message: warnings.length ? '공유 상태를 바꿨어요.' : '병원 프로젝트룸에 공유했어요.', data: { shareStatus: '공유됨', warnings: warnings } });
   }
   if (admRead_(hit.vals, C_SNAP) || admWasPushed_(admRead_(hit.vals, C_KEY))) {
@@ -520,26 +496,6 @@ function admDelete_(data) {
   } catch (e) {}
   return admOut_({ result: 'success', message: admRead_(v, C_NAME) + ' 지원서를 삭제했어요.' });
 }
-
-function admMsgRow_(key) {
-  var out = SpreadsheetApp.getActive().getSheetByName(OUT_SHEET);
-  if (!out || out.getLastRow() < 2) throw new Error('문자발송 탭이 비어 있어요.');
-  var keys = out.getRange(2, 1, out.getLastRow() - 1, 1).getValues();
-  for (var i = 0; i < keys.length; i++) if (String(keys[i][0]) === String(key)) return { out: out, row: i + 2 };
-  throw new Error('문자 행을 찾지 못했어요. 새로고침해 주세요.');
-}
-function admMarkSent_(data) {
-  var h = admMsgRow_(data.key);
-  h.out.getRange(h.row, 9).setValue(data.sent === false ? false : true);
-  return admOut_({ result: 'success', message: data.sent === false ? '보냄 표시를 풀었어요.' : '보냄으로 표시했어요.' });
-}
-function admSaveMessage_(data) {
-  var h = admMsgRow_(data.key);
-  if (h.out.getRange(h.row, 9).getValue() === true) throw new Error('이미 보낸 문자는 고칠 수 없어요.');
-  h.out.getRange(h.row, 6).setValue(String(data.text || ''));
-  return admOut_({ result: 'success', message: '문구를 저장했어요. 자동 원문이 바뀌기 전까지 유지돼요.' });
-}
-
 
 /* ---------- 문자 보냄 기록 (DB 탭 맨 끝 '문자 보낸 단계' 열, 한 사람당 한 칸) ---------- */
 const SENT_HEAD = '문자 보낸 단계';
@@ -654,16 +610,6 @@ function admWasPushed_(key) {
 }
 
 /** 점검용: Apps Script 편집기에서 이 함수를 선택해 실행하면 실행 로그에 연결 상태가 나온다 (개인정보는 출력하지 않는다) */
-function admSelfTest() {
-  var db = dbSheet_();
-  Logger.log('DB 탭: ' + (db ? db.getName() : '없음') + ' / 마지막 행: ' + (db ? db.getLastRow() : '-'));
-  Logger.log('열 순서 OK: ' + layoutOk_());
-  Logger.log('비밀키 설정됨: ' + !!PropertiesService.getScriptProperties().getProperty('ADMIN_API_SECRET'));
-  var out = JSON.parse(admList_().getContent());
-  Logger.log('결과: ' + out.result + ' / 지원자 ' + (out.rows || []).length + '명 / 문자 ' + (out.messages || []).length + '건 ' + (out.message || ''));
-}
-
-
 /** 연락처: 숫자만 남기고 010… 형태로 맞춘다 (앞자리 0이 빠진 10자리도 보정) */
 function admPhone_(v) {
   var d = String(v || '').replace(/\D/g, '');
@@ -681,7 +627,7 @@ function admBlog_(v) {
 
 /**
  * 연락처·블로그 주소를 바꾼다. 연락처는 시트의 '같은 지원서' 판단(연락처+클리닉+시술)에 쓰이므로,
- * 이미 프로젝트룸에 올라간 지원자는 룸의 모집정보 글과 만들어진 문자(문자발송 탭)도 같이 바꿔서 연결이 끊기지 않게 한다.
+ * 이미 프로젝트룸에 올라간 지원자는 룸의 모집정보 글도 같이 바꿔서 연결이 끊기지 않게 한다.
  * 돌려주는 값: 알려줄 내용(없으면 '')
  */
 function admContactChange_(db, hit, newPhone, newBlog) {
@@ -693,7 +639,6 @@ function admContactChange_(db, hit, newPhone, newBlog) {
   var note = '';
   var clinics = loadClinics_(), maps = loadMaps_();
   var oldDk = oldRaw ? dupKey_(parseFull_(oldRaw), clinics, maps) : '';
-  var strip = function (p) { return String(p).replace(/\D/g, '').replace(/^0+/, ''); };
 
   if (inRoom && oldDk) {
     var client = loadClients_().filter(function (c) { return c.name === admRead_(hit.vals, C_CLIENT); })[0];
@@ -721,18 +666,5 @@ function admContactChange_(db, hit, newPhone, newBlog) {
   db.getRange(hit.row, C_BLOG).setNumberFormat('@').setValue(newBlog);
   refreshRows_(db, [hit.row]); // 점검·모집정보 원문 새로고침
 
-  // 이미 만들어진 문자(문자발송 탭)의 연락처·키도 새 번호로 맞춘다 (같은 문자가 다시 만들어지지 않게)
-  if (oldDk && strip(oldPhone) !== strip(newPhone)) {
-    var out = SpreadsheetApp.getActive().getSheetByName(OUT_SHEET);
-    if (out && out.getLastRow() >= 2) {
-      var newDk = strip(newPhone) + oldDk.slice(oldDk.indexOf('|'));
-      var rows = out.getRange(2, 1, out.getLastRow() - 1, 5).getValues();
-      for (var i = 0; i < rows.length; i++) {
-        if (String(rows[i][0]).indexOf(oldDk + '|') !== 0) continue;
-        out.getRange(i + 2, 1).setValue(newDk + String(rows[i][0]).slice(oldDk.length));
-        out.getRange(i + 2, 5).setValue(newPhone);
-      }
-    }
-  }
   return note;
 }

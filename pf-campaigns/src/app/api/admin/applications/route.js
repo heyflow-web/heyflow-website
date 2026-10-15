@@ -55,7 +55,6 @@ export async function GET() {
       success: true,
       totalCount: applications.length,
       applications,
-      messages: Array.isArray(json.messages) ? json.messages : [],
       sheetUrl: SHEET_URL,
     });
   } catch (error) {
@@ -70,7 +69,7 @@ export async function POST(request) {
   try {
     const body = await request.json();
     const { action } = body;
-    const allowed = ["updateFields", "setShare", "deleteRow", "markSent", "saveMessage", "renderMessages", "markMessageSent"];
+    const allowed = ["updateFields", "setShare", "deleteRow", "renderMessages", "markMessageSent"];
     if (!allowed.includes(action)) {
       return NextResponse.json({ success: false, error: "알 수 없는 요청입니다." }, { status: 400 });
     }
