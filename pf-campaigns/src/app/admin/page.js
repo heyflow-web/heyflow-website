@@ -658,7 +658,7 @@ function AdminDashboard({ handleLogout }) {
       {/* 상단 바 */}
       <header className="sticky top-0 z-30 bg-white border-b border-line">
         <div className="max-w-7xl mx-auto h-16 px-4 sm:px-8 flex items-center gap-4">
-          <h1 className="text-subtitle font-bold text-ink shrink-0">체험단 관리</h1>
+          <h1 className="text-subtitle font-bold text-ink shrink-0">체험단 관리자룸</h1>
 
           <div className="flex-1 max-w-md hidden md:block">
             <Input
@@ -685,6 +685,9 @@ function AdminDashboard({ handleLogout }) {
             )}
             <Button variant="ghost" size="sm" onClick={downloadCSV} className="hidden sm:inline-flex">
               CSV 저장
+            </Button>
+            <Button variant="ghost" size="sm" href="/experience" target="_blank" rel="noreferrer">
+              라운지 바로가기
             </Button>
             <Button variant="ghost" size="sm" onClick={handleLogout}>
               로그아웃
