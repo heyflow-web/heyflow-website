@@ -307,6 +307,7 @@ function admRoute_(data) {
       case 'markSent': return admMarkSent_(data);
       case 'saveMessage': return admSaveMessage_(data);
       case 'renderMessages': return admRenderMessages_(data);
+      case 'markMessageSent': return admMarkMessageSent_(data);
     }
     return admErr_('알 수 없는 요청: ' + data.action);
   } catch (err) {
@@ -540,6 +541,48 @@ function admSaveMessage_(data) {
 }
 
 
+/* ---------- 문자 보냄 기록 (DB 탭 맨 끝 '문자 보낸 단계' 열, 한 사람당 한 칸) ---------- */
+const SENT_HEAD = '문자 보낸 단계';
+
+/** '문자 보낸 단계' 열 번호. 없으면 맨 끝에 머리글을 만든다. */
+function admSentCol_(db) {
+  var last = db.getLastColumn();
+  var head = db.getRange(1, 1, 1, Math.max(last, C_SNAP)).getValues()[0];
+  for (var i = C_SNAP; i < head.length; i++) if (String(head[i]).trim() === SENT_HEAD) return i + 1;
+  var col = Math.max(last, C_SNAP) + 1;
+  db.getRange(1, col).setValue(SENT_HEAD);
+  return col;
+}
+
+/** 칸 내용(줄마다 "단계|보낸 시각") → { 단계: 보낸 시각 } */
+function admParseSent_(text) {
+  var m = {};
+  String(text || '').split('\n').forEach(function (line) {
+    var i = line.indexOf('|');
+    var k = (i >= 0 ? line.slice(0, i) : line).trim();
+    if (k) m[k] = i >= 0 ? line.slice(i + 1).trim() : '';
+  });
+  return m;
+}
+function admJoinSent_(m) {
+  return Object.keys(m).map(function (k) { return k + '|' + m[k]; }).join('\n');
+}
+
+/** 이 단계 문자를 보냈다고 표시하거나(sent 기본 true) 표시를 푼다. */
+function admMarkMessageSent_(data) {
+  var db = dbSheet_();
+  var hit = admRow_(db, data.id || data);
+  var tpl = String(data.tpl || '').trim();
+  if (!tpl) throw new Error('어느 단계 문자인지 알 수 없어요.');
+  var col = admSentCol_(db);
+  var cell = db.getRange(hit.row, col);
+  var m = admParseSent_(cell.getValue());
+  var on = data.sent !== false;
+  if (on) m[tpl] = Utilities.formatDate(new Date(), TZ, 'yyyy-MM-dd HH:mm'); else delete m[tpl];
+  cell.setNumberFormat('@').setValue(admJoinSent_(m));
+  return admOut_({ result: 'success', message: on ? '보냄으로 표시했어요.' : '보냄 표시를 풀었어요.', data: { sent: m } });
+}
+
 /**
  * 이 지원자에게 보낼 수 있는 모든 단계의 문자를, 지원자 정보로 채워서 돌려준다.
  * (문자템플릿 탭의 모든 행. 지금 진행상태와 상관없이 전부.) 시트에는 아무것도 쓰지 않는다.
@@ -564,6 +607,7 @@ function admRenderMessages_(data) {
   var client = null;
   loadClients_().forEach(function (c) { if (c.name === admRead_(v, C_CLIENT)) client = c; });
   var current = canonStatus_(admRead_(v, C_PROG)) || '';
+  var sentMap = admParseSent_(db.getRange(hit.row, admSentCol_(db)).getValue());
 
   var list = [];
   Object.keys(templates).forEach(function (tk) {
@@ -591,7 +635,8 @@ function admRenderMessages_(data) {
       vars['원고링크'] = link || '(원고 링크 없음)';
       if (!link) warn.push('원고 링크 없음(폴더 미생성)');
     }
-    list.push({ tpl: tk, text: fillTemplate_(tpl, vars), warn: warn.join(' / '), current: tk === current });
+    list.push({ tpl: tk, text: fillTemplate_(tpl, vars), warn: warn.join(' / '), current: tk === current,
+      sent: Object.prototype.hasOwnProperty.call(sentMap, tk), sentAt: sentMap[tk] || '' });
   });
   return admOut_({ result: 'success', data: { messages: list, phone: admRead_(v, C_PHONE) } });
 }

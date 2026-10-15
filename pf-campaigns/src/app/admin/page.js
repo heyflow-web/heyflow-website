@@ -353,6 +353,25 @@ function AdminDashboard({ handleLogout }) {
 
   const selectedRendered = renderedMessages.find((m) => m.tpl === selectedTemplateKey) || null;
 
+  // 이 단계 문자를 보냈다고 시트(DB)에 기록한다. 한 사람당 한 칸에 모이므로 시트가 쌓이지 않는다.
+  const handleMarkMessageSent = async (sent) => {
+    if (!messageApplicant || !selectedRendered) return;
+    const tpl = selectedRendered.tpl;
+    try {
+      const data = await callAdmin({ action: "markMessageSent", id: identityOf(messageApplicant), tpl, sent });
+      if (data.success) {
+        const at = data.data && data.data.sent ? data.data.sent[tpl] || "" : "";
+        setRenderedMessages((prev) => prev.map((m) => (m.tpl === tpl ? { ...m, sent, sentAt: sent ? at : "" } : m)));
+        showToast(data.message);
+      } else {
+        setAlertInfo({ title: "보냄 표시를 저장하지 못했어요", lines: [data.error || ""] });
+      }
+    } catch (err) {
+      console.error(err);
+      showToast("보냄 표시 저장 중 오류가 발생했습니다.");
+    }
+  };
+
   // 병원 목록 고유값 추출
   const hospitalOptions = useMemo(() => {
     const set = new Set();
@@ -1504,6 +1523,11 @@ function AdminDashboard({ handleLogout }) {
                 전화 걸기
               </Button>
               <div className="ml-auto flex flex-wrap items-center gap-2">
+                {selectedRendered && (
+                  <Button variant={selectedRendered.sent ? "weak" : "secondary"} onClick={() => handleMarkMessageSent(!selectedRendered.sent)}>
+                    {selectedRendered.sent ? "보냄 취소" : "보냄 표시"}
+                  </Button>
+                )}
                 <Button
                   variant="secondary"
                   onClick={() => {
@@ -1537,7 +1561,7 @@ function AdminDashboard({ handleLogout }) {
               )}
               <div className="flex flex-wrap gap-2">
                 {[
-                  ...renderedMessages.map((m) => ({ key: m.tpl, label: `${m.tpl}${m.current ? " · 지금 단계" : ""}` })),
+                  ...renderedMessages.map((m) => ({ key: m.tpl, label: `${m.sent ? "✓ " : ""}${m.tpl}${m.current ? " · 지금 단계" : ""}${m.sent ? " · 보냄" : ""}` })),
                   { key: "custom", label: "직접 작성" },
                 ].map((opt) => (
                   <button
@@ -1553,6 +1577,11 @@ function AdminDashboard({ handleLogout }) {
                   </button>
                 ))}
               </div>
+              {selectedRendered && selectedRendered.sent && (
+                <p className="text-small text-sub bg-fill rounded-control px-3 py-2">
+                  {selectedRendered.sentAt ? `${selectedRendered.sentAt}에 보냄으로 표시했어요.` : "보냄으로 표시되어 있어요."}
+                </p>
+              )}
               {selectedRendered && selectedRendered.warn && (
                 <p className="text-small text-danger-strong bg-danger-weak rounded-control px-3 py-2">확인: {selectedRendered.warn}</p>
               )}
@@ -1570,6 +1599,7 @@ function AdminDashboard({ handleLogout }) {
             <ul className="text-caption text-sub space-y-1 list-disc pl-4">
               <li>모든 단계의 문구가 이 지원자의 이름·시술·예약일·병원 정보로 채워져 있어요. 보낼 단계를 골라 주세요.</li>
               <li>내용을 고쳐도 시트에는 저장되지 않아요. 복사하거나 문자 앱으로 바로 보내세요.</li>
+              <li>보낸 뒤 [보냄 표시]를 누르면 시트(DB)에 기록돼요. 이미 보낸 단계는 ✓로 보여요.</li>
             </ul>
           </div>
         )}
