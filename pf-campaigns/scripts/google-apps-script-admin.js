@@ -52,7 +52,8 @@ function readCampaigns_() {
 // 새 고객사가 생기면 아래에 "고객사": "폴더ID" 한 줄만 추가하면 된다.
 var PHOTO_FOLDERS = {
   "살만": "1j7Jlt2LWPkFzbg2wyEvfaxFgGf7sYgSo",
-  "큐어람": "1VQihiH2xh_UjIcg5kvT0oOxEbM2VQ9VG"
+  "큐어람": "1VQihiH2xh_UjIcg5kvT0oOxEbM2VQ9VG",
+  "크몽접수": "1yydocg-Tlpzwk1rj-Q-VPG7DS096BmHN"
 };
 var PHOTO_FOLDER_DEFAULT = "살만"; // 고객사를 못 찾았을 때 쓰는 폴더
 
