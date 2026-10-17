@@ -7,21 +7,17 @@ import campaignsData from "../../data/campaigns.json";
 export default function CampaignListPage() {
   const [selectedCategory, setSelectedCategory] = useState("전체");
 
-  const categories = [
-    "전체",
-    "편평사마귀제거",
-    "피부클리닉",
-    "문제성발톱",
-    "재활클리닉",
-    "여성클리닉",
-    "반영구화장",
-    "족부클리닉",
-  ];
+  // 탭 묶음: 비슷한 카테고리는 하나의 탭으로 보여줌 (캠페인의 실제 카테고리 값은 그대로 유지)
+  const TAB_GROUP = { 편평사마귀제거: "피부클리닉", 족부클리닉: "문제성발톱" };
+  const tabOf = (item) => TAB_GROUP[item.category] || item.category;
+
+  // 탭은 캠페인 목록 순서대로 자동 생성 (시트에 새 카테고리가 생기면 탭도 자동으로 생김)
+  const categories = ["전체", ...Array.from(new Set(campaignsData.map(tabOf).filter(Boolean)))];
 
   const filteredCampaigns =
     selectedCategory === "전체"
       ? campaignsData
-      : campaignsData.filter((item) => item.category === selectedCategory);
+      : campaignsData.filter((item) => tabOf(item) === selectedCategory);
 
   return (
     <div className="min-h-screen bg-fill w-full overflow-x-clip">
